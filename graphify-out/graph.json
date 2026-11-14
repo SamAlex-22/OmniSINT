@@ -1,0 +1,768 @@
+{
+  "generated_at_utc": "2026-11-14T19:24:38.556406+00:00",
+  "stats": {
+    "total_nodes": 37,
+    "total_edges": 66,
+    "communities_count": 10
+  },
+  "god_nodes": [
+    {
+      "id": "omnisint.core.models",
+      "degree": 22
+    },
+    {
+      "id": "omnisint.core.custody",
+      "degree": 11
+    },
+    {
+      "id": "scripts.update_code_graph",
+      "degree": 10
+    },
+    {
+      "id": "BaseModel",
+      "degree": 9
+    },
+    {
+      "id": "omnisint.config",
+      "degree": 7
+    },
+    {
+      "id": "tests.test_models_and_custody",
+      "degree": 6
+    },
+    {
+      "id": "__future__",
+      "degree": 5
+    },
+    {
+      "id": "typing",
+      "degree": 4
+    },
+    {
+      "id": "pydantic",
+      "degree": 3
+    },
+    {
+      "id": "StrEnum",
+      "degree": 3
+    },
+    {
+      "id": "pathlib",
+      "degree": 2
+    },
+    {
+      "id": "omnisint.config.OmniSINTSettings",
+      "degree": 2
+    }
+  ],
+  "communities": {
+    "omnisint": [
+      "omnisint"
+    ],
+    "api": [
+      "omnisint.api",
+      "omnisint.api.routes"
+    ],
+    "cli": [
+      "omnisint.cli"
+    ],
+    "collectors": [
+      "omnisint.collectors"
+    ],
+    "config": [
+      "omnisint.config",
+      "omnisint.config.OmniSINTSettings",
+      "omnisint.config.get_settings"
+    ],
+    "core": [
+      "omnisint.core",
+      "omnisint.core.custody",
+      "omnisint.core.custody.canonicalize_payload",
+      "omnisint.core.custody.compute_sha256",
+      "omnisint.core.custody.compute_chain_hash",
+      "omnisint.core.custody.CustodyLedger",
+      "omnisint.core.models",
+      "omnisint.core.models.utc_now",
+      "omnisint.core.models.new_uuid",
+      "omnisint.core.models.EntityType",
+      "omnisint.core.models.RelationType",
+      "omnisint.core.models.CaseStatus",
+      "omnisint.core.models.EvidenceItem",
+      "omnisint.core.models.AuditLogEntry",
+      "omnisint.core.models.EntityNode",
+      "omnisint.core.models.RelationshipEdge",
+      "omnisint.core.models.HierarchyTreeNode",
+      "omnisint.core.models.PersonaCluster",
+      "omnisint.core.models.CollectorResult",
+      "omnisint.core.models.Case"
+    ],
+    "intelligence": [
+      "omnisint.intelligence"
+    ],
+    "reporting": [
+      "omnisint.reporting"
+    ],
+    "scripts": [
+      "scripts.update_code_graph",
+      "scripts.update_code_graph.extract_module_info",
+      "scripts.update_code_graph.build_graph",
+      "scripts.update_code_graph.write_outputs"
+    ],
+    "tests": [
+      "tests",
+      "tests.test_models_and_custody",
+      "tests.test_models_and_custody.TestModelsAndCustody"
+    ]
+  },
+  "nodes": [
+    {
+      "id": "omnisint",
+      "type": "module",
+      "file": "omnisint/__init__.py",
+      "community": "omnisint",
+      "docstring": "OmniSINT \u2014 OSINT Aggregation, Case Management, and AI Entity-Resolution Platform."
+    },
+    {
+      "id": "omnisint.api",
+      "type": "module",
+      "file": "omnisint/api/__init__.py",
+      "community": "api",
+      "docstring": "FastAPI REST & WebSocket backend for OmniSINT."
+    },
+    {
+      "id": "omnisint.api.routes",
+      "type": "module",
+      "file": "omnisint/api/routes/__init__.py",
+      "community": "api",
+      "docstring": "API route modules for OmniSINT."
+    },
+    {
+      "id": "omnisint.cli",
+      "type": "module",
+      "file": "omnisint/cli/__init__.py",
+      "community": "cli",
+      "docstring": "Typer CLI and Textual interactive TUI for OmniSINT."
+    },
+    {
+      "id": "omnisint.collectors",
+      "type": "module",
+      "file": "omnisint/collectors/__init__.py",
+      "community": "collectors",
+      "docstring": "Pluggable passive OSINT collectors."
+    },
+    {
+      "id": "omnisint.config",
+      "type": "module",
+      "file": "omnisint/config.py",
+      "community": "config",
+      "docstring": "Centralized Pydantic v2 configuration for OmniSINT."
+    },
+    {
+      "id": "omnisint.config.OmniSINTSettings",
+      "type": "class",
+      "file": "omnisint/config.py",
+      "line": 12,
+      "community": "config",
+      "methods": [],
+      "docstring": "Application-wide settings loaded from environment variables or defaults."
+    },
+    {
+      "id": "omnisint.config.get_settings",
+      "type": "function",
+      "file": "omnisint/config.py",
+      "line": 57,
+      "community": "config",
+      "docstring": "Return a fresh settings instance."
+    },
+    {
+      "id": "omnisint.core",
+      "type": "module",
+      "file": "omnisint/core/__init__.py",
+      "community": "core",
+      "docstring": "Core data models, chain-of-custody ledger, SQLite storage, and async orchestrator."
+    },
+    {
+      "id": "omnisint.core.custody",
+      "type": "module",
+      "file": "omnisint/core/custody.py",
+      "community": "core",
+      "docstring": "OSINT Pilot-grade Chain of Custody & SHA-256 Evidentiary Ledger for OmniSINT."
+    },
+    {
+      "id": "omnisint.core.custody.canonicalize_payload",
+      "type": "function",
+      "file": "omnisint/core/custody.py",
+      "line": 14,
+      "community": "core",
+      "docstring": "Serialize any raw OSINT payload into deterministic canonical UTF-8 bytes."
+    },
+    {
+      "id": "omnisint.core.custody.compute_sha256",
+      "type": "function",
+      "file": "omnisint/core/custody.py",
+      "line": 23,
+      "community": "core",
+      "docstring": "Compute hex-encoded SHA-256 digest of a canonicalized payload."
+    },
+    {
+      "id": "omnisint.core.custody.compute_chain_hash",
+      "type": "function",
+      "file": "omnisint/core/custody.py",
+      "line": 28,
+      "community": "core",
+      "docstring": "Compute tamper-evident chained SHA-256 digest linking previous evidence record."
+    },
+    {
+      "id": "omnisint.core.custody.CustodyLedger",
+      "type": "class",
+      "file": "omnisint/core/custody.py",
+      "line": 40,
+      "community": "core",
+      "methods": [
+        "__init__",
+        "evidence_items",
+        "audit_log",
+        "head_chain_hash",
+        "record_evidence",
+        "log_action",
+        "verify_item",
+        "verify_chain"
+      ],
+      "docstring": "Manages cryptographic evidence acquisition, hash chaining, and audit trail for a Case."
+    },
+    {
+      "id": "omnisint.core.models",
+      "type": "module",
+      "file": "omnisint/core/models.py",
+      "community": "core",
+      "docstring": "Unified Pydantic v2 ontology for OmniSINT Entities, Edges, Cases, and Chain of Custody."
+    },
+    {
+      "id": "omnisint.core.models.utc_now",
+      "type": "function",
+      "file": "omnisint/core/models.py",
+      "line": 13,
+      "community": "core",
+      "docstring": "Return current timezone-aware UTC datetime."
+    },
+    {
+      "id": "omnisint.core.models.new_uuid",
+      "type": "function",
+      "file": "omnisint/core/models.py",
+      "line": 18,
+      "community": "core",
+      "docstring": "Return a fresh UUIDv4 string."
+    },
+    {
+      "id": "omnisint.core.models.EntityType",
+      "type": "class",
+      "file": "omnisint/core/models.py",
+      "line": 23,
+      "community": "core",
+      "methods": [],
+      "docstring": "Canonical OSINT entity and observable types."
+    },
+    {
+      "id": "omnisint.core.models.RelationType",
+      "type": "class",
+      "file": "omnisint/core/models.py",
+      "line": 45,
+      "community": "core",
+      "methods": [],
+      "docstring": "Canonical directed or undirected relationship types between entities."
+    },
+    {
+      "id": "omnisint.core.models.CaseStatus",
+      "type": "class",
+      "file": "omnisint/core/models.py",
+      "line": 69,
+      "community": "core",
+      "methods": [],
+      "docstring": "Investigative lifecycle status of a Case."
+    },
+    {
+      "id": "omnisint.core.models.EvidenceItem",
+      "type": "class",
+      "file": "omnisint/core/models.py",
+      "line": 78,
+      "community": "core",
+      "methods": [],
+      "docstring": "OSINT Pilot-grade immutable Chain of Custody record for a collected artifact."
+    },
+    {
+      "id": "omnisint.core.models.AuditLogEntry",
+      "type": "class",
+      "file": "omnisint/core/models.py",
+      "line": 96,
+      "community": "core",
+      "methods": [],
+      "docstring": "Chronological investigator or system action recorded in the Case custody trail."
+    },
+    {
+      "id": "omnisint.core.models.EntityNode",
+      "type": "class",
+      "file": "omnisint/core/models.py",
+      "line": 110,
+      "community": "core",
+      "methods": [
+        "model_post_init",
+        "canonical_key"
+      ],
+      "docstring": "A single vertex in the OmniSINT intelligence graph."
+    },
+    {
+      "id": "omnisint.core.models.RelationshipEdge",
+      "type": "class",
+      "file": "omnisint/core/models.py",
+      "line": 142,
+      "community": "core",
+      "methods": [
+        "prevent_self_loop"
+      ],
+      "docstring": "Weighted, evidence-backed link between two EntityNodes."
+    },
+    {
+      "id": "omnisint.core.models.HierarchyTreeNode",
+      "type": "class",
+      "file": "omnisint/core/models.py",
+      "line": 168,
+      "community": "core",
+      "methods": [],
+      "docstring": "Recursive node representing the resolved target's Information Hierarchy Tree."
+    },
+    {
+      "id": "omnisint.core.models.PersonaCluster",
+      "type": "class",
+      "file": "omnisint/core/models.py",
+      "line": 184,
+      "community": "core",
+      "methods": [],
+      "docstring": "Disambiguated candidate identity cluster separating colliding namesakes."
+    },
+    {
+      "id": "omnisint.core.models.CollectorResult",
+      "type": "class",
+      "file": "omnisint/core/models.py",
+      "line": 203,
+      "community": "core",
+      "methods": [],
+      "docstring": "Standardized output returned by any OmniSINT Collector plugin."
+    },
+    {
+      "id": "omnisint.core.models.Case",
+      "type": "class",
+      "file": "omnisint/core/models.py",
+      "line": 216,
+      "community": "core",
+      "methods": [],
+      "docstring": "Top-level OSINT Pilot investigative container."
+    },
+    {
+      "id": "omnisint.intelligence",
+      "type": "module",
+      "file": "omnisint/intelligence/__init__.py",
+      "community": "intelligence",
+      "docstring": "Mathematical and AI entity-resolution modules (entropy, similarity, temporal, graph, LLM)."
+    },
+    {
+      "id": "omnisint.reporting",
+      "type": "module",
+      "file": "omnisint/reporting/__init__.py",
+      "community": "reporting",
+      "docstring": "Investigative dossier and STIX 2.1 reporting exporters."
+    },
+    {
+      "id": "scripts.update_code_graph",
+      "type": "module",
+      "file": "scripts/update_code_graph.py",
+      "community": "scripts",
+      "docstring": "Deterministic AST & Graphify Context Knowledge Graph Builder for OmniSINT."
+    },
+    {
+      "id": "scripts.update_code_graph.extract_module_info",
+      "type": "function",
+      "file": "scripts/update_code_graph.py",
+      "line": 25,
+      "community": "scripts",
+      "docstring": "Parse a Python file into AST nodes (module, classes, functions) and structural edges."
+    },
+    {
+      "id": "scripts.update_code_graph.build_graph",
+      "type": "function",
+      "file": "scripts/update_code_graph.py",
+      "line": 97,
+      "community": "scripts",
+      "docstring": "Scan workspace and build the structured codebase knowledge graph."
+    },
+    {
+      "id": "scripts.update_code_graph.write_outputs",
+      "type": "function",
+      "file": "scripts/update_code_graph.py",
+      "line": 140,
+      "community": "scripts",
+      "docstring": "Write graph.json and human/agent-readable GRAPH_REPORT.md."
+    },
+    {
+      "id": "tests",
+      "type": "module",
+      "file": "tests/__init__.py",
+      "community": "tests",
+      "docstring": "Pytest test suite for OmniSINT."
+    },
+    {
+      "id": "tests.test_models_and_custody",
+      "type": "module",
+      "file": "tests/test_models_and_custody.py",
+      "community": "tests",
+      "docstring": "Unit tests for Task 1: Core Ontology & OSINT Pilot Chain-of-Custody Engine."
+    },
+    {
+      "id": "tests.test_models_and_custody.TestModelsAndCustody",
+      "type": "class",
+      "file": "tests/test_models_and_custody.py",
+      "line": 22,
+      "community": "tests",
+      "methods": [
+        "test_entity_node_defaults_and_canonical_key",
+        "test_relationship_edge_prevents_self_loop",
+        "test_hierarchy_tree_and_persona_cluster_serialization",
+        "test_custody_ledger_hash_chaining_and_verification",
+        "test_custody_ledger_detects_tampering",
+        "test_compute_sha256_canonical_json_key_order"
+      ],
+      "docstring": "Test suite for OmniSINT core models and cryptographic chain of custody."
+    }
+  ],
+  "edges": [
+    {
+      "source": "omnisint.config",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.config",
+      "target": "os",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.config",
+      "target": "pathlib",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.config",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.config",
+      "target": "pydantic",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.config",
+      "target": "omnisint.config.OmniSINTSettings",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.config.OmniSINTSettings",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.config",
+      "target": "omnisint.config.get_settings",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core",
+      "target": "omnisint.core.custody",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.custody",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.custody",
+      "target": "hashlib",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.custody",
+      "target": "json",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.custody",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.custody",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.custody",
+      "target": "omnisint.core.custody.canonicalize_payload",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.custody",
+      "target": "omnisint.core.custody.compute_sha256",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.custody",
+      "target": "omnisint.core.custody.compute_chain_hash",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.custody",
+      "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.models",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.models",
+      "target": "datetime",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.models",
+      "target": "enum",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.models",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.models",
+      "target": "uuid",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.models",
+      "target": "pydantic",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.models",
+      "target": "omnisint.core.models.utc_now",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.models",
+      "target": "omnisint.core.models.new_uuid",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.models",
+      "target": "omnisint.core.models.EntityType",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.models.EntityType",
+      "target": "StrEnum",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.core.models",
+      "target": "omnisint.core.models.RelationType",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.models.RelationType",
+      "target": "StrEnum",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.core.models",
+      "target": "omnisint.core.models.CaseStatus",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.models.CaseStatus",
+      "target": "StrEnum",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.core.models",
+      "target": "omnisint.core.models.EvidenceItem",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.models.EvidenceItem",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.core.models",
+      "target": "omnisint.core.models.AuditLogEntry",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.models.AuditLogEntry",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.core.models",
+      "target": "omnisint.core.models.EntityNode",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.models.EntityNode",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.core.models",
+      "target": "omnisint.core.models.RelationshipEdge",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.models.RelationshipEdge",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.core.models",
+      "target": "omnisint.core.models.HierarchyTreeNode",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.models.HierarchyTreeNode",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.core.models",
+      "target": "omnisint.core.models.PersonaCluster",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.models.PersonaCluster",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.core.models",
+      "target": "omnisint.core.models.CollectorResult",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.models.CollectorResult",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.core.models",
+      "target": "omnisint.core.models.Case",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.models.Case",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "scripts.update_code_graph",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "scripts.update_code_graph",
+      "target": "ast",
+      "relation": "imports"
+    },
+    {
+      "source": "scripts.update_code_graph",
+      "target": "json",
+      "relation": "imports"
+    },
+    {
+      "source": "scripts.update_code_graph",
+      "target": "collections",
+      "relation": "imports"
+    },
+    {
+      "source": "scripts.update_code_graph",
+      "target": "datetime",
+      "relation": "imports"
+    },
+    {
+      "source": "scripts.update_code_graph",
+      "target": "pathlib",
+      "relation": "imports"
+    },
+    {
+      "source": "scripts.update_code_graph",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "scripts.update_code_graph",
+      "target": "scripts.update_code_graph.extract_module_info",
+      "relation": "defines"
+    },
+    {
+      "source": "scripts.update_code_graph",
+      "target": "scripts.update_code_graph.build_graph",
+      "relation": "defines"
+    },
+    {
+      "source": "scripts.update_code_graph",
+      "target": "scripts.update_code_graph.write_outputs",
+      "relation": "defines"
+    },
+    {
+      "source": "tests.test_models_and_custody",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_models_and_custody",
+      "target": "unittest",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_models_and_custody",
+      "target": "pydantic",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_models_and_custody",
+      "target": "omnisint.core.custody",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_models_and_custody",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_models_and_custody",
+      "target": "tests.test_models_and_custody.TestModelsAndCustody",
+      "relation": "defines"
+    },
+    {
+      "source": "tests.test_models_and_custody.TestModelsAndCustody",
+      "target": "unittest.TestCase",
+      "relation": "inherits"
+    }
+  ]
+}

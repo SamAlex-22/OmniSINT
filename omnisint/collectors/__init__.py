@@ -1,0 +1,1 @@
+"""Pluggable passive OSINT collectors."""
