@@ -1,26 +1,42 @@
 {
-  "generated_at_utc": "2026-11-16T09:12:45.720023+00:00",
+  "generated_at_utc": "2026-11-16T20:21:30.897984+00:00",
   "stats": {
-    "total_nodes": 43,
-    "total_edges": 92,
+    "total_nodes": 81,
+    "total_edges": 157,
     "communities_count": 10
   },
   "god_nodes": [
     {
       "id": "omnisint.core.models",
-      "degree": 24
+      "degree": 26
+    },
+    {
+      "id": "omnisint.intelligence.similarity",
+      "degree": 20
+    },
+    {
+      "id": "omnisint.intelligence.entropy",
+      "degree": 19
+    },
+    {
+      "id": "omnisint.intelligence.temporal",
+      "degree": 18
     },
     {
       "id": "omnisint.core.storage",
       "degree": 16
     },
     {
+      "id": "BaseModel",
+      "degree": 14
+    },
+    {
       "id": "omnisint.core.custody",
       "degree": 13
     },
     {
-      "id": "BaseModel",
-      "degree": 10
+      "id": "__future__",
+      "degree": 11
     },
     {
       "id": "scripts.update_code_graph",
@@ -35,24 +51,8 @@
       "degree": 8
     },
     {
-      "id": "__future__",
-      "degree": 7
-    },
-    {
-      "id": "tests.test_models_and_custody",
-      "degree": 6
-    },
-    {
       "id": "typing",
-      "degree": 5
-    },
-    {
-      "id": "pathlib",
-      "degree": 4
-    },
-    {
-      "id": "pydantic",
-      "degree": 4
+      "degree": 7
     }
   ],
   "communities": {
@@ -101,7 +101,43 @@
       "omnisint.core.storage.CaseStorage"
     ],
     "intelligence": [
-      "omnisint.intelligence"
+      "omnisint.intelligence",
+      "omnisint.intelligence.entropy",
+      "omnisint.intelligence.entropy.HandleEntropyMetrics",
+      "omnisint.intelligence.entropy.strip_email_domain",
+      "omnisint.intelligence.entropy.tokenize_handle",
+      "omnisint.intelligence.entropy.shannon_entropy",
+      "omnisint.intelligence.entropy.information_bits",
+      "omnisint.intelligence.entropy._unusual_bigram_ratio",
+      "omnisint.intelligence.entropy.compute_rarity_score",
+      "omnisint.intelligence.entropy.estimate_collision_probability",
+      "omnisint.intelligence.entropy.analyze_handle_entropy",
+      "omnisint.intelligence.entropy.enrich_node_entropy",
+      "omnisint.intelligence.similarity",
+      "omnisint.intelligence.similarity.SimilarityResult",
+      "omnisint.intelligence.similarity.normalize_leet",
+      "omnisint.intelligence.similarity.levenshtein_distance",
+      "omnisint.intelligence.similarity.normalized_levenshtein",
+      "omnisint.intelligence.similarity.jaro_similarity",
+      "omnisint.intelligence.similarity.jaro_winkler_similarity",
+      "omnisint.intelligence.similarity._subtoken_coverage_score",
+      "omnisint.intelligence.similarity.token_swap_similarity",
+      "omnisint.intelligence.similarity.compute_dhash_from_pixels",
+      "omnisint.intelligence.similarity.compute_dhash_from_bytes",
+      "omnisint.intelligence.similarity.hamming_distance_hex",
+      "omnisint.intelligence.similarity.avatar_hash_similarity",
+      "omnisint.intelligence.similarity.compare_handles",
+      "omnisint.intelligence.temporal",
+      "omnisint.intelligence.temporal.TemporalProfile",
+      "omnisint.intelligence.temporal.TemporalCorrelationResult",
+      "omnisint.intelligence.temporal.format_utc_offset",
+      "omnisint.intelligence.temporal.parse_timestamp",
+      "omnisint.intelligence.temporal._infer_offset_from_sleep_window",
+      "omnisint.intelligence.temporal.build_temporal_profile",
+      "omnisint.intelligence.temporal.hourly_cosine_similarity",
+      "omnisint.intelligence.temporal._smooth_histogram",
+      "omnisint.intelligence.temporal.correlate_temporal_profiles",
+      "omnisint.intelligence.temporal.correlate_timestamps"
     ],
     "reporting": [
       "omnisint.reporting"
@@ -114,6 +150,8 @@
     ],
     "tests": [
       "tests",
+      "tests.test_entropy_and_similarity",
+      "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
       "tests.test_models_and_custody",
       "tests.test_models_and_custody.TestModelsAndCustody",
       "tests.test_storage",
@@ -454,6 +492,295 @@
       "docstring": "Mathematical and AI entity-resolution modules (entropy, similarity, temporal, graph, LLM)."
     },
     {
+      "id": "omnisint.intelligence.entropy",
+      "type": "module",
+      "file": "omnisint/intelligence/entropy.py",
+      "community": "intelligence",
+      "docstring": "Shannon entropy, n-gram rarity, and handle collision probability scoring for OmniSINT."
+    },
+    {
+      "id": "omnisint.intelligence.entropy.HandleEntropyMetrics",
+      "type": "class",
+      "file": "omnisint/intelligence/entropy.py",
+      "line": 232,
+      "community": "intelligence",
+      "methods": [],
+      "docstring": "Comprehensive information-theoretic and collision-risk metrics for an OSINT handle."
+    },
+    {
+      "id": "omnisint.intelligence.entropy.strip_email_domain",
+      "type": "function",
+      "file": "omnisint/intelligence/entropy.py",
+      "line": 247,
+      "community": "intelligence",
+      "docstring": "Return the local part if value is an email address, else the stripped string."
+    },
+    {
+      "id": "omnisint.intelligence.entropy.tokenize_handle",
+      "type": "function",
+      "file": "omnisint/intelligence/entropy.py",
+      "line": 255,
+      "community": "intelligence",
+      "docstring": "Split a handle into lowercase alphanumeric sub-tokens across delimiters, camelCase, and digits."
+    },
+    {
+      "id": "omnisint.intelligence.entropy.shannon_entropy",
+      "type": "function",
+      "file": "omnisint/intelligence/entropy.py",
+      "line": 262,
+      "community": "intelligence",
+      "docstring": "Compute Shannon entropy H(X) in bits per character for a string."
+    },
+    {
+      "id": "omnisint.intelligence.entropy.information_bits",
+      "type": "function",
+      "file": "omnisint/intelligence/entropy.py",
+      "line": 273,
+      "community": "intelligence",
+      "docstring": "Compute total Shannon information content I(X) = |X| * H(X) in bits."
+    },
+    {
+      "id": "omnisint.intelligence.entropy._unusual_bigram_ratio",
+      "type": "function",
+      "file": "omnisint/intelligence/entropy.py",
+      "line": 281,
+      "community": "intelligence",
+      "docstring": "Compute fraction of character bigrams that are NOT top-50 common English bigrams."
+    },
+    {
+      "id": "omnisint.intelligence.entropy.compute_rarity_score",
+      "type": "function",
+      "file": "omnisint/intelligence/entropy.py",
+      "line": 290,
+      "community": "intelligence",
+      "docstring": "Compute a normalized [0.0, 1.0] rarity score for a handle or username."
+    },
+    {
+      "id": "omnisint.intelligence.entropy.estimate_collision_probability",
+      "type": "function",
+      "file": "omnisint/intelligence/entropy.py",
+      "line": 363,
+      "community": "intelligence",
+      "docstring": "Estimate the probability [0.0, 1.0] that two accounts with this handle belong to different people."
+    },
+    {
+      "id": "omnisint.intelligence.entropy.analyze_handle_entropy",
+      "type": "function",
+      "file": "omnisint/intelligence/entropy.py",
+      "line": 368,
+      "community": "intelligence",
+      "docstring": "Perform full entropy, token, rarity, and collision-risk analysis on a handle."
+    },
+    {
+      "id": "omnisint.intelligence.entropy.enrich_node_entropy",
+      "type": "function",
+      "file": "omnisint/intelligence/entropy.py",
+      "line": 389,
+      "community": "intelligence",
+      "docstring": "Populate `entropy_score` and `rarity_score` on an EntityNode using its value."
+    },
+    {
+      "id": "omnisint.intelligence.similarity",
+      "type": "module",
+      "file": "omnisint/intelligence/similarity.py",
+      "community": "intelligence",
+      "docstring": "Multi-modal similarity scoring: Jaro-Winkler, Levenshtein, token-swap, and perceptual avatar hashing."
+    },
+    {
+      "id": "omnisint.intelligence.similarity.SimilarityResult",
+      "type": "class",
+      "file": "omnisint/intelligence/similarity.py",
+      "line": 30,
+      "community": "intelligence",
+      "methods": [],
+      "docstring": "Structured multi-modal similarity evaluation between two OSINT handles or profiles."
+    },
+    {
+      "id": "omnisint.intelligence.similarity.normalize_leet",
+      "type": "function",
+      "file": "omnisint/intelligence/similarity.py",
+      "line": 47,
+      "community": "intelligence",
+      "docstring": "Normalize common leetspeak substitutions into lowercase alphabetic characters."
+    },
+    {
+      "id": "omnisint.intelligence.similarity.levenshtein_distance",
+      "type": "function",
+      "file": "omnisint/intelligence/similarity.py",
+      "line": 53,
+      "community": "intelligence",
+      "docstring": "Compute exact Levenshtein edit distance between two strings."
+    },
+    {
+      "id": "omnisint.intelligence.similarity.normalized_levenshtein",
+      "type": "function",
+      "file": "omnisint/intelligence/similarity.py",
+      "line": 78,
+      "community": "intelligence",
+      "docstring": "Compute normalized Levenshtein similarity in [0.0, 1.0]."
+    },
+    {
+      "id": "omnisint.intelligence.similarity.jaro_similarity",
+      "type": "function",
+      "file": "omnisint/intelligence/similarity.py",
+      "line": 91,
+      "community": "intelligence",
+      "docstring": "Compute Jaro string similarity in [0.0, 1.0]."
+    },
+    {
+      "id": "omnisint.intelligence.similarity.jaro_winkler_similarity",
+      "type": "function",
+      "file": "omnisint/intelligence/similarity.py",
+      "line": 140,
+      "community": "intelligence",
+      "docstring": "Compute Jaro-Winkler similarity in [0.0, 1.0] with shared prefix boost."
+    },
+    {
+      "id": "omnisint.intelligence.similarity._subtoken_coverage_score",
+      "type": "function",
+      "file": "omnisint/intelligence/similarity.py",
+      "line": 159,
+      "community": "intelligence",
+      "docstring": "Evaluate how completely a list of tokens covers a delimiter-free concatenated handle."
+    },
+    {
+      "id": "omnisint.intelligence.similarity.token_swap_similarity",
+      "type": "function",
+      "file": "omnisint/intelligence/similarity.py",
+      "line": 192,
+      "community": "intelligence",
+      "docstring": "Compute order-invariant token & concatenated sub-token similarity between two handles."
+    },
+    {
+      "id": "omnisint.intelligence.similarity.compute_dhash_from_pixels",
+      "type": "function",
+      "file": "omnisint/intelligence/similarity.py",
+      "line": 220,
+      "community": "intelligence",
+      "docstring": "Compute a 64-bit horizontal difference hash (dHash, 16 hex chars) from an 8x9 grayscale grid."
+    },
+    {
+      "id": "omnisint.intelligence.similarity.compute_dhash_from_bytes",
+      "type": "function",
+      "file": "omnisint/intelligence/similarity.py",
+      "line": 247,
+      "community": "intelligence",
+      "docstring": "Compute a 64-bit perceptual difference hash (16 hex chars) from raw avatar bytes."
+    },
+    {
+      "id": "omnisint.intelligence.similarity.hamming_distance_hex",
+      "type": "function",
+      "file": "omnisint/intelligence/similarity.py",
+      "line": 268,
+      "community": "intelligence",
+      "docstring": "Compute bit-level Hamming distance between two equal-length hexadecimal perceptual hashes."
+    },
+    {
+      "id": "omnisint.intelligence.similarity.avatar_hash_similarity",
+      "type": "function",
+      "file": "omnisint/intelligence/similarity.py",
+      "line": 278,
+      "community": "intelligence",
+      "docstring": "Compute normalized [0.0, 1.0] perceptual avatar similarity from two hex dHash/pHash strings."
+    },
+    {
+      "id": "omnisint.intelligence.similarity.compare_handles",
+      "type": "function",
+      "file": "omnisint/intelligence/similarity.py",
+      "line": 287,
+      "community": "intelligence",
+      "docstring": "Compute rarity-weighted multi-modal similarity between two handles and optional avatar hashes."
+    },
+    {
+      "id": "omnisint.intelligence.temporal",
+      "type": "module",
+      "file": "omnisint/intelligence/temporal.py",
+      "community": "intelligence",
+      "docstring": "Timezone inference and active-hour circadian fingerprinting from OSINT timestamps."
+    },
+    {
+      "id": "omnisint.intelligence.temporal.TemporalProfile",
+      "type": "class",
+      "file": "omnisint/intelligence/temporal.py",
+      "line": 13,
+      "community": "intelligence",
+      "methods": [],
+      "docstring": "Circadian activity profile and inferred timezone derived from entity timestamps."
+    },
+    {
+      "id": "omnisint.intelligence.temporal.TemporalCorrelationResult",
+      "type": "class",
+      "file": "omnisint/intelligence/temporal.py",
+      "line": 31,
+      "community": "intelligence",
+      "methods": [],
+      "docstring": "Comparison result between two entities' temporal activity fingerprints."
+    },
+    {
+      "id": "omnisint.intelligence.temporal.format_utc_offset",
+      "type": "function",
+      "file": "omnisint/intelligence/temporal.py",
+      "line": 46,
+      "community": "intelligence",
+      "docstring": "Format a floating-point hour offset (e.g. 5.5 or -4.0) as 'UTC+05:30' or 'UTC-04:00'."
+    },
+    {
+      "id": "omnisint.intelligence.temporal.parse_timestamp",
+      "type": "function",
+      "file": "omnisint/intelligence/temporal.py",
+      "line": 55,
+      "community": "intelligence",
+      "docstring": "Parse a datetime or ISO-8601 string into (utc_datetime, explicit_offset_hours_or_None)."
+    },
+    {
+      "id": "omnisint.intelligence.temporal._infer_offset_from_sleep_window",
+      "type": "function",
+      "file": "omnisint/intelligence/temporal.py",
+      "line": 83,
+      "community": "intelligence",
+      "docstring": "Infer UTC offset in hours by locating the 7-hour minimum activity window (sleep trough)."
+    },
+    {
+      "id": "omnisint.intelligence.temporal.build_temporal_profile",
+      "type": "function",
+      "file": "omnisint/intelligence/temporal.py",
+      "line": 112,
+      "community": "intelligence",
+      "docstring": "Construct a 24-hour UTC activity histogram and infer the operator's timezone."
+    },
+    {
+      "id": "omnisint.intelligence.temporal.hourly_cosine_similarity",
+      "type": "function",
+      "file": "omnisint/intelligence/temporal.py",
+      "line": 154,
+      "community": "intelligence",
+      "docstring": "Compute exact cosine similarity in [0.0, 1.0] between two 24-hour activity vectors."
+    },
+    {
+      "id": "omnisint.intelligence.temporal._smooth_histogram",
+      "type": "function",
+      "file": "omnisint/intelligence/temporal.py",
+      "line": 167,
+      "community": "intelligence",
+      "docstring": "Apply circular [0.25, 0.50, 0.25] 3-hour kernel smoothing to account for +/- 1h jitter."
+    },
+    {
+      "id": "omnisint.intelligence.temporal.correlate_temporal_profiles",
+      "type": "function",
+      "file": "omnisint/intelligence/temporal.py",
+      "line": 175,
+      "community": "intelligence",
+      "docstring": "Compare two TemporalProfiles across circadian rhythm, timezone offset, and weekend cadence."
+    },
+    {
+      "id": "omnisint.intelligence.temporal.correlate_timestamps",
+      "type": "function",
+      "file": "omnisint/intelligence/temporal.py",
+      "line": 237,
+      "community": "intelligence",
+      "docstring": "Build temporal profiles from two timestamp sequences and compute their correlation."
+    },
+    {
       "id": "omnisint.reporting",
       "type": "module",
       "file": "omnisint/reporting/__init__.py",
@@ -497,6 +824,28 @@
       "file": "tests/__init__.py",
       "community": "tests",
       "docstring": "Pytest test suite for OmniSINT."
+    },
+    {
+      "id": "tests.test_entropy_and_similarity",
+      "type": "module",
+      "file": "tests/test_entropy_and_similarity.py",
+      "community": "tests",
+      "docstring": "Unit tests for Task 3: Shannon Entropy, Handle Rarity, Multi-Modal Similarity & Temporal Correlation."
+    },
+    {
+      "id": "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "type": "class",
+      "file": "tests/test_entropy_and_similarity.py",
+      "line": 33,
+      "community": "tests",
+      "methods": [
+        "test_tokenize_handle_and_shannon_entropy",
+        "test_handle_rarity_penalizes_common_names_and_rewards_unique_handles",
+        "test_string_and_token_swap_similarity",
+        "test_perceptual_avatar_dhash_and_multi_modal_comparison",
+        "test_temporal_profile_and_timezone_correlation"
+      ],
+      "docstring": "Test suite for mathematical entity disambiguation primitives (Task 3)."
     },
     {
       "id": "tests.test_models_and_custody",
@@ -870,6 +1219,291 @@
       "relation": "defines"
     },
     {
+      "source": "omnisint.intelligence",
+      "target": "omnisint.intelligence.entropy",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence",
+      "target": "omnisint.intelligence.similarity",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence",
+      "target": "omnisint.intelligence.temporal",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.entropy",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.entropy",
+      "target": "math",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.entropy",
+      "target": "re",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.entropy",
+      "target": "collections",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.entropy",
+      "target": "pydantic",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.entropy",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.entropy",
+      "target": "omnisint.intelligence.entropy.HandleEntropyMetrics",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.entropy.HandleEntropyMetrics",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.intelligence.entropy",
+      "target": "omnisint.intelligence.entropy.strip_email_domain",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.entropy",
+      "target": "omnisint.intelligence.entropy.tokenize_handle",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.entropy",
+      "target": "omnisint.intelligence.entropy.shannon_entropy",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.entropy",
+      "target": "omnisint.intelligence.entropy.information_bits",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.entropy",
+      "target": "omnisint.intelligence.entropy._unusual_bigram_ratio",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.entropy",
+      "target": "omnisint.intelligence.entropy.compute_rarity_score",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.entropy",
+      "target": "omnisint.intelligence.entropy.estimate_collision_probability",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.entropy",
+      "target": "omnisint.intelligence.entropy.analyze_handle_entropy",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.entropy",
+      "target": "omnisint.intelligence.entropy.enrich_node_entropy",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.similarity",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.similarity",
+      "target": "itertools",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.similarity",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.similarity",
+      "target": "pydantic",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.similarity",
+      "target": "omnisint.intelligence.entropy",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.similarity",
+      "target": "omnisint.intelligence.similarity.SimilarityResult",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.similarity.SimilarityResult",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.intelligence.similarity",
+      "target": "omnisint.intelligence.similarity.normalize_leet",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.similarity",
+      "target": "omnisint.intelligence.similarity.levenshtein_distance",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.similarity",
+      "target": "omnisint.intelligence.similarity.normalized_levenshtein",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.similarity",
+      "target": "omnisint.intelligence.similarity.jaro_similarity",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.similarity",
+      "target": "omnisint.intelligence.similarity.jaro_winkler_similarity",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.similarity",
+      "target": "omnisint.intelligence.similarity._subtoken_coverage_score",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.similarity",
+      "target": "omnisint.intelligence.similarity.token_swap_similarity",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.similarity",
+      "target": "omnisint.intelligence.similarity.compute_dhash_from_pixels",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.similarity",
+      "target": "omnisint.intelligence.similarity.compute_dhash_from_bytes",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.similarity",
+      "target": "omnisint.intelligence.similarity.hamming_distance_hex",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.similarity",
+      "target": "omnisint.intelligence.similarity.avatar_hash_similarity",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.similarity",
+      "target": "omnisint.intelligence.similarity.compare_handles",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.temporal",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.temporal",
+      "target": "math",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.temporal",
+      "target": "collections",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.temporal",
+      "target": "datetime",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.temporal",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.temporal",
+      "target": "pydantic",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.temporal",
+      "target": "omnisint.intelligence.temporal.TemporalProfile",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.temporal.TemporalProfile",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.intelligence.temporal",
+      "target": "omnisint.intelligence.temporal.TemporalCorrelationResult",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.temporal.TemporalCorrelationResult",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.intelligence.temporal",
+      "target": "omnisint.intelligence.temporal.format_utc_offset",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.temporal",
+      "target": "omnisint.intelligence.temporal.parse_timestamp",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.temporal",
+      "target": "omnisint.intelligence.temporal._infer_offset_from_sleep_window",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.temporal",
+      "target": "omnisint.intelligence.temporal.build_temporal_profile",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.temporal",
+      "target": "omnisint.intelligence.temporal.hourly_cosine_similarity",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.temporal",
+      "target": "omnisint.intelligence.temporal._smooth_histogram",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.temporal",
+      "target": "omnisint.intelligence.temporal.correlate_temporal_profiles",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.temporal",
+      "target": "omnisint.intelligence.temporal.correlate_timestamps",
+      "relation": "defines"
+    },
+    {
       "source": "scripts.update_code_graph",
       "target": "__future__",
       "relation": "imports"
@@ -918,6 +1552,46 @@
       "source": "scripts.update_code_graph",
       "target": "scripts.update_code_graph.write_outputs",
       "relation": "defines"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity",
+      "target": "unittest",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity",
+      "target": "omnisint.intelligence.entropy",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity",
+      "target": "omnisint.intelligence.similarity",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity",
+      "target": "omnisint.intelligence.temporal",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity",
+      "target": "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "relation": "defines"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "target": "unittest.TestCase",
+      "relation": "inherits"
     },
     {
       "source": "tests.test_models_and_custody",

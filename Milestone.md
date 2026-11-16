@@ -54,3 +54,34 @@ This document tracks how and what was engineered across each completed milestone
 ### 2. Verification & Graphify Sync
 - **Unit Tests (`tests/test_storage.py`):** 4/4 async storage tests passing (10/10 total suite tests passing in `0.033s`), covering file-backed persistence, canonical node/edge deduplication, multi-collector result merging with cryptographic custody verification, and TTL cache expiration/invalidation.
 - **Graphify Knowledge Graph (`graphify-out/GRAPH_REPORT.md`):** Updated via `python3 scripts/update_code_graph.py` (`43 nodes, 92 edges`).
+
+---
+
+## Milestone 3 (Task 3): Mathematical Disambiguation Part 1 — Shannon Entropy, Handle Rarity & Multi-Modal Similarity
+**Status:** Completed  
+**Modules Created / Updated:**
+- `omnisint/intelligence/entropy.py`
+- `omnisint/intelligence/similarity.py`
+- `omnisint/intelligence/temporal.py`
+- `omnisint/intelligence/__init__.py`
+- `tests/test_entropy_and_similarity.py`
+
+### 1. What Was Built
+1. **Shannon Entropy, N-Gram Rarity & Handle Collision Scoring (`omnisint/intelligence/entropy.py`):**
+   - **Tokenization & Email Normalization (`tokenize_handle`, `strip_email_domain`):** Splits handles across delimiters (`_`, `-`, `.`), camelCase transitions, and digit boundaries while stripping email domains.
+   - **Information Theory Metrics (`shannon_entropy`, `information_bits`):** Computes character-level Shannon entropy $H(X)$ in bits/character and total information content $I(X) = |X| \cdot H(X)$.
+   - **Rarity & Namesake Collision Probability (`compute_rarity_score`, `estimate_collision_probability`, `analyze_handle_entropy`, `enrich_node_entropy`):** Combines Shannon entropy, unusual bigram ratio (`COMMON_ENGLISH_BIGRAMS`), character-class diversity, and a curated high-collision human name/dictionary token filter (`COMMON_NAME_TOKENS`) to penalize common names (`john_smith` $\rightarrow$ rarity `< 0.35`, high collision risk) while rewarding unique handles (`x7_krypton_99` $\rightarrow$ rarity `> 0.70`, low collision risk).
+
+2. **Multi-Modal Lexical, Token-Swap & Perceptual Avatar Similarity (`omnisint/intelligence/similarity.py`):**
+   - **Edit & Prefix Similarity (`levenshtein_distance`, `normalized_levenshtein`, `jaro_similarity`, `jaro_winkler_similarity`, `normalize_leet`):** Evaluates lexical similarity and leetspeak substitutions (`0->o, 1->i, 3->e, 4->a, 5->s, 7->t`).
+   - **Order-Invariant & Concatenated Token-Swap Matching (`token_swap_similarity`):** Combines Dice token overlap with greedy sub-token coverage and permutation edit distance to match both reordered handles (`john_doe_sec` $\leftrightarrow$ `sec_john_doe`) and delimiter-free concatenated handles (`john_doe_sec` $\leftrightarrow$ `doejohnsec` $= 1.0$).
+   - **Perceptual Avatar Hashing (`compute_dhash_from_pixels`, `compute_dhash_from_bytes`, `hamming_distance_hex`, `avatar_hash_similarity`):** Generates 64-bit (16-hex-char) horizontal gradient difference hashes (`dHash`) from 8x9 pixel grids or raw avatar byte streams and computes normalized bit-level Hamming similarity.
+   - **Rarity-Weighted Multi-Modal Evaluator (`compare_handles` -> `SimilarityResult`):** Synthesizes lexical, token-swap, leetspeak, handle rarity weight, and perceptual avatar similarity with an explicit rationale string.
+
+3. **Circadian Active-Hour & Timezone Fingerprinting (`omnisint/intelligence/temporal.py`):**
+   - **Circadian Profiling (`build_temporal_profile` -> `TemporalProfile`):** Builds a 24-bin UTC activity histogram, weekend cadence ratio, and infers the operator's timezone (`UTC+HH:MM`) either from explicit ISO-8601/Git commit offsets or by locating the 7-hour biological sleep trough.
+   - **Temporal Correlation (`hourly_cosine_similarity`, `correlate_temporal_profiles`, `correlate_timestamps` -> `TemporalCorrelationResult`):** Computes raw and 3-hour circularly smoothed cosine similarity, circular timezone offset alignment, and weekday/weekend cadence similarity to separate colliding namesakes operating in different timezones.
+
+### 2. Verification & Graphify Sync
+- **Unit Tests (`tests/test_entropy_and_similarity.py`):** 5/5 tests passing (15/15 total suite tests passing in `0.033s`), covering Shannon entropy, common-name vs rare-handle scoring, `john_doe_sec` $\leftrightarrow$ `doejohnsec` token-swap matching, 64-bit `dHash` Hamming similarity, and `UTC+05:30` vs `UTC-07:00` temporal disambiguation.
+- **Graphify Knowledge Graph (`graphify-out/GRAPH_REPORT.md`):** Updated via `python3 scripts/update_code_graph.py` (`81 nodes, 157 edges`).
