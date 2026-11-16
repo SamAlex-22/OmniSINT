@@ -1,25 +1,25 @@
 # OmniSINT — Graphify Codebase Knowledge Report
 
-- **Generated (UTC):** `2026-11-14T19:24:38.556406+00:00`
-- **Total AST Nodes:** `37`
-- **Total Structural Edges:** `66`
+- **Generated (UTC):** `2026-11-16T09:12:45.720023+00:00`
+- **Total AST Nodes:** `43`
+- **Total Structural Edges:** `92`
 - **Architectural Communities:** `10`
 
 ## 1. High-Centrality 'God Nodes' (Core Abstractions)
 | Node ID | Degree (Connections) |
 | :--- | :--- |
-| `omnisint.core.models` | 22 |
-| `omnisint.core.custody` | 11 |
+| `omnisint.core.models` | 24 |
+| `omnisint.core.storage` | 16 |
+| `omnisint.core.custody` | 13 |
+| `BaseModel` | 10 |
 | `scripts.update_code_graph` | 10 |
-| `BaseModel` | 9 |
-| `omnisint.config` | 7 |
+| `tests.test_storage` | 9 |
+| `omnisint.config` | 8 |
+| `__future__` | 7 |
 | `tests.test_models_and_custody` | 6 |
-| `__future__` | 5 |
-| `typing` | 4 |
-| `pydantic` | 3 |
-| `StrEnum` | 3 |
-| `pathlib` | 2 |
-| `omnisint.config.OmniSINTSettings` | 2 |
+| `typing` | 5 |
+| `pathlib` | 4 |
+| `pydantic` | 4 |
 
 ## 2. Architectural Communities & Symbols
 ### Community: `api` (2 nodes)
@@ -37,7 +37,7 @@
 - **`omnisint.config.OmniSINTSettings`** (`class` in `omnisint/config.py`) — Application-wide settings loaded from environment variables or defaults.
 - **`omnisint.config.get_settings`** (`function` in `omnisint/config.py`) — Return a fresh settings instance.
 
-### Community: `core` (20 nodes)
+### Community: `core` (24 nodes)
 - **`omnisint.core`** (`module` in `omnisint/core/__init__.py`) — Core data models, chain-of-custody ledger, SQLite storage, and async orchestrator.
 - **`omnisint.core.custody`** (`module` in `omnisint/core/custody.py`) — OSINT Pilot-grade Chain of Custody & SHA-256 Evidentiary Ledger for OmniSINT.
 - **`omnisint.core.custody.canonicalize_payload`** (`function` in `omnisint/core/custody.py`) — Serialize any raw OSINT payload into deterministic canonical UTF-8 bytes.
@@ -58,6 +58,10 @@
 - **`omnisint.core.models.PersonaCluster`** (`class` in `omnisint/core/models.py`) — Disambiguated candidate identity cluster separating colliding namesakes.
 - **`omnisint.core.models.CollectorResult`** (`class` in `omnisint/core/models.py`) — Standardized output returned by any OmniSINT Collector plugin.
 - **`omnisint.core.models.Case`** (`class` in `omnisint/core/models.py`) — Top-level OSINT Pilot investigative container.
+- **`omnisint.core.storage`** (`module` in `omnisint/core/storage.py`) — Async SQLite Case Store & TTL Response Cache for OmniSINT.
+- **`omnisint.core.storage.make_cache_key`** (`function` in `omnisint/core/storage.py`) — Generate a deterministic SHA-256 cache key for a collector request.
+- **`omnisint.core.storage.CacheEntry`** (`class` in `omnisint/core/storage.py`) — Cached collector response record with TTL metadata and SHA-256 integrity hash.
+- **`omnisint.core.storage.CaseStorage`** (`class` in `omnisint/core/storage.py`) — Async SQLite persistence engine for Cases, Graph Entities/Edges, Custody Ledger, and HTTP Cache.
 
 ### Community: `intelligence` (1 nodes)
 - **`omnisint.intelligence`** (`module` in `omnisint/intelligence/__init__.py`) — Mathematical and AI entity-resolution modules (entropy, similarity, temporal, graph, LLM).
@@ -74,7 +78,9 @@
 - **`scripts.update_code_graph.build_graph`** (`function` in `scripts/update_code_graph.py`) — Scan workspace and build the structured codebase knowledge graph.
 - **`scripts.update_code_graph.write_outputs`** (`function` in `scripts/update_code_graph.py`) — Write graph.json and human/agent-readable GRAPH_REPORT.md.
 
-### Community: `tests` (3 nodes)
+### Community: `tests` (5 nodes)
 - **`tests`** (`module` in `tests/__init__.py`) — Pytest test suite for OmniSINT.
 - **`tests.test_models_and_custody`** (`module` in `tests/test_models_and_custody.py`) — Unit tests for Task 1: Core Ontology & OSINT Pilot Chain-of-Custody Engine.
 - **`tests.test_models_and_custody.TestModelsAndCustody`** (`class` in `tests/test_models_and_custody.py`) — Test suite for OmniSINT core models and cryptographic chain of custody.
+- **`tests.test_storage`** (`module` in `tests/test_storage.py`) — Unit tests for Task 2: Async SQLite Case Store & TTL Response Cache.
+- **`tests.test_storage.TestCaseStorage`** (`class` in `tests/test_storage.py`) — Test suite for async SQLite case persistence, graph deduplication, custody chain, and TTL cache.

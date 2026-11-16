@@ -8,7 +8,7 @@ This file breaks down the entire **OmniSINT** architecture into **10 sequential,
 
 - [x] **Task 0:** Project Initialization, Package Skeleton, `AGENTS.md`, & Graphify AST Indexer (`scripts/update_code_graph.py`)
 - [x] **Task 1:** Core Ontology & OSINT Pilot Chain-of-Custody Engine (`omnisint/core/models.py`, `omnisint/core/custody.py`)
-- [ ] **Task 2:** Async SQLite Case Store & TTL Response Cache (`omnisint/core/storage.py`)
+- [x] **Task 2:** Async SQLite Case Store & TTL Response Cache (`omnisint/core/storage.py`)
 - [ ] **Task 3:** Mathematical Disambiguation Part 1 — Shannon Entropy, Handle Rarity & Multi-Modal Similarity (`omnisint/intelligence/entropy.py`, `omnisint/intelligence/similarity.py`, `omnisint/intelligence/temporal.py`)
 - [ ] **Task 4:** Mathematical Disambiguation Part 2 — NetworkX Knowledge Graph, Louvain Persona Clustering & Hierarchy Tree (`omnisint/intelligence/graph_engine.py`)
 - [ ] **Task 5:** Citation-Locked AI Analyst & Persona Dossier Synthesizer (`omnisint/intelligence/ai_analyst.py`)

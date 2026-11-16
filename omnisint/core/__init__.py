@@ -20,11 +20,14 @@ from omnisint.core.models import (
     RelationshipEdge,
     RelationType,
 )
+from omnisint.core.storage import CacheEntry, CaseStorage, make_cache_key
 
 __all__ = [
     "AuditLogEntry",
+    "CacheEntry",
     "Case",
     "CaseStatus",
+    "CaseStorage",
     "CollectorResult",
     "CustodyLedger",
     "EntityNode",
@@ -38,4 +41,5 @@ __all__ = [
     "canonicalize_payload",
     "compute_chain_hash",
     "compute_sha256",
+    "make_cache_key",
 ]

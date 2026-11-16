@@ -1,29 +1,41 @@
 {
-  "generated_at_utc": "2026-11-14T19:24:38.556406+00:00",
+  "generated_at_utc": "2026-11-16T09:12:45.720023+00:00",
   "stats": {
-    "total_nodes": 37,
-    "total_edges": 66,
+    "total_nodes": 43,
+    "total_edges": 92,
     "communities_count": 10
   },
   "god_nodes": [
     {
       "id": "omnisint.core.models",
-      "degree": 22
+      "degree": 24
+    },
+    {
+      "id": "omnisint.core.storage",
+      "degree": 16
     },
     {
       "id": "omnisint.core.custody",
-      "degree": 11
+      "degree": 13
+    },
+    {
+      "id": "BaseModel",
+      "degree": 10
     },
     {
       "id": "scripts.update_code_graph",
       "degree": 10
     },
     {
-      "id": "BaseModel",
+      "id": "tests.test_storage",
       "degree": 9
     },
     {
       "id": "omnisint.config",
+      "degree": 8
+    },
+    {
+      "id": "__future__",
       "degree": 7
     },
     {
@@ -31,28 +43,16 @@
       "degree": 6
     },
     {
-      "id": "__future__",
+      "id": "typing",
       "degree": 5
     },
     {
-      "id": "typing",
+      "id": "pathlib",
       "degree": 4
     },
     {
       "id": "pydantic",
-      "degree": 3
-    },
-    {
-      "id": "StrEnum",
-      "degree": 3
-    },
-    {
-      "id": "pathlib",
-      "degree": 2
-    },
-    {
-      "id": "omnisint.config.OmniSINTSettings",
-      "degree": 2
+      "degree": 4
     }
   ],
   "communities": {
@@ -94,7 +94,11 @@
       "omnisint.core.models.HierarchyTreeNode",
       "omnisint.core.models.PersonaCluster",
       "omnisint.core.models.CollectorResult",
-      "omnisint.core.models.Case"
+      "omnisint.core.models.Case",
+      "omnisint.core.storage",
+      "omnisint.core.storage.make_cache_key",
+      "omnisint.core.storage.CacheEntry",
+      "omnisint.core.storage.CaseStorage"
     ],
     "intelligence": [
       "omnisint.intelligence"
@@ -111,7 +115,9 @@
     "tests": [
       "tests",
       "tests.test_models_and_custody",
-      "tests.test_models_and_custody.TestModelsAndCustody"
+      "tests.test_models_and_custody.TestModelsAndCustody",
+      "tests.test_storage",
+      "tests.test_storage.TestCaseStorage"
     ]
   },
   "nodes": [
@@ -358,6 +364,89 @@
       "docstring": "Top-level OSINT Pilot investigative container."
     },
     {
+      "id": "omnisint.core.storage",
+      "type": "module",
+      "file": "omnisint/core/storage.py",
+      "community": "core",
+      "docstring": "Async SQLite Case Store & TTL Response Cache for OmniSINT."
+    },
+    {
+      "id": "omnisint.core.storage.make_cache_key",
+      "type": "function",
+      "file": "omnisint/core/storage.py",
+      "line": 36,
+      "community": "core",
+      "docstring": "Generate a deterministic SHA-256 cache key for a collector request."
+    },
+    {
+      "id": "omnisint.core.storage.CacheEntry",
+      "type": "class",
+      "file": "omnisint/core/storage.py",
+      "line": 53,
+      "community": "core",
+      "methods": [
+        "is_expired"
+      ],
+      "docstring": "Cached collector response record with TTL metadata and SHA-256 integrity hash."
+    },
+    {
+      "id": "omnisint.core.storage.CaseStorage",
+      "type": "class",
+      "file": "omnisint/core/storage.py",
+      "line": 73,
+      "community": "core",
+      "methods": [
+        "__init__",
+        "__aenter__",
+        "__aexit__",
+        "_open_connection_sync",
+        "_create_schema_sync",
+        "initialize",
+        "_ensure_conn",
+        "close",
+        "_encode_payload",
+        "_decode_payload",
+        "_row_to_node",
+        "_row_to_edge",
+        "_row_to_evidence",
+        "_row_to_audit",
+        "create_case",
+        "_save_case_sync",
+        "save_case",
+        "_get_case_sync",
+        "get_case",
+        "_list_cases_sync",
+        "list_cases",
+        "update_case_status",
+        "_delete_case_sync",
+        "delete_case",
+        "_upsert_node_sync",
+        "upsert_node",
+        "_upsert_edge_sync",
+        "upsert_edge",
+        "_get_case_nodes_sync",
+        "get_case_nodes",
+        "_get_case_edges_sync",
+        "get_case_edges",
+        "_get_custody_ledger_sync",
+        "get_custody_ledger",
+        "_record_evidence_sync",
+        "record_evidence",
+        "verify_case_custody",
+        "_merge_collector_result_sync",
+        "merge_collector_result",
+        "_get_cached_response_sync",
+        "get_cached_response",
+        "_set_cached_response_sync",
+        "set_cached_response",
+        "_invalidate_cache_sync",
+        "invalidate_cache",
+        "_purge_expired_cache_sync",
+        "purge_expired_cache"
+      ],
+      "docstring": "Async SQLite persistence engine for Cases, Graph Entities/Edges, Custody Ledger, and HTTP Cache."
+    },
+    {
       "id": "omnisint.intelligence",
       "type": "module",
       "file": "omnisint/intelligence/__init__.py",
@@ -431,6 +520,27 @@
         "test_compute_sha256_canonical_json_key_order"
       ],
       "docstring": "Test suite for OmniSINT core models and cryptographic chain of custody."
+    },
+    {
+      "id": "tests.test_storage",
+      "type": "module",
+      "file": "tests/test_storage.py",
+      "community": "tests",
+      "docstring": "Unit tests for Task 2: Async SQLite Case Store & TTL Response Cache."
+    },
+    {
+      "id": "tests.test_storage.TestCaseStorage",
+      "type": "class",
+      "file": "tests/test_storage.py",
+      "line": 24,
+      "community": "tests",
+      "methods": [
+        "test_case_lifecycle_and_file_persistence",
+        "test_node_and_edge_canonical_deduplication",
+        "test_evidence_custody_chain_roundtrip_and_merge_collector_result",
+        "test_ttl_response_cache_hit_expiry_and_invalidation"
+      ],
+      "docstring": "Test suite for async SQLite case persistence, graph deduplication, custody chain, and TTL cache."
     }
   ],
   "edges": [
@@ -482,6 +592,11 @@
     {
       "source": "omnisint.core",
       "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core",
+      "target": "omnisint.core.storage",
       "relation": "imports"
     },
     {
@@ -680,6 +795,81 @@
       "relation": "inherits"
     },
     {
+      "source": "omnisint.core.storage",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.storage",
+      "target": "asyncio",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.storage",
+      "target": "json",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.storage",
+      "target": "sqlite3",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.storage",
+      "target": "datetime",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.storage",
+      "target": "pathlib",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.storage",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.storage",
+      "target": "pydantic",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.storage",
+      "target": "omnisint.config",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.storage",
+      "target": "omnisint.core.custody",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.storage",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.storage",
+      "target": "omnisint.core.storage.make_cache_key",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.storage",
+      "target": "omnisint.core.storage.CacheEntry",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.storage.CacheEntry",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.core.storage",
+      "target": "omnisint.core.storage.CaseStorage",
+      "relation": "defines"
+    },
+    {
       "source": "scripts.update_code_graph",
       "target": "__future__",
       "relation": "imports"
@@ -762,6 +952,56 @@
     {
       "source": "tests.test_models_and_custody.TestModelsAndCustody",
       "target": "unittest.TestCase",
+      "relation": "inherits"
+    },
+    {
+      "source": "tests.test_storage",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_storage",
+      "target": "tempfile",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_storage",
+      "target": "unittest",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_storage",
+      "target": "datetime",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_storage",
+      "target": "pathlib",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_storage",
+      "target": "omnisint.core.custody",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_storage",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_storage",
+      "target": "omnisint.core.storage",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_storage",
+      "target": "tests.test_storage.TestCaseStorage",
+      "relation": "defines"
+    },
+    {
+      "source": "tests.test_storage.TestCaseStorage",
+      "target": "unittest.IsolatedAsyncioTestCase",
       "relation": "inherits"
     }
   ]
