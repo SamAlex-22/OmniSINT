@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "omnisint"
 version = "0.1.0"
 description = "Enterprise-grade OSINT Aggregation, Case Management, and AI Entity-Resolution Platform"
-readme = "AGENTS.md"
+readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "OmniSINT Contributors" }]
