@@ -1,25 +1,25 @@
 # OmniSINT — Graphify Codebase Knowledge Report
 
-- **Generated (UTC):** `2026-11-17T17:12:06.269456+00:00`
-- **Total AST Nodes:** `93`
-- **Total Structural Edges:** `184`
+- **Generated (UTC):** `2026-11-17T17:29:32.239708+00:00`
+- **Total AST Nodes:** `105`
+- **Total Structural Edges:** `216`
 - **Architectural Communities:** `10`
 
 ## 1. High-Centrality 'God Nodes' (Core Abstractions)
 | Node ID | Degree (Connections) |
 | :--- | :--- |
-| `omnisint.core.models` | 28 |
-| `omnisint.intelligence.similarity` | 22 |
+| `omnisint.core.models` | 30 |
+| `omnisint.intelligence.similarity` | 23 |
+| `omnisint.intelligence.ai_analyst` | 21 |
 | `omnisint.intelligence.entropy` | 20 |
-| `omnisint.intelligence.graph_engine` | 19 |
+| `omnisint.intelligence.graph_engine` | 20 |
+| `BaseModel` | 19 |
 | `omnisint.intelligence.temporal` | 19 |
-| `BaseModel` | 16 |
 | `omnisint.core.storage` | 16 |
-| `__future__` | 13 |
-| `omnisint.core.custody` | 13 |
+| `__future__` | 15 |
+| `omnisint.core.custody` | 14 |
+| `typing` | 10 |
 | `scripts.update_code_graph` | 10 |
-| `tests.test_storage` | 9 |
-| `omnisint.config` | 8 |
 
 ## 2. Architectural Communities & Symbols
 ### Community: `api` (2 nodes)
@@ -63,8 +63,18 @@
 - **`omnisint.core.storage.CacheEntry`** (`class` in `omnisint/core/storage.py`) — Cached collector response record with TTL metadata and SHA-256 integrity hash.
 - **`omnisint.core.storage.CaseStorage`** (`class` in `omnisint/core/storage.py`) — Async SQLite persistence engine for Cases, Graph Entities/Edges, Custody Ledger, and HTTP Cache.
 
-### Community: `intelligence` (47 nodes)
+### Community: `intelligence` (57 nodes)
 - **`omnisint.intelligence`** (`module` in `omnisint/intelligence/__init__.py`) — Mathematical and AI entity-resolution modules (entropy, similarity, temporal, graph, LLM).
+- **`omnisint.intelligence.ai_analyst`** (`module` in `omnisint/intelligence/ai_analyst.py`) — Citation-locked AI Entity Disambiguation Analyst & Persona Dossier Synthesizer for OmniSINT.
+- **`omnisint.intelligence.ai_analyst.IdentityMatrixEntry`** (`class` in `omnisint/intelligence/ai_analyst.py`) — Single row in the resolved Identity Confidence Matrix for a PersonaCluster.
+- **`omnisint.intelligence.ai_analyst.CitationAuditResult`** (`class` in `omnisint/intelligence/ai_analyst.py`) — Verification audit of node_id and evidence_id citations in an AI intelligence brief.
+- **`omnisint.intelligence.ai_analyst.AIAnalysisReport`** (`class` in `omnisint/intelligence/ai_analyst.py`) — Comprehensive citation-locked intelligence analysis report for a Case.
+- **`omnisint.intelligence.ai_analyst.classify_confidence_tier`** (`function` in `omnisint/intelligence/ai_analyst.py`) — Classify a numeric [0.0, 1.0] confidence score into HIGH, MEDIUM, or LOW.
+- **`omnisint.intelligence.ai_analyst.extract_citations`** (`function` in `omnisint/intelligence/ai_analyst.py`) — Extract all unique [node:<id>] and [evidence:<id>] references from an analytical text.
+- **`omnisint.intelligence.ai_analyst.audit_citations`** (`function` in `omnisint/intelligence/ai_analyst.py`) — Verify that all cited node_ids and evidence_ids exist in the case and every persona is cited.
+- **`omnisint.intelligence.ai_analyst.sanitize_hallucinated_citations`** (`function` in `omnisint/intelligence/ai_analyst.py`) — Replace any hallucinated [node:<id>] or [evidence:<id>] tags with explicit redaction markers.
+- **`omnisint.intelligence.ai_analyst._default_http_post_json`** (`async_function` in `omnisint/intelligence/ai_analyst.py`) — Perform an async JSON POST request using standard library urllib inside a worker thread.
+- **`omnisint.intelligence.ai_analyst.AIAnalyst`** (`class` in `omnisint/intelligence/ai_analyst.py`) — Citation-enforced AI Entity Disambiguation Analyst & Dossier Synthesizer.
 - **`omnisint.intelligence.entropy`** (`module` in `omnisint/intelligence/entropy.py`) — Shannon entropy, n-gram rarity, and handle collision probability scoring for OmniSINT.
 - **`omnisint.intelligence.entropy.HandleEntropyMetrics`** (`class` in `omnisint/intelligence/entropy.py`) — Comprehensive information-theoretic and collision-risk metrics for an OSINT handle.
 - **`omnisint.intelligence.entropy.strip_email_domain`** (`function` in `omnisint/intelligence/entropy.py`) — Return the local part if value is an email address, else the stripped string.
@@ -124,8 +134,10 @@
 - **`scripts.update_code_graph.build_graph`** (`function` in `scripts/update_code_graph.py`) — Scan workspace and build the structured codebase knowledge graph.
 - **`scripts.update_code_graph.write_outputs`** (`function` in `scripts/update_code_graph.py`) — Write graph.json and human/agent-readable GRAPH_REPORT.md.
 
-### Community: `tests` (9 nodes)
+### Community: `tests` (11 nodes)
 - **`tests`** (`module` in `tests/__init__.py`) — Pytest test suite for OmniSINT.
+- **`tests.test_ai_analyst`** (`module` in `tests/test_ai_analyst.py`) — Unit tests for Task 5: Citation-Locked AI Analyst & Persona Dossier Synthesizer.
+- **`tests.test_ai_analyst.TestAIAnalyst`** (`class` in `tests/test_ai_analyst.py`) — Test suite for citation-locked AIAnalyst, Identity Confidence Matrix, and LLM providers.
 - **`tests.test_entropy_and_similarity`** (`module` in `tests/test_entropy_and_similarity.py`) — Unit tests for Task 3: Shannon Entropy, Handle Rarity, Multi-Modal Similarity & Temporal Correlation.
 - **`tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal`** (`class` in `tests/test_entropy_and_similarity.py`) — Test suite for mathematical entity disambiguation primitives (Task 3).
 - **`tests.test_graph_engine`** (`module` in `tests/test_graph_engine.py`) — Unit tests for Task 4: NetworkX Knowledge Graph, Louvain Persona Clustering & Hierarchy Tree.

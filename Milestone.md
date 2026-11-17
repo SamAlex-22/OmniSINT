@@ -117,3 +117,30 @@ This document tracks how and what was engineered across each completed milestone
 - **Unit Tests (`tests/test_graph_engine.py`):** 5/5 new graph engine tests passing (20/20 total suite tests passing in `0.040s`), covering node deduplication/remapping, multi-modal edge synthesis, colliding namesake separation (`UTC+05:30` Bengaluru vs `UTC-07:00` Seattle), uncorroborated common-name separation (`john_smith`), nested `HierarchyTreeNode` construction, and `Case` in-place integration.
 - **Graphify Knowledge Graph (`graphify-out/GRAPH_REPORT.md`):** Updated via `python3 scripts/update_code_graph.py` (`93 nodes, 184 edges`).
 
+---
+
+## Milestone 5 (Task 5): Citation-Locked AI Analyst & Persona Dossier Synthesizer
+**Status:** Completed  
+**Modules Created / Updated:**
+- `omnisint/intelligence/ai_analyst.py`
+- `omnisint/intelligence/__init__.py`
+- `tests/test_ai_analyst.py`
+
+### 1. What Was Built
+1. **Identity Confidence Matrix & Citation-Locked Dossier Synthesizer (`AIAnalyst` in `omnisint/intelligence/ai_analyst.py`):**
+   - **Identity Confidence Matrix (`IdentityMatrixEntry`, `build_identity_matrix`, `classify_confidence_tier`):** Evaluates each resolved `PersonaCluster` into a structured confidence tier (`HIGH`, `MEDIUM`, `LOW`), enumerating corroborating modalities (High Handle Entropy, Lexical/Token-Swap Handle Alignment, Perceptual Avatar Match `dHash`, Circadian/Timezone Fingerprint, Hard Contact Selector, Cryptographic Key Correlation, Infrastructure Ownership, Source Code Repository Attribution) and explicit `[node:<id>]` / `[evidence:<id>]` citations.
+   - **Deterministic Offline Intelligence Dossier (`synthesize_deterministic_brief`, `_build_persona_narrative`):** Synthesizes an executive Markdown intelligence brief out-of-the-box without requiring external API keys—including Executive Summary, Identity Confidence Matrix table, per-persona disambiguation & namesake conflict narratives, embedded Unicode Information Hierarchy Trees, and prioritized next-hop pivot actions.
+   - **Automatic Graph Disambiguation Integration (`analyze_case`, `analyze_case_sync`):** Automatically runs `KnowledgeGraphEngine.apply_to_case(case)` when `case.personas` is unpopulated, and updates `case.ai_executive_brief` and `persona.summary` in-place.
+
+2. **Multi-Provider LLM Support with Automatic Offline Fallback (`_call_external_llm`):**
+   - **Pluggable Providers (`gemini`, `openai`, `ollama`, `deterministic`):** Supports Google Gemini (`generateContent`), OpenAI (`chat/completions`), and local Ollama (`/api/generate`) with low temperature (`0.1`), system-level citation-locking instructions (`SYSTEM_PROMPT_CITATION_LOCKED`), injectable async HTTP transport for testing, and automatic fallback to `deterministic` synthesis if an API key is absent or an endpoint is unreachable.
+
+3. **Cryptographic & Evidentiary Citation Verification Guardrail (`audit_citations`, `extract_citations`, `sanitize_hallucinated_citations`):**
+   - **Zero-Hallucination Citation Audit (`CitationAuditResult`):** Extracts all `[node:<id>]` and `[evidence:<id>]` references from generated briefs and cross-verifies them against the Case's `EntityNode` IDs and `CustodyLedger` `EvidenceItem` IDs, ensuring every `PersonaCluster` is cited.
+   - **Automatic Sanitization & Verified Appendix:** If an external LLM hallucinates any unverified `node_id` or `evidence_id`, `sanitize_hallucinated_citations` replaces the fabricated tag with `[REDACTED-UNVERIFIED-NODE:<id>]` / `[REDACTED-UNVERIFIED-EVIDENCE:<id>]` and appends the deterministic Verified Evidentiary Appendix so the final brief remains 100% citation-compliant.
+
+### 2. Verification & Graphify Sync
+- **Unit Tests (`tests/test_ai_analyst.py`):** 3/3 async/sync tests passing (23/23 total suite tests passing in `0.056s`), covering deterministic citation-locked dossier generation, hallucinated ID detection and redaction, and mocked `gemini`, `openai`, and `ollama` LLM provider flows plus missing-key fallback.
+- **Graphify Knowledge Graph (`graphify-out/GRAPH_REPORT.md`):** Updated via `python3 scripts/update_code_graph.py` (`105 nodes, 216 edges`).
+
+

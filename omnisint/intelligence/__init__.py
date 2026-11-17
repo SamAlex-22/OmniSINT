@@ -1,5 +1,15 @@
 """Mathematical and AI entity-resolution modules (entropy, similarity, temporal, graph, LLM)."""
 
+from omnisint.intelligence.ai_analyst import (
+    AIAnalysisReport,
+    AIAnalyst,
+    CitationAuditResult,
+    IdentityMatrixEntry,
+    audit_citations,
+    classify_confidence_tier,
+    extract_citations,
+    sanitize_hallucinated_citations,
+)
 from omnisint.intelligence.entropy import (
     COMMON_ENGLISH_BIGRAMS,
     COMMON_NAME_TOKENS,
@@ -49,20 +59,26 @@ from omnisint.intelligence.temporal import (
 )
 
 __all__ = [
+    "AIAnalysisReport",
+    "AIAnalyst",
     "CATEGORY_ORDER",
     "COMMON_ENGLISH_BIGRAMS",
     "COMMON_NAME_TOKENS",
+    "CitationAuditResult",
     "DisambiguationConfig",
     "ENTITY_CATEGORY_MAP",
     "GraphDisambiguationReport",
     "HandleEntropyMetrics",
+    "IdentityMatrixEntry",
     "KnowledgeGraphEngine",
     "SimilarityResult",
     "TemporalCorrelationResult",
     "TemporalProfile",
     "analyze_handle_entropy",
+    "audit_citations",
     "avatar_hash_similarity",
     "build_temporal_profile",
+    "classify_confidence_tier",
     "compare_handles",
     "compute_dhash_from_bytes",
     "compute_dhash_from_pixels",
@@ -72,6 +88,7 @@ __all__ = [
     "correlate_timestamps",
     "enrich_node_entropy",
     "estimate_collision_probability",
+    "extract_citations",
     "format_utc_offset",
     "hamming_distance_hex",
     "hourly_cosine_similarity",
@@ -84,6 +101,7 @@ __all__ = [
     "normalized_levenshtein",
     "parse_timestamp",
     "render_hierarchy_ascii",
+    "sanitize_hallucinated_citations",
     "shannon_entropy",
     "strip_email_domain",
     "token_swap_similarity",

@@ -1,18 +1,22 @@
 {
-  "generated_at_utc": "2026-11-17T17:12:06.269456+00:00",
+  "generated_at_utc": "2026-11-17T17:29:32.239708+00:00",
   "stats": {
-    "total_nodes": 93,
-    "total_edges": 184,
+    "total_nodes": 105,
+    "total_edges": 216,
     "communities_count": 10
   },
   "god_nodes": [
     {
       "id": "omnisint.core.models",
-      "degree": 28
+      "degree": 30
     },
     {
       "id": "omnisint.intelligence.similarity",
-      "degree": 22
+      "degree": 23
+    },
+    {
+      "id": "omnisint.intelligence.ai_analyst",
+      "degree": 21
     },
     {
       "id": "omnisint.intelligence.entropy",
@@ -20,6 +24,10 @@
     },
     {
       "id": "omnisint.intelligence.graph_engine",
+      "degree": 20
+    },
+    {
+      "id": "BaseModel",
       "degree": 19
     },
     {
@@ -27,32 +35,24 @@
       "degree": 19
     },
     {
-      "id": "BaseModel",
-      "degree": 16
-    },
-    {
       "id": "omnisint.core.storage",
       "degree": 16
     },
     {
       "id": "__future__",
-      "degree": 13
+      "degree": 15
     },
     {
       "id": "omnisint.core.custody",
-      "degree": 13
+      "degree": 14
+    },
+    {
+      "id": "typing",
+      "degree": 10
     },
     {
       "id": "scripts.update_code_graph",
       "degree": 10
-    },
-    {
-      "id": "tests.test_storage",
-      "degree": 9
-    },
-    {
-      "id": "omnisint.config",
-      "degree": 8
     }
   ],
   "communities": {
@@ -102,6 +102,16 @@
     ],
     "intelligence": [
       "omnisint.intelligence",
+      "omnisint.intelligence.ai_analyst",
+      "omnisint.intelligence.ai_analyst.IdentityMatrixEntry",
+      "omnisint.intelligence.ai_analyst.CitationAuditResult",
+      "omnisint.intelligence.ai_analyst.AIAnalysisReport",
+      "omnisint.intelligence.ai_analyst.classify_confidence_tier",
+      "omnisint.intelligence.ai_analyst.extract_citations",
+      "omnisint.intelligence.ai_analyst.audit_citations",
+      "omnisint.intelligence.ai_analyst.sanitize_hallucinated_citations",
+      "omnisint.intelligence.ai_analyst._default_http_post_json",
+      "omnisint.intelligence.ai_analyst.AIAnalyst",
       "omnisint.intelligence.entropy",
       "omnisint.intelligence.entropy.HandleEntropyMetrics",
       "omnisint.intelligence.entropy.strip_email_domain",
@@ -160,6 +170,8 @@
     ],
     "tests": [
       "tests",
+      "tests.test_ai_analyst",
+      "tests.test_ai_analyst.TestAIAnalyst",
       "tests.test_entropy_and_similarity",
       "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
       "tests.test_graph_engine",
@@ -502,6 +514,98 @@
       "file": "omnisint/intelligence/__init__.py",
       "community": "intelligence",
       "docstring": "Mathematical and AI entity-resolution modules (entropy, similarity, temporal, graph, LLM)."
+    },
+    {
+      "id": "omnisint.intelligence.ai_analyst",
+      "type": "module",
+      "file": "omnisint/intelligence/ai_analyst.py",
+      "community": "intelligence",
+      "docstring": "Citation-locked AI Entity Disambiguation Analyst & Persona Dossier Synthesizer for OmniSINT."
+    },
+    {
+      "id": "omnisint.intelligence.ai_analyst.IdentityMatrixEntry",
+      "type": "class",
+      "file": "omnisint/intelligence/ai_analyst.py",
+      "line": 45,
+      "community": "intelligence",
+      "methods": [],
+      "docstring": "Single row in the resolved Identity Confidence Matrix for a PersonaCluster."
+    },
+    {
+      "id": "omnisint.intelligence.ai_analyst.CitationAuditResult",
+      "type": "class",
+      "file": "omnisint/intelligence/ai_analyst.py",
+      "line": 63,
+      "community": "intelligence",
+      "methods": [],
+      "docstring": "Verification audit of node_id and evidence_id citations in an AI intelligence brief."
+    },
+    {
+      "id": "omnisint.intelligence.ai_analyst.AIAnalysisReport",
+      "type": "class",
+      "file": "omnisint/intelligence/ai_analyst.py",
+      "line": 77,
+      "community": "intelligence",
+      "methods": [],
+      "docstring": "Comprehensive citation-locked intelligence analysis report for a Case."
+    },
+    {
+      "id": "omnisint.intelligence.ai_analyst.classify_confidence_tier",
+      "type": "function",
+      "file": "omnisint/intelligence/ai_analyst.py",
+      "line": 93,
+      "community": "intelligence",
+      "docstring": "Classify a numeric [0.0, 1.0] confidence score into HIGH, MEDIUM, or LOW."
+    },
+    {
+      "id": "omnisint.intelligence.ai_analyst.extract_citations",
+      "type": "function",
+      "file": "omnisint/intelligence/ai_analyst.py",
+      "line": 102,
+      "community": "intelligence",
+      "docstring": "Extract all unique [node:<id>] and [evidence:<id>] references from an analytical text."
+    },
+    {
+      "id": "omnisint.intelligence.ai_analyst.audit_citations",
+      "type": "function",
+      "file": "omnisint/intelligence/ai_analyst.py",
+      "line": 109,
+      "community": "intelligence",
+      "docstring": "Verify that all cited node_ids and evidence_ids exist in the case and every persona is cited."
+    },
+    {
+      "id": "omnisint.intelligence.ai_analyst.sanitize_hallucinated_citations",
+      "type": "function",
+      "file": "omnisint/intelligence/ai_analyst.py",
+      "line": 167,
+      "community": "intelligence",
+      "docstring": "Replace any hallucinated [node:<id>] or [evidence:<id>] tags with explicit redaction markers."
+    },
+    {
+      "id": "omnisint.intelligence.ai_analyst._default_http_post_json",
+      "type": "async_function",
+      "file": "omnisint/intelligence/ai_analyst.py",
+      "line": 187,
+      "community": "intelligence",
+      "docstring": "Perform an async JSON POST request using standard library urllib inside a worker thread."
+    },
+    {
+      "id": "omnisint.intelligence.ai_analyst.AIAnalyst",
+      "type": "class",
+      "file": "omnisint/intelligence/ai_analyst.py",
+      "line": 206,
+      "community": "intelligence",
+      "methods": [
+        "__init__",
+        "build_identity_matrix",
+        "_build_persona_narrative",
+        "synthesize_deterministic_brief",
+        "_build_llm_user_prompt",
+        "_call_external_llm",
+        "analyze_case",
+        "analyze_case_sync"
+      ],
+      "docstring": "Citation-enforced AI Entity Disambiguation Analyst & Dossier Synthesizer."
     },
     {
       "id": "omnisint.intelligence.entropy",
@@ -964,6 +1068,27 @@
       "docstring": "Pytest test suite for OmniSINT."
     },
     {
+      "id": "tests.test_ai_analyst",
+      "type": "module",
+      "file": "tests/test_ai_analyst.py",
+      "community": "tests",
+      "docstring": "Unit tests for Task 5: Citation-Locked AI Analyst & Persona Dossier Synthesizer."
+    },
+    {
+      "id": "tests.test_ai_analyst.TestAIAnalyst",
+      "type": "class",
+      "file": "tests/test_ai_analyst.py",
+      "line": 25,
+      "community": "tests",
+      "methods": [
+        "_build_disambiguation_case",
+        "test_deterministic_ai_analyst_produces_citation_locked_brief_and_matrix",
+        "test_citation_audit_detects_and_sanitizes_hallucinated_ids",
+        "test_gemini_openai_and_ollama_providers_with_mock_transport"
+      ],
+      "docstring": "Test suite for citation-locked AIAnalyst, Identity Confidence Matrix, and LLM providers."
+    },
+    {
       "id": "tests.test_entropy_and_similarity",
       "type": "module",
       "file": "tests/test_entropy_and_similarity.py",
@@ -1380,6 +1505,11 @@
     },
     {
       "source": "omnisint.intelligence",
+      "target": "omnisint.intelligence.ai_analyst",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence",
       "target": "omnisint.intelligence.entropy",
       "relation": "imports"
     },
@@ -1397,6 +1527,116 @@
       "source": "omnisint.intelligence",
       "target": "omnisint.intelligence.temporal",
       "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst",
+      "target": "asyncio",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst",
+      "target": "json",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst",
+      "target": "re",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst",
+      "target": "urllib.request",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst",
+      "target": "pydantic",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst",
+      "target": "omnisint.config",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst",
+      "target": "omnisint.intelligence.graph_engine",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst",
+      "target": "omnisint.intelligence.ai_analyst.IdentityMatrixEntry",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst.IdentityMatrixEntry",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst",
+      "target": "omnisint.intelligence.ai_analyst.CitationAuditResult",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst.CitationAuditResult",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst",
+      "target": "omnisint.intelligence.ai_analyst.AIAnalysisReport",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst.AIAnalysisReport",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst",
+      "target": "omnisint.intelligence.ai_analyst.classify_confidence_tier",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst",
+      "target": "omnisint.intelligence.ai_analyst.extract_citations",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst",
+      "target": "omnisint.intelligence.ai_analyst.audit_citations",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst",
+      "target": "omnisint.intelligence.ai_analyst.sanitize_hallucinated_citations",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst",
+      "target": "omnisint.intelligence.ai_analyst._default_http_post_json",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst",
+      "target": "omnisint.intelligence.ai_analyst.AIAnalyst",
+      "relation": "defines"
     },
     {
       "source": "omnisint.intelligence.entropy",
@@ -1812,6 +2052,51 @@
       "source": "scripts.update_code_graph",
       "target": "scripts.update_code_graph.write_outputs",
       "relation": "defines"
+    },
+    {
+      "source": "tests.test_ai_analyst",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_ai_analyst",
+      "target": "unittest",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_ai_analyst",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_ai_analyst",
+      "target": "omnisint.core.custody",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_ai_analyst",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_ai_analyst",
+      "target": "omnisint.intelligence.ai_analyst",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_ai_analyst",
+      "target": "omnisint.intelligence.similarity",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_ai_analyst",
+      "target": "tests.test_ai_analyst.TestAIAnalyst",
+      "relation": "defines"
+    },
+    {
+      "source": "tests.test_ai_analyst.TestAIAnalyst",
+      "target": "unittest.IsolatedAsyncioTestCase",
+      "relation": "inherits"
     },
     {
       "source": "tests.test_entropy_and_similarity",
