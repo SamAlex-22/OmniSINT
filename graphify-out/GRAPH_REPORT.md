@@ -1,25 +1,25 @@
 # OmniSINT — Graphify Codebase Knowledge Report
 
-- **Generated (UTC):** `2026-11-16T20:21:30.897984+00:00`
-- **Total AST Nodes:** `81`
-- **Total Structural Edges:** `157`
+- **Generated (UTC):** `2026-11-17T17:12:06.269456+00:00`
+- **Total AST Nodes:** `93`
+- **Total Structural Edges:** `184`
 - **Architectural Communities:** `10`
 
 ## 1. High-Centrality 'God Nodes' (Core Abstractions)
 | Node ID | Degree (Connections) |
 | :--- | :--- |
-| `omnisint.core.models` | 26 |
-| `omnisint.intelligence.similarity` | 20 |
-| `omnisint.intelligence.entropy` | 19 |
-| `omnisint.intelligence.temporal` | 18 |
+| `omnisint.core.models` | 28 |
+| `omnisint.intelligence.similarity` | 22 |
+| `omnisint.intelligence.entropy` | 20 |
+| `omnisint.intelligence.graph_engine` | 19 |
+| `omnisint.intelligence.temporal` | 19 |
+| `BaseModel` | 16 |
 | `omnisint.core.storage` | 16 |
-| `BaseModel` | 14 |
+| `__future__` | 13 |
 | `omnisint.core.custody` | 13 |
-| `__future__` | 11 |
 | `scripts.update_code_graph` | 10 |
 | `tests.test_storage` | 9 |
 | `omnisint.config` | 8 |
-| `typing` | 7 |
 
 ## 2. Architectural Communities & Symbols
 ### Community: `api` (2 nodes)
@@ -63,7 +63,7 @@
 - **`omnisint.core.storage.CacheEntry`** (`class` in `omnisint/core/storage.py`) — Cached collector response record with TTL metadata and SHA-256 integrity hash.
 - **`omnisint.core.storage.CaseStorage`** (`class` in `omnisint/core/storage.py`) — Async SQLite persistence engine for Cases, Graph Entities/Edges, Custody Ledger, and HTTP Cache.
 
-### Community: `intelligence` (37 nodes)
+### Community: `intelligence` (47 nodes)
 - **`omnisint.intelligence`** (`module` in `omnisint/intelligence/__init__.py`) — Mathematical and AI entity-resolution modules (entropy, similarity, temporal, graph, LLM).
 - **`omnisint.intelligence.entropy`** (`module` in `omnisint/intelligence/entropy.py`) — Shannon entropy, n-gram rarity, and handle collision probability scoring for OmniSINT.
 - **`omnisint.intelligence.entropy.HandleEntropyMetrics`** (`class` in `omnisint/intelligence/entropy.py`) — Comprehensive information-theoretic and collision-risk metrics for an OSINT handle.
@@ -76,6 +76,16 @@
 - **`omnisint.intelligence.entropy.estimate_collision_probability`** (`function` in `omnisint/intelligence/entropy.py`) — Estimate the probability [0.0, 1.0] that two accounts with this handle belong to different people.
 - **`omnisint.intelligence.entropy.analyze_handle_entropy`** (`function` in `omnisint/intelligence/entropy.py`) — Perform full entropy, token, rarity, and collision-risk analysis on a handle.
 - **`omnisint.intelligence.entropy.enrich_node_entropy`** (`function` in `omnisint/intelligence/entropy.py`) — Populate `entropy_score` and `rarity_score` on an EntityNode using its value.
+- **`omnisint.intelligence.graph_engine`** (`module` in `omnisint/intelligence/graph_engine.py`) — NetworkX knowledge graph, conflict-aware Louvain persona clustering, and hierarchy tree builder.
+- **`omnisint.intelligence.graph_engine.DisambiguationConfig`** (`class` in `omnisint/intelligence/graph_engine.py`) — Configuration thresholds for mathematical entity disambiguation and Louvain clustering.
+- **`omnisint.intelligence.graph_engine.GraphDisambiguationReport`** (`class` in `omnisint/intelligence/graph_engine.py`) — Summary report produced by KnowledgeGraphEngine persona disambiguation.
+- **`omnisint.intelligence.graph_engine._FallbackWeightedGraph`** (`class` in `omnisint/intelligence/graph_engine.py`) — Pure-Python NetworkX-compatible weighted undirected graph for offline environments.
+- **`omnisint.intelligence.graph_engine._parse_explicit_tz_offset`** (`function` in `omnisint/intelligence/graph_engine.py`) — Parse an explicit timezone string such as 'UTC+05:30', '+05:30', or 'UTC-07:00' into hours.
+- **`omnisint.intelligence.graph_engine._extract_node_temporal_profile`** (`function` in `omnisint/intelligence/graph_engine.py`) — Extract or synthesize a TemporalProfile from an EntityNode's attributes.
+- **`omnisint.intelligence.graph_engine.compute_modularity`** (`function` in `omnisint/intelligence/graph_engine.py`) — Compute Newman-Girvan weighted modularity Q in [-0.5, 1.0] for a graph partition.
+- **`omnisint.intelligence.graph_engine.louvain_communities_deterministic`** (`function` in `omnisint/intelligence/graph_engine.py`) — Partition weighted graph nodes into communities via conflict-aware Louvain modularity optimization.
+- **`omnisint.intelligence.graph_engine.KnowledgeGraphEngine`** (`class` in `omnisint/intelligence/graph_engine.py`) — Graph intelligence engine for entity deduplication, Louvain persona clustering, and hierarchy tree synthesis.
+- **`omnisint.intelligence.graph_engine.render_hierarchy_ascii`** (`function` in `omnisint/intelligence/graph_engine.py`) — Render a HierarchyTreeNode into an investigative Unicode box-drawing hierarchy tree.
 - **`omnisint.intelligence.similarity`** (`module` in `omnisint/intelligence/similarity.py`) — Multi-modal similarity scoring: Jaro-Winkler, Levenshtein, token-swap, and perceptual avatar hashing.
 - **`omnisint.intelligence.similarity.SimilarityResult`** (`class` in `omnisint/intelligence/similarity.py`) — Structured multi-modal similarity evaluation between two OSINT handles or profiles.
 - **`omnisint.intelligence.similarity.normalize_leet`** (`function` in `omnisint/intelligence/similarity.py`) — Normalize common leetspeak substitutions into lowercase alphabetic characters.
@@ -114,10 +124,12 @@
 - **`scripts.update_code_graph.build_graph`** (`function` in `scripts/update_code_graph.py`) — Scan workspace and build the structured codebase knowledge graph.
 - **`scripts.update_code_graph.write_outputs`** (`function` in `scripts/update_code_graph.py`) — Write graph.json and human/agent-readable GRAPH_REPORT.md.
 
-### Community: `tests` (7 nodes)
+### Community: `tests` (9 nodes)
 - **`tests`** (`module` in `tests/__init__.py`) — Pytest test suite for OmniSINT.
 - **`tests.test_entropy_and_similarity`** (`module` in `tests/test_entropy_and_similarity.py`) — Unit tests for Task 3: Shannon Entropy, Handle Rarity, Multi-Modal Similarity & Temporal Correlation.
 - **`tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal`** (`class` in `tests/test_entropy_and_similarity.py`) — Test suite for mathematical entity disambiguation primitives (Task 3).
+- **`tests.test_graph_engine`** (`module` in `tests/test_graph_engine.py`) — Unit tests for Task 4: NetworkX Knowledge Graph, Louvain Persona Clustering & Hierarchy Tree.
+- **`tests.test_graph_engine.TestKnowledgeGraphEngine`** (`class` in `tests/test_graph_engine.py`) — Test suite for KnowledgeGraphEngine disambiguation, Louvain clustering, and Hierarchy Tree.
 - **`tests.test_models_and_custody`** (`module` in `tests/test_models_and_custody.py`) — Unit tests for Task 1: Core Ontology & OSINT Pilot Chain-of-Custody Engine.
 - **`tests.test_models_and_custody.TestModelsAndCustody`** (`class` in `tests/test_models_and_custody.py`) — Test suite for OmniSINT core models and cryptographic chain of custody.
 - **`tests.test_storage`** (`module` in `tests/test_storage.py`) — Unit tests for Task 2: Async SQLite Case Store & TTL Response Cache.

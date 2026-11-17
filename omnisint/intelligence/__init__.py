@@ -13,6 +13,16 @@ from omnisint.intelligence.entropy import (
     strip_email_domain,
     tokenize_handle,
 )
+from omnisint.intelligence.graph_engine import (
+    CATEGORY_ORDER,
+    ENTITY_CATEGORY_MAP,
+    DisambiguationConfig,
+    GraphDisambiguationReport,
+    KnowledgeGraphEngine,
+    compute_modularity,
+    louvain_communities_deterministic,
+    render_hierarchy_ascii,
+)
 from omnisint.intelligence.similarity import (
     SimilarityResult,
     avatar_hash_similarity,
@@ -23,7 +33,7 @@ from omnisint.intelligence.similarity import (
     jaro_similarity,
     jaro_winkler_similarity,
     levenshtein_distance,
-     normalize_leet,
+    normalize_leet,
     normalized_levenshtein,
     token_swap_similarity,
 )
@@ -39,9 +49,14 @@ from omnisint.intelligence.temporal import (
 )
 
 __all__ = [
+    "CATEGORY_ORDER",
     "COMMON_ENGLISH_BIGRAMS",
     "COMMON_NAME_TOKENS",
+    "DisambiguationConfig",
+    "ENTITY_CATEGORY_MAP",
+    "GraphDisambiguationReport",
     "HandleEntropyMetrics",
+    "KnowledgeGraphEngine",
     "SimilarityResult",
     "TemporalCorrelationResult",
     "TemporalProfile",
@@ -51,6 +66,7 @@ __all__ = [
     "compare_handles",
     "compute_dhash_from_bytes",
     "compute_dhash_from_pixels",
+    "compute_modularity",
     "compute_rarity_score",
     "correlate_temporal_profiles",
     "correlate_timestamps",
@@ -63,9 +79,11 @@ __all__ = [
     "jaro_similarity",
     "jaro_winkler_similarity",
     "levenshtein_distance",
+    "louvain_communities_deterministic",
     "normalize_leet",
     "normalized_levenshtein",
     "parse_timestamp",
+    "render_hierarchy_ascii",
     "shannon_entropy",
     "strip_email_domain",
     "token_swap_similarity",

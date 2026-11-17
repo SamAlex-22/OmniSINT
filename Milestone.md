@@ -85,3 +85,35 @@ This document tracks how and what was engineered across each completed milestone
 ### 2. Verification & Graphify Sync
 - **Unit Tests (`tests/test_entropy_and_similarity.py`):** 5/5 tests passing (15/15 total suite tests passing in `0.033s`), covering Shannon entropy, common-name vs rare-handle scoring, `john_doe_sec` $\leftrightarrow$ `doejohnsec` token-swap matching, 64-bit `dHash` Hamming similarity, and `UTC+05:30` vs `UTC-07:00` temporal disambiguation.
 - **Graphify Knowledge Graph (`graphify-out/GRAPH_REPORT.md`):** Updated via `python3 scripts/update_code_graph.py` (`81 nodes, 157 edges`).
+
+---
+
+## Milestone 4 (Task 4): Mathematical Disambiguation Part 2 — NetworkX Knowledge Graph, Louvain Persona Clustering & Hierarchy Tree
+**Status:** Completed  
+**Modules Created / Updated:**
+- `omnisint/intelligence/graph_engine.py`
+- `omnisint/intelligence/__init__.py`
+- `tests/test_graph_engine.py`
+
+### 1. What Was Built
+1. **NetworkX & Offline-Compatible Knowledge Graph Engine (`KnowledgeGraphEngine` in `omnisint/intelligence/graph_engine.py`):**
+   - **Canonical Deduplication & Automatic Entropy Enrichment (`add_node`, `add_edge`, `ingest_nodes_and_edges`, `from_case`):** Automatically enriches ingested `EntityNode` records with Shannon entropy and handle rarity scores, merges duplicate entities by `canonical_key` (`<entity_type>:<platform>:<lowercase_value>`), combines `evidence_ids` and `attributes`, and remaps temporary duplicate `node_id` references on edges.
+   - **Dual Graph Backend (`_FallbackWeightedGraph` & `networkx.Graph`):** Synchronizes entities and weighted relationships with `networkx.Graph` when installed while providing a 100% API-compatible pure-Python weighted graph fallback so tests and offline deployments run with zero external binary dependencies.
+
+2. **Pairwise Multi-Modal Similarity Synthesis & Namesake Conflict Detection (`synthesize_similarity_edges`):**
+   - **Automated Disambiguation Edges:** Evaluates candidate identity anchors using Task 3's primitives (`compare_handles`, `avatar_hash_similarity`, `correlate_temporal_profiles`) and shared hard selectors (`EMAIL`, `PGP_KEY`, `SSH_KEY`, `AVATAR_HASH`, `REPOSITORY`, `DOMAIN`) to synthesize evidence-backed `SIMILAR_HANDLE`, `SAME_AVATAR`, `TEMPORAL_CORRELATION`, and `RESOLVED_SAME_PERSONA` edges.
+   - **Must-Not-Link Namesake Separation (`_record_conflict`):** Detects incompatible circadian/timezone profiles (e.g., `UTC+05:30` vs `UTC-07:00`), conflicting physical locations (`Bengaluru, India` vs `Seattle, USA`), divergent perceptual avatar hashes on low-rarity handles, and uncorroborated identical common-name handles (`john_smith`), recording explicit conflict constraints to prevent false-positive persona merges.
+
+3. **Conflict-Aware Louvain Community Detection & Multi-Hop Observable Propagation (`louvain_communities_deterministic`, ` compute_modularity`, `detect_persona_clusters`):**
+   - **Two-Phase Conflict-Aware Louvain Optimization:** Maximizes Newman-Girvan weighted modularity $Q$ across the identity core while enforcing must-not-link conflict pairs so colliding namesakes strictly partition into separate `PersonaCluster` containers.
+   - **Multi-Hop Weighted Observable Propagation:** Propagates persona membership from resolved identity anchors across structural edges (`OWNS_DOMAIN` $\rightarrow$ `HAS_SUBDOMAIN` $\rightarrow$ `RESOLVES_TO`, `OWNS_REPO`, `HAS_EMAIL`, `USES_KEY`, `MEMBER_OF`) so every persona retains its full technical and organizational footprint.
+   - **Citation-Backed Persona Synthesis:** Populates each `PersonaCluster` with `confidence_score`, `avg_handle_entropy`, `inferred_timezone`, `evidence_ids`, explicit `disambiguation_reasons` (citing `[node_id]` and `evidence_ids`), and context-aware `recommended_pivots`.
+
+4. **Recursive Information Hierarchy Tree & UI Exporters (`build_hierarchy_tree`, `render_hierarchy_ascii`, `to_cytoscape_elements`):**
+   - **Structured Hierarchy Tree (`HierarchyTreeNode`):** Organizes each resolved persona into `Root Persona` $\rightarrow$ `Accounts` / `Emails` / `Infrastructure` / `Organizations` / `Repositories`, preserving multi-level sub-hierarchies (`DOMAIN` $\rightarrow$ `SUBDOMAIN` $\rightarrow$ `IP_ADDRESS` and `SOCIAL_PROFILE` $\rightarrow$ `AVATAR_HASH`).
+   - **ASCII Tree & Cytoscape.js Serialization:** Renders investigative Unicode box-drawing trees for CLI/Markdown dossiers and exports compound cluster + node/edge JSON elements for the Cytoscape.js Web GUI.
+
+### 2. Verification & Graphify Sync
+- **Unit Tests (`tests/test_graph_engine.py`):** 5/5 new graph engine tests passing (20/20 total suite tests passing in `0.040s`), covering node deduplication/remapping, multi-modal edge synthesis, colliding namesake separation (`UTC+05:30` Bengaluru vs `UTC-07:00` Seattle), uncorroborated common-name separation (`john_smith`), nested `HierarchyTreeNode` construction, and `Case` in-place integration.
+- **Graphify Knowledge Graph (`graphify-out/GRAPH_REPORT.md`):** Updated via `python3 scripts/update_code_graph.py` (`93 nodes, 184 edges`).
+

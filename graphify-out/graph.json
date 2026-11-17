@@ -1,42 +1,46 @@
 {
-  "generated_at_utc": "2026-11-16T20:21:30.897984+00:00",
+  "generated_at_utc": "2026-11-17T17:12:06.269456+00:00",
   "stats": {
-    "total_nodes": 81,
-    "total_edges": 157,
+    "total_nodes": 93,
+    "total_edges": 184,
     "communities_count": 10
   },
   "god_nodes": [
     {
       "id": "omnisint.core.models",
-      "degree": 26
+      "degree": 28
     },
     {
       "id": "omnisint.intelligence.similarity",
-      "degree": 20
+      "degree": 22
     },
     {
       "id": "omnisint.intelligence.entropy",
+      "degree": 20
+    },
+    {
+      "id": "omnisint.intelligence.graph_engine",
       "degree": 19
     },
     {
       "id": "omnisint.intelligence.temporal",
-      "degree": 18
+      "degree": 19
+    },
+    {
+      "id": "BaseModel",
+      "degree": 16
     },
     {
       "id": "omnisint.core.storage",
       "degree": 16
     },
     {
-      "id": "BaseModel",
-      "degree": 14
+      "id": "__future__",
+      "degree": 13
     },
     {
       "id": "omnisint.core.custody",
       "degree": 13
-    },
-    {
-      "id": "__future__",
-      "degree": 11
     },
     {
       "id": "scripts.update_code_graph",
@@ -49,10 +53,6 @@
     {
       "id": "omnisint.config",
       "degree": 8
-    },
-    {
-      "id": "typing",
-      "degree": 7
     }
   ],
   "communities": {
@@ -113,6 +113,16 @@
       "omnisint.intelligence.entropy.estimate_collision_probability",
       "omnisint.intelligence.entropy.analyze_handle_entropy",
       "omnisint.intelligence.entropy.enrich_node_entropy",
+      "omnisint.intelligence.graph_engine",
+      "omnisint.intelligence.graph_engine.DisambiguationConfig",
+      "omnisint.intelligence.graph_engine.GraphDisambiguationReport",
+      "omnisint.intelligence.graph_engine._FallbackWeightedGraph",
+      "omnisint.intelligence.graph_engine._parse_explicit_tz_offset",
+      "omnisint.intelligence.graph_engine._extract_node_temporal_profile",
+      "omnisint.intelligence.graph_engine.compute_modularity",
+      "omnisint.intelligence.graph_engine.louvain_communities_deterministic",
+      "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "omnisint.intelligence.graph_engine.render_hierarchy_ascii",
       "omnisint.intelligence.similarity",
       "omnisint.intelligence.similarity.SimilarityResult",
       "omnisint.intelligence.similarity.normalize_leet",
@@ -152,6 +162,8 @@
       "tests",
       "tests.test_entropy_and_similarity",
       "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "tests.test_graph_engine",
+      "tests.test_graph_engine.TestKnowledgeGraphEngine",
       "tests.test_models_and_custody",
       "tests.test_models_and_custody.TestModelsAndCustody",
       "tests.test_storage",
@@ -580,6 +592,132 @@
       "docstring": "Populate `entropy_score` and `rarity_score` on an EntityNode using its value."
     },
     {
+      "id": "omnisint.intelligence.graph_engine",
+      "type": "module",
+      "file": "omnisint/intelligence/graph_engine.py",
+      "community": "intelligence",
+      "docstring": "NetworkX knowledge graph, conflict-aware Louvain persona clustering, and hierarchy tree builder."
+    },
+    {
+      "id": "omnisint.intelligence.graph_engine.DisambiguationConfig",
+      "type": "class",
+      "file": "omnisint/intelligence/graph_engine.py",
+      "line": 96,
+      "community": "intelligence",
+      "methods": [],
+      "docstring": "Configuration thresholds for mathematical entity disambiguation and Louvain clustering."
+    },
+    {
+      "id": "omnisint.intelligence.graph_engine.GraphDisambiguationReport",
+      "type": "class",
+      "file": "omnisint/intelligence/graph_engine.py",
+      "line": 111,
+      "community": "intelligence",
+      "methods": [],
+      "docstring": "Summary report produced by KnowledgeGraphEngine persona disambiguation."
+    },
+    {
+      "id": "omnisint.intelligence.graph_engine._FallbackWeightedGraph",
+      "type": "class",
+      "file": "omnisint/intelligence/graph_engine.py",
+      "line": 124,
+      "community": "intelligence",
+      "methods": [
+        "__init__",
+        "clear",
+        "add_node",
+        "add_edge",
+        "has_node",
+        "has_edge",
+        "get_edge_data",
+        "neighbors",
+        "number_of_nodes",
+        "number_of_edges",
+        "nodes",
+        "edges",
+        "degree"
+      ],
+      "docstring": "Pure-Python NetworkX-compatible weighted undirected graph for offline environments."
+    },
+    {
+      "id": "omnisint.intelligence.graph_engine._parse_explicit_tz_offset",
+      "type": "function",
+      "file": "omnisint/intelligence/graph_engine.py",
+      "line": 209,
+      "community": "intelligence",
+      "docstring": "Parse an explicit timezone string such as 'UTC+05:30', '+05:30', or 'UTC-07:00' into hours."
+    },
+    {
+      "id": "omnisint.intelligence.graph_engine._extract_node_temporal_profile",
+      "type": "function",
+      "file": "omnisint/intelligence/graph_engine.py",
+      "line": 238,
+      "community": "intelligence",
+      "docstring": "Extract or synthesize a TemporalProfile from an EntityNode's attributes."
+    },
+    {
+      "id": "omnisint.intelligence.graph_engine.compute_modularity",
+      "type": "function",
+      "file": "omnisint/intelligence/graph_engine.py",
+      "line": 280,
+      "community": "intelligence",
+      "docstring": "Compute Newman-Girvan weighted modularity Q in [-0.5, 1.0] for a graph partition."
+    },
+    {
+      "id": "omnisint.intelligence.graph_engine.louvain_communities_deterministic",
+      "type": "function",
+      "file": "omnisint/intelligence/graph_engine.py",
+      "line": 312,
+      "community": "intelligence",
+      "docstring": "Partition weighted graph nodes into communities via conflict-aware Louvain modularity optimization."
+    },
+    {
+      "id": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "type": "class",
+      "file": "omnisint/intelligence/graph_engine.py",
+      "line": 455,
+      "community": "intelligence",
+      "methods": [
+        "__init__",
+        "graph",
+        "nodes",
+        "edges",
+        "from_case",
+        "clear",
+        "get_node",
+        "add_node",
+        "add_edge",
+        "ingest_nodes_and_edges",
+        "_sync_graph_node",
+        "_sync_graph_edge",
+        "_extract_avatar_hash",
+        "_extract_handle_string",
+        "_record_conflict",
+        "_has_shared_hard_selector",
+        "_check_location_conflict",
+        "synthesize_similarity_edges",
+        "_build_clustering_adjacency",
+        "detect_persona_clusters",
+        "_select_primary_node",
+        "_infer_cluster_timezone",
+        "_construct_persona_cluster",
+        "_recommend_pivots",
+        "build_hierarchy_tree",
+        "resolve_personas",
+        "apply_to_case",
+        "to_cytoscape_elements"
+      ],
+      "docstring": "Graph intelligence engine for entity deduplication, Louvain persona clustering, and hierarchy tree synthesis."
+    },
+    {
+      "id": "omnisint.intelligence.graph_engine.render_hierarchy_ascii",
+      "type": "function",
+      "file": "omnisint/intelligence/graph_engine.py",
+      "line": 1619,
+      "community": "intelligence",
+      "docstring": "Render a HierarchyTreeNode into an investigative Unicode box-drawing hierarchy tree."
+    },
+    {
       "id": "omnisint.intelligence.similarity",
       "type": "module",
       "file": "omnisint/intelligence/similarity.py",
@@ -846,6 +984,28 @@
         "test_temporal_profile_and_timezone_correlation"
       ],
       "docstring": "Test suite for mathematical entity disambiguation primitives (Task 3)."
+    },
+    {
+      "id": "tests.test_graph_engine",
+      "type": "module",
+      "file": "tests/test_graph_engine.py",
+      "community": "tests",
+      "docstring": "Unit tests for Task 4: NetworkX Knowledge Graph, Louvain Persona Clustering & Hierarchy Tree."
+    },
+    {
+      "id": "tests.test_graph_engine.TestKnowledgeGraphEngine",
+      "type": "class",
+      "file": "tests/test_graph_engine.py",
+      "line": 21,
+      "community": "tests",
+      "methods": [
+        "test_node_deduplication_and_entropy_enrichment",
+        "test_similarity_edge_synthesis_for_rare_and_corroborated_handles",
+        "test_colliding_namesake_separation_into_distinct_persona_clusters",
+        "test_apply_to_case_updates_nodes_edges_and_personas",
+        "test_uncorroborated_common_names_separate_without_false_positive_merge"
+      ],
+      "docstring": "Test suite for KnowledgeGraphEngine disambiguation, Louvain clustering, and Hierarchy Tree."
     },
     {
       "id": "tests.test_models_and_custody",
@@ -1225,6 +1385,11 @@
     },
     {
       "source": "omnisint.intelligence",
+      "target": "omnisint.intelligence.graph_engine",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence",
       "target": "omnisint.intelligence.similarity",
       "relation": "imports"
     },
@@ -1316,6 +1481,101 @@
     {
       "source": "omnisint.intelligence.entropy",
       "target": "omnisint.intelligence.entropy.enrich_node_entropy",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine",
+      "target": "collections",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine",
+      "target": "pydantic",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine",
+      "target": "omnisint.intelligence.entropy",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine",
+      "target": "omnisint.intelligence.similarity",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine",
+      "target": "omnisint.intelligence.temporal",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine",
+      "target": "omnisint.intelligence.graph_engine.DisambiguationConfig",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine.DisambiguationConfig",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine",
+      "target": "omnisint.intelligence.graph_engine.GraphDisambiguationReport",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine.GraphDisambiguationReport",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine",
+      "target": "omnisint.intelligence.graph_engine._FallbackWeightedGraph",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine",
+      "target": "omnisint.intelligence.graph_engine._parse_explicit_tz_offset",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine",
+      "target": "omnisint.intelligence.graph_engine._extract_node_temporal_profile",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine",
+      "target": "omnisint.intelligence.graph_engine.compute_modularity",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine",
+      "target": "omnisint.intelligence.graph_engine.louvain_communities_deterministic",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine",
+      "target": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine",
+      "target": "omnisint.intelligence.graph_engine.render_hierarchy_ascii",
       "relation": "defines"
     },
     {
@@ -1590,6 +1850,41 @@
     },
     {
       "source": "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "target": "unittest.TestCase",
+      "relation": "inherits"
+    },
+    {
+      "source": "tests.test_graph_engine",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_graph_engine",
+      "target": "unittest",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_graph_engine",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_graph_engine",
+      "target": "omnisint.intelligence.graph_engine",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_graph_engine",
+      "target": "omnisint.intelligence.similarity",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_graph_engine",
+      "target": "tests.test_graph_engine.TestKnowledgeGraphEngine",
+      "relation": "defines"
+    },
+    {
+      "source": "tests.test_graph_engine.TestKnowledgeGraphEngine",
       "target": "unittest.TestCase",
       "relation": "inherits"
     },
