@@ -9,6 +9,7 @@ from omnisint.intelligence.ai_analyst import (
     classify_confidence_tier,
     extract_citations,
     sanitize_hallucinated_citations,
+    sanitize_untrusted_osint_text,
 )
 from omnisint.intelligence.entropy import (
     COMMON_ENGLISH_BIGRAMS,
@@ -102,6 +103,7 @@ __all__ = [
     "parse_timestamp",
     "render_hierarchy_ascii",
     "sanitize_hallucinated_citations",
+    "sanitize_untrusted_osint_text",
     "shannon_entropy",
     "strip_email_domain",
     "token_swap_similarity",

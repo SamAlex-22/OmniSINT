@@ -32,11 +32,11 @@ Think of **OmniSINT** as building a complete, automated **Digital Detective & Fo
 - [x] **Task 3:** Mathematical Disambiguation Part 1 — Shannon Entropy, Handle Rarity & Multi-Modal Similarity (`omnisint/intelligence/entropy.py`, `omnisint/intelligence/similarity.py`, `omnisint/intelligence/temporal.py`)
 - [x] **Task 4:** Mathematical Disambiguation Part 2 — NetworkX Knowledge Graph, Louvain Persona Clustering & Hierarchy Tree (`omnisint/intelligence/graph_engine.py`)
 - [x] **Task 5:** Citation-Locked AI Analyst & Persona Dossier Synthesizer (`omnisint/intelligence/ai_analyst.py`)
-- [ ] **Task 6:** Pluggable Collector Framework + Username & GitHub/PGP Collectors (`omnisint/collectors/base.py`, `username_collector.py`, `github_collector.py`)
-- [ ] **Task 7:** Infrastructure, Threat Intel & Search Dork Collectors (`domain_ct_collector.py`, `threat_intel.py`, `search_dork_collector.py`)
-- [ ] **Task 8:** Async Scan Orchestrator, Cross-Indicator Pivot Engine & STIX 2.1 / Markdown Exporters (`omnisint/core/orchestrator.py`, `omnisint/reporting/`)
-- [ ] **Task 9:** FastAPI Backend, WebSocket Live Stream & Cytoscape.js Interactive Web GUI (`omnisint/api/`, `web/index.html`)
-- [ ] **Task 10:** Typer CLI & Textual Interactive Terminal Dashboard (`omnisint/cli/main.py`, `omnisint/cli/tui.py`) + End-to-End Integration Suite
+- [x] **Task 6:** Pluggable Collector Framework + Username & GitHub/PGP Collectors (`omnisint/collectors/base.py`, `username_collector.py`, `github_collector.py`)
+- [x] **Task 7:** Infrastructure, Threat Intel & Search Dork Collectors (`domain_ct_collector.py`, `threat_intel.py`, `search_dork_collector.py`)
+- [x] **Task 8:** Async Scan Orchestrator, Cross-Indicator Pivot Engine & STIX 2.1 / Markdown Exporters (`omnisint/core/orchestrator.py`, `omnisint/reporting/`)
+- [x] **Task 9:** FastAPI Backend, WebSocket Live Stream & Cytoscape.js Interactive Web GUI (`omnisint/api/`, `web/index.html`)
+- [x] **Task 10:** Typer CLI & Textual Interactive Terminal Dashboard (`omnisint/cli/main.py`, `omnisint/cli/tui.py`) + End-to-End Integration Suite
 
 ---
 
@@ -135,7 +135,7 @@ Think of **OmniSINT** as building a complete, automated **Digital Detective & Fo
 ---
 
 ### Task 6: Pluggable Collector Framework + Username & GitHub/PGP Collectors
-- **Status:** `[ ] Pending`
+- **Status:** `[x] Completed`
 - **Why This Task Exists (Plain-English Problem & Solution):**
   Now that our storage, cryptography, math, graph clustering, and AI analyst are ready, we need **passive OSINT collectors** to gather real-world identity data!
   - **Why `BaseCollector` & `CollectorRegistry` (`omnisint/collectors/base.py`):**
@@ -144,9 +144,9 @@ Think of **OmniSINT** as building a complete, automated **Digital Detective & Fo
     2. Rate-limiting and exponential backoff (`429 Too Many Requests`),
     3. Computing the SHA-256 hash of the raw HTTP response and creating an `EvidenceItem`, and
     4. Handling network timeouts gracefully without crashing the whole scan.
-    `BaseCollector` handles all of this automatically via a single helper method `fetch_with_custody_and_cache()`, while `CollectorRegistry` lets the orchestrator discover which collectors can handle a `USERNAME`, `EMAIL`, `DOMAIN`, or `IP_ADDRESS`.
+    `BaseCollector` handles all of this automatically via `fetch_with_custody()`, while `CollectorRegistry` lets the orchestrator discover which collectors can handle a `USERNAME`, `EMAIL`, `DOMAIN`, or `IP_ADDRESS`.
   - **Why `UsernameCollector` (`username_collector.py`):**
-    Given a handle like `krypton_sec_x7`, checks developer and social platforms (GitHub, GitLab, Reddit, Keybase, HackerNews, Mastodon, etc.), extracts display names, bios, locations, activity timestamps, and avatar perceptual hashes (`dHash`), and emits `SOCIAL_PROFILE` and `AVATAR_HASH` nodes.
+    Given a handle like `krypton_sec_x7`, checks developer and social platforms (GitHub, GitLab, Reddit, Keybase, HackerNews, Dev.to), extracts display names, bios, locations, activity timestamps, and avatar perceptual hashes (`dHash`), and emits `SOCIAL_PROFILE` and `AVATAR_HASH` nodes.
   - **Why `GitHubCollector` (`github_collector.py`):**
     GitHub is one of the highest-value passive OSINT sources for developer and threat-actor attribution. Even when a user hides their email on their profile page:
     1. Their public events (`api.github.com/users/<user>/events/public`) and commit headers often expose their real commit author email (`alex.sec@proton.me`) and local timezone offset (`+05:30`),
@@ -162,29 +162,29 @@ Think of **OmniSINT** as building a complete, automated **Digital Detective & Fo
     • [SSH_KEY]        ssh-ed25519 AAAAC3Nza... (extracted from github.com/krypton_sec_x7.keys)
     • [REPOSITORY]     github.com/krypton_sec_x7/omnisint
   Output Custody:
-    • 4 EvidenceItem records with SHA-256 digests of the raw JSON/key responses
+    • 4+ EvidenceItem records with SHA-256 digests of the raw JSON/key responses
   ```
-- **Files to Create:**
-  - `omnisint/collectors/base.py` (`BaseCollector`, `CollectorRegistry`)
-  - `omnisint/collectors/username_collector.py` (`UsernameCollector`)
-  - `omnisint/collectors/github_collector.py` (`GitHubCollector`)
-  - `tests/test_identity_collectors.py` (offline deterministic tests using mocked HTTP responses)
-- **Prompt to Run:**
+- **Files Created:**
+  - [omnisint/collectors/base.py](file:///Users/alex/OmniSINT/omnisint/collectors/base.py) (`BaseCollector`, `CollectorConfig`, `CollectorRegistry`, `HttpResponseData`)
+  - [omnisint/collectors/username_collector.py](file:///Users/alex/OmniSINT/omnisint/collectors/username_collector.py) (`UsernameCollector`, `PlatformSpec`)
+  - [omnisint/collectors/github_collector.py](file:///Users/alex/OmniSINT/omnisint/collectors/github_collector.py) (`GitHubCollector`)
+  - [tests/test_identity_collectors.py](file:///Users/alex/OmniSINT/tests/test_identity_collectors.py) (offline deterministic tests using mocked HTTP responses)
+- **Prompt Used:**
   > `"Implement Task 6 from TASKS.md: Collector Framework, UsernameCollector, and GitHubCollector, run tests, and update Graphify."`
 
 ---
 
 ### Task 7: Infrastructure, Threat Intel & Search Dork Collectors
-- **Status:** `[ ] Pending`
+- **Status:** `[x] Completed`
 - **Why This Task Exists (Plain-English Problem & Solution):**
   An investigation doesn't stop at social profiles—once you discover a target's personal domain (e.g., `alexsec.io`) or email domain, you need to map their **technical infrastructure, historical web footprint, and security reputation**:
   1. **`DomainCTCollector` (`domain_ct_collector.py`):**
      - **Why Certificate Transparency (`crt.sh`)?** Whenever anyone creates an SSL/TLS certificate (e.g., via Let's Encrypt or Cloudflare) for a hidden subdomain like `staging-vpn.alexsec.io`, Certificate Authorities are legally required to publish that certificate to public Certificate Transparency logs. By querying `crt.sh/?q=alexsec.io&output=json`, `DomainCTCollector` passively discovers subdomains without sending a single packet to the target's server!
-     - Also queries **RDAP / WHOIS** registration records and passive DNS (`A`, `AAAA`, `MX`, `TXT`) to emit `DOMAIN`, `SUBDOMAIN`, `CERTIFICATE`, `IP_ADDRESS`, and `ORGANIZATION` nodes.
+     - Also queries **RDAP / WHOIS** registration records and passive DNS (`dns.google/resolve`) to emit `DOMAIN`, `SUBDOMAIN`, `CERTIFICATE`, `IP_ADDRESS`, `EMAIL`, and `ORGANIZATION` nodes.
   2. **`ThreatIntelCollector` (`threat_intel.py`):**
-     - Queries **VirusTotal v3** (and deterministic passive reputation analysis when no API key is configured) to inspect whether a discovered domain or IP address is associated with known malware, phishing, command-and-control (C2), or shared hosting, emitting `THREAT_INDICATOR` nodes (`FLAGGED_BY`).
+     - Queries **VirusTotal v3** (and deterministic passive posture fallback when no API key is configured) to inspect whether a discovered domain or IP address is associated with known malware, phishing, command-and-control (C2), or passive DNS resolutions, emitting `THREAT_INDICATOR` nodes (`FLAGGED_BY`) and `IP_ADDRESS` nodes (`RESOLVES_TO`).
   3. **`SearchDorkCollector` (`search_dork_collector.py`):**
-     - Generates targeted OSINT search dorks (e.g., `"krypton_sec_x7" site:pastebin.com OR site:gist.github.com`) and queries the **Internet Archive Wayback Machine CDX API (`web.archive.org/cdx/search/cdx`)** + optional Google Custom Search Engine (CSE) to uncover historical URLs (`URL`, `MENTIONED_AT`) even after pages have been deleted from the live internet.
+     - Generates targeted OSINT search dorks (`generate_dork_queries()`) and queries the **Internet Archive Wayback Machine CDX API (`web.archive.org/cdx/search/cdx`)** + optional Google Custom Search Engine (CSE) to uncover historical URLs (`URL`, `MENTIONED_AT`) even after pages have been deleted from the live internet.
 - **Concrete Example (Input $\rightarrow$ Output):**
   ```text
   Input Query:  domain = "alexsec.io"
@@ -196,27 +196,27 @@ Think of **OmniSINT** as building a complete, automated **Digital Detective & Fo
        ├── MENTIONED_AT  ──> [URL] https://web.archive.org/web/20250101/https://alexsec.io/about
        └── FLAGGED_BY    ──> [THREAT_INDICATOR] VT Reputation: Clean (0/90 detections)
   ```
-- **Files to Create:**
-  - `omnisint/collectors/domain_ct_collector.py` (`DomainCTCollector`)
-  - `omnisint/collectors/threat_intel.py` (`ThreatIntelCollector`)
-  - `omnisint/collectors/search_dork_collector.py` (`SearchDorkCollector`)
-  - `tests/test_infra_collectors.py`
-- **Prompt to Run:**
+- **Files Created:**
+  - [omnisint/collectors/domain_ct_collector.py](file:///Users/alex/OmniSINT/omnisint/collectors/domain_ct_collector.py) (`DomainCTCollector`)
+  - [omnisint/collectors/threat_intel.py](file:///Users/alex/OmniSINT/omnisint/collectors/threat_intel.py) (`ThreatIntelCollector`)
+  - [omnisint/collectors/search_dork_collector.py](file:///Users/alex/OmniSINT/omnisint/collectors/search_dork_collector.py) (`SearchDorkCollector`, `generate_dork_queries`)
+  - [tests/test_infra_collectors.py](file:///Users/alex/OmniSINT/tests/test_infra_collectors.py)
+- **Prompt Used:**
   > `"Implement Task 7 from TASKS.md: DomainCTCollector, ThreatIntelCollector, and SearchDorkCollector, run tests, and update Graphify."`
 
 ---
 
 ### Task 8: Async Scan Orchestrator, Cross-Indicator Pivot Engine & STIX 2.1 / Markdown Exporters
-- **Status:** `[ ] Pending`
+- **Status:** `[x] Completed`
 - **Why This Task Exists (Plain-English Problem & Solution):**
   1. **Automated Multi-Hop Pivoting (`ScanOrchestrator` in `omnisint/core/orchestrator.py`):**
      In real OSINT work, one clue leads to another:
      - **Hop 1:** You scan username `krypton_sec_x7`. `GitHubCollector` discovers email `krypton@alexsec.io` and personal website `alexsec.io`.
-     - **Hop 2 (Automatic or Analyst-Triggered Pivot):** `ScanOrchestrator` inspects newly discovered nodes, extracts the domain `alexsec.io` from `krypton@alexsec.io`, and automatically runs `DomainCTCollector` and `ThreatIntelCollector` on `alexsec.io`!
+     - **Hop 2 (Automatic or Analyst-Triggered Pivot):** `ScanOrchestrator` inspects newly discovered nodes, extracts the domain `alexsec.io` from `krypton@alexsec.io`, and automatically runs `DomainCTCollector`, `ThreatIntelCollector`, and `SearchDorkCollector` on `alexsec.io`!
      - **Final Resolution:** Once all hops finish, `ScanOrchestrator` merges all results into `CaseStorage`, verifies the SHA-256 custody chain, runs `KnowledgeGraphEngine` to separate any colliding namesakes into `PersonaCluster`s, and invokes `AIAnalyst` to generate the citation-locked executive brief.
   2. **Industry-Standard Reporting Exporters (`omnisint/reporting/`):**
-     - **`MarkdownExporter` (`markdown_exporter.py`):** Generates a complete, court/SOC-ready Markdown investigative dossier containing the Case overview, AI Executive Brief, Identity Confidence Matrix, Mermaid + ASCII Hierarchy Trees, and the complete **SHA-256 Chain of Custody Audit Table**.
-     - **`STIXExporter` (`stix_exporter.py`):** Exports the entire resolved intelligence graph into an OASIS **STIX 2.1 JSON Bundle** (`type: "bundle"`, `identity`, `user-account`, `email-addr`, `domain-name`, `ipv4-addr`, `relationship`, `note`) so corporate SOC teams can import OmniSINT findings directly into **OpenCTI, MISP, Splunk, or Microsoft Sentinel**.
+     - **`MarkdownExporter` (`markdown_exporter.py`):** Generates a complete investigative Markdown dossier containing the Case overview, optional Ed25519 signature, AI Executive Brief, Mermaid + ASCII Hierarchy Trees, and the complete **SHA-256 Chain of Custody Audit Table**.
+     - **`STIXExporter` (`stix_exporter.py`):** Exports the entire resolved intelligence graph into an OASIS **STIX 2.1 JSON Bundle** (`type: "bundle"`, `identity`, `user-account`, `email-addr`, `domain-name`, `ipv4-addr`, `relationship`, `note`) so SOC teams can import OmniSINT findings directly into **OpenCTI, MISP, Splunk, or Microsoft Sentinel**.
 - **Concrete Example (Sample STIX 2.1 Bundle Snippet):**
   ```json
   {
@@ -234,21 +234,21 @@ Think of **OmniSINT** as building a complete, automated **Digital Detective & Fo
     ]
   }
   ```
-- **Files to Create:**
-  - `omnisint/core/orchestrator.py` (`ScanOrchestrator`, `PivotRequest`, `ScanProgressEvent`)
-  - `omnisint/reporting/markdown_exporter.py` (`MarkdownExporter`)
-  - `omnisint/reporting/stix_exporter.py` (`STIXExporter`)
-  - `tests/test_orchestrator_and_reporting.py`
-- **Prompt to Run:**
+- **Files Created:**
+  - [omnisint/core/orchestrator.py](file:///Users/alex/OmniSINT/omnisint/core/orchestrator.py) (`ScanOrchestrator`, `PivotRequest`, `ScanProgressEvent`, `infer_entity_type`)
+  - [omnisint/reporting/markdown_exporter.py](file:///Users/alex/OmniSINT/omnisint/reporting/markdown_exporter.py) (`MarkdownExporter`)
+  - [omnisint/reporting/stix_exporter.py](file:///Users/alex/OmniSINT/omnisint/reporting/stix_exporter.py) (`STIXExporter`)
+  - [tests/test_orchestrator_and_reporting.py](file:///Users/alex/OmniSINT/tests/test_orchestrator_and_reporting.py)
+- **Prompt Used:**
   > `"Implement Task 8 from TASKS.md: Scan Orchestrator, Pivot Engine, and STIX 2.1 / Markdown Exporters, run tests, and update Graphify."`
 
 ---
 
 ### Task 9: FastAPI Backend, WebSocket Live Stream & Cytoscape.js Interactive Web GUI
-- **Status:** `[ ] Pending`
+- **Status:** `[x] Completed`
 - **Why This Task Exists (Plain-English Problem & Solution):**
   Visualizing a 50-node OSINT graph and comparing separated namesake personas side-by-side is fastest in an interactive visual dashboard.
-  1. **FastAPI REST & WebSocket Server (`omnisint/api/app.py`, `omnisint/api/routes/`):**
+  1. **FastAPI + WSGI REST & WebSocket Server (`omnisint/api/app.py`, `omnisint/api/routes/cases.py`):**
      - `POST /api/cases` & `GET /api/cases`: Create and list investigations.
      - `POST /api/cases/{case_id}/scan`: Trigger a multi-collector OSINT scan with real-time progress over `/ws/cases/{case_id}`.
      - `POST /api/cases/{case_id}/pivot`: Click any node in the UI to pivot and expand the graph from that entity.
@@ -260,26 +260,31 @@ Think of **OmniSINT** as building a complete, automated **Digital Detective & Fo
      - **Persona Disambiguation Filter Bar:** Isolate `Persona #1 (UTC+05:30)` vs `Persona #2 (UTC-07:00)` side-by-side.
      - **Entropy & Confidence Inspector + One-Click Pivot Drawer.**
      - **Cryptographic Chain-of-Custody Verification Badge & Evidence Viewer.**
-- **Files to Create:**
-  - `omnisint/api/app.py`
-  - `omnisint/api/routes/cases.py`
-  - `web/index.html`
-  - `tests/test_api.py`
-- **Prompt to Run:**
+- **Files Created:**
+  - [omnisint/api/app.py](file:///Users/alex/OmniSINT/omnisint/api/app.py) (`create_app`, `get_default_app`)
+  - [omnisint/api/routes/cases.py](file:///Users/alex/OmniSINT/omnisint/api/routes/cases.py) (`OmniSINTAPIService`, `ProgressBroadcaster`, `build_fastapi_router`)
+  - [web/index.html](file:///Users/alex/OmniSINT/web/index.html)
+  - [tests/test_api.py](file:///Users/alex/OmniSINT/tests/test_api.py)
+- **Prompt Used:**
   > `"Implement Task 9 from TASKS.md: FastAPI Backend and Cytoscape.js Web GUI, run tests, and update Graphify."`
 
 ---
 
 ### Task 10: Typer CLI & Textual Interactive Terminal Dashboard + End-to-End Verification
-- **Status:** `[ ] Pending`
+- **Status:** `[x] Completed`
 - **Why This Task Exists (Plain-English Problem & Solution):**
   Cybersecurity specialists and incident responders frequently work in terminal sessions over SSH where a browser isn't available. Task 10 provides a complete command-line interface (CLI) and an interactive terminal dashboard (TUI):
-  1. **Typer + Rich CLI (`omnisint/cli/main.py`):**
+  1. **Click / Typer-Compatible CLI (`omnisint/cli/main.py`):**
      ```bash
+     # Run the built-in offline colliding-namesake disambiguation demo
+     omnisint demo --db demo.db --output-md dossier.md --output-stix bundle.stix.json
+
      # Run an investigation scan and display resolved Persona Hierarchy Trees
      omnisint scan krypton_sec_x7 --title "Incident #402 Attribution"
 
      # Inspect a case and cryptographically verify its SHA-256 Chain of Custody
+     omnisint case list
+     omnisint case show <case_id>
      omnisint case verify <case_id>
 
      # Pivot on a specific discovered node ID from the command line
@@ -289,17 +294,17 @@ Think of **OmniSINT** as building a complete, automated **Digital Detective & Fo
      omnisint report <case_id> --format markdown --output dossier.md
      omnisint report <case_id> --format stix --output bundle.stix.json
 
-     # Launch the interactive Textual terminal dashboard or FastAPI Web GUI
-     omnisint tui
+     # Launch the interactive Textual/headless terminal dashboard or Web GUI
+     omnisint tui <case_id>
      omnisint serve --port 8000
      ```
-  2. **Textual Interactive Terminal Dashboard (`omnisint/cli/tui.py`):**
-     - Keyboard- and mouse-navigable terminal UI featuring a live **Persona & Information Hierarchy Tree** panel, **Entity & Entropy Inspector**, **SHA-256 Custody Ledger table**, and **Citation-Locked AI Brief** viewer.
+  2. **Interactive Terminal Dashboard (`omnisint/cli/tui.py`):**
+     - `OmniSINTTUIDashboard` with live **Persona & Information Hierarchy Tree** view, **Identity Confidence Matrix** view, **SHA-256 Custody Ledger** view, and **Citation-Locked AI Brief** view (backed by `textual` when installed and deterministic snapshot rendering in headless shells).
   3. **End-to-End Integration Suite (`tests/test_cli_e2e.py`):**
-     - Verifies the entire platform end-to-end: CLI commands, collector execution, SQLite persistence, SHA-256 tamper verification, Louvain namesake separation, citation-locked AI synthesis, FastAPI routes, and Markdown / STIX 2.1 exports.
-- **Files to Create:**
-  - `omnisint/cli/main.py`
-  - `omnisint/cli/tui.py`
-  - `tests/test_cli_e2e.py`
-- **Prompt to Run:**
+     - Verifies `omnisint demo`, `case list`, `case show`, `case verify` (both intact and SQLite-tampered!), `report`, `tui --snapshot`, and `OmniSINTTUIDashboard` view switching.
+- **Files Created:**
+  - [omnisint/cli/main.py](file:///Users/alex/OmniSINT/omnisint/cli/main.py) (`app`, `run_cli`, `build_demo_collision_case`)
+  - [omnisint/cli/tui.py](file:///Users/alex/OmniSINT/omnisint/cli/tui.py) (`OmniSINTTUIDashboard`, `launch_tui`)
+  - [tests/test_cli_e2e.py](file:///Users/alex/OmniSINT/tests/test_cli_e2e.py)
+- **Prompt Used:**
   > `"Implement Task 10 from TASKS.md: Typer CLI, Textual TUI, and End-to-End Verification, run tests, and update Graphify."`

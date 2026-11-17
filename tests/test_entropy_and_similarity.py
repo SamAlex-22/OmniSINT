@@ -44,10 +44,13 @@ class TestEntropySimilarityAndTemporal(unittest.TestCase):
 
     def test_handle_rarity_penalizes_common_names_and_rewards_unique_handles(self) -> None:
         common_metrics = analyze_handle_entropy("john_smith")
+        multinational_common = analyze_handle_entropy("rahul_sharma")
         rare_metrics = analyze_handle_entropy("x7_krypton_99")
 
         self.assertLess(common_metrics.rarity_score, 0.35)
+        self.assertLess(multinational_common.rarity_score, 0.35)
         self.assertTrue(common_metrics.is_high_collision_risk)
+        self.assertTrue(multinational_common.is_high_collision_risk)
         self.assertGreater(rare_metrics.rarity_score, 0.70)
         self.assertFalse(rare_metrics.is_high_collision_risk)
         self.assertGreater(
@@ -150,6 +153,16 @@ class TestEntropySimilarityAndTemporal(unittest.TestCase):
             hourly_cosine_similarity(prof_a.hourly_histogram_utc, prof_b.hourly_histogram_utc),
             0.0,
         )
+
+        # Verify local-timezone weekend_ratio: Friday 23:00-07:00 is Saturday in UTC+05:30!
+        # 2026-05-08 is a Friday; 2026-05-08T20:00:00Z = 2026-05-09T01:30:00+05:30 (Saturday local)
+        ist_weekend_prof = build_temporal_profile(
+            [
+                "2026-05-09T01:30:00+05:30",  # Saturday local, Friday UTC!
+                "2026-05-09T02:00:00+05:30",  # Saturday local, Friday UTC!
+            ]
+        )
+        self.assertEqual(ist_weekend_prof.weekend_ratio, 1.0)
 
 
 if __name__ == "__main__":

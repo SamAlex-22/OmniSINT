@@ -501,6 +501,24 @@ class TestKnowledgeGraphEngine(unittest.TestCase):
         self.assertEqual(len(report.conflicts_detected), 1)
         self.assertIn("uncorroborated identical common handle", report.conflicts_detected[0])
 
+    def test_location_alias_normalization_avoids_false_conflict(self) -> None:
+        engine = KnowledgeGraphEngine()
+        n1 = EntityNode(
+            node_id="n-loc-1",
+            entity_type=EntityType.SOCIAL_PROFILE,
+            value="rahul_sharma",
+            platform="GitHub",
+            attributes={"location": "Bangalore"},
+        )
+        n2 = EntityNode(
+            node_id="n-loc-2",
+            entity_type=EntityType.SOCIAL_PROFILE,
+            value="rahul_sharma",
+            platform="Twitter",
+            attributes={"location": "Bengaluru, India"},
+        )
+        self.assertIsNone(engine._check_location_conflict(n1, n2))
+
 
 if __name__ == "__main__":
     unittest.main()

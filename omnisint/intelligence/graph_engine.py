@@ -652,12 +652,23 @@ class KnowledgeGraphEngine:
                 confidence=edge.confidence,
             )
 
-    def _extract_avatar_hash(self, node: EntityNode) -> str | None:
+    def _extract_avatar_hash(
+        self,
+        node: EntityNode,
+        neighbor_index: dict[str, set[str]] | None = None,
+    ) -> str | None:
         """Return a hex perceptual hash from node attributes or adjacent AVATAR_HASH nodes."""
         for attr_key in ("avatar_hash", "dhash", "phash", "avatar_dhash"):
             val = node.attributes.get(attr_key)
             if isinstance(val, str) and len(val.strip()) >= 8:
                 return val.strip()
+
+        if neighbor_index is not None:
+            for other_id in neighbor_index.get(node.node_id, ()):
+                other_node = self._nodes.get(other_id)
+                if other_node and other_node.entity_type == EntityType.AVATAR_HASH:
+                    return other_node.value.strip()
+            return None
 
         for edge in self._edges.values():
             other_id: str | None = None
@@ -691,7 +702,22 @@ class KnowledgeGraphEngine:
             f"Separated {node_a.label} [{node_a.node_id}] and {node_b.label} [{node_b.node_id}]: {reason}"
         )
 
-    def _has_shared_hard_selector(self, node_a: EntityNode, node_b: EntityNode) -> tuple[bool, str]:
+    def _build_hard_selector_neighbor_index(self) -> dict[str, set[str]]:
+        """Precompute node adjacency excluding SIMILAR_HANDLE edges for fast pairwise lookups."""
+        neighbors: dict[str, set[str]] = defaultdict(set)
+        for edge in self._edges.values():
+            if edge.relation_type == RelationType.SIMILAR_HANDLE:
+                continue
+            neighbors[edge.source_node_id].add(edge.target_node_id)
+            neighbors[edge.target_node_id].add(edge.source_node_id)
+        return neighbors
+
+    def _has_shared_hard_selector(
+        self,
+        node_a: EntityNode,
+        node_b: EntityNode,
+        neighbor_index: dict[str, set[str]] | None = None,
+    ) -> tuple[bool, str]:
         """Check whether two identity nodes share an explicit email, key, domain, or graph neighbor selector."""
         # 1. Check direct attribute matches (email, pgp_fingerprint, ssh_key, website/domain)
         for attr_key in ("email", "commit_email", "pgp_key", "ssh_key", "domain", "website"):
@@ -706,20 +732,24 @@ class KnowledgeGraphEngine:
                 return True, f"shared {attr_key} '{val_a.strip()}'"
 
         # 2. Check shared high-specificity neighbor nodes in the graph
-        neighbors_a: set[str] = set()
-        neighbors_b: set[str] = set()
-        for edge in self._edges.values():
-            if edge.relation_type == RelationType.SIMILAR_HANDLE:
-                continue
-            if edge.source_node_id == node_a.node_id:
-                neighbors_a.add(edge.target_node_id)
-            elif edge.target_node_id == node_a.node_id:
-                neighbors_a.add(edge.source_node_id)
+        if neighbor_index is not None:
+            neighbors_a = neighbor_index.get(node_a.node_id, set())
+            neighbors_b = neighbor_index.get(node_b.node_id, set())
+        else:
+            neighbors_a = set()
+            neighbors_b = set()
+            for edge in self._edges.values():
+                if edge.relation_type == RelationType.SIMILAR_HANDLE:
+                    continue
+                if edge.source_node_id == node_a.node_id:
+                    neighbors_a.add(edge.target_node_id)
+                elif edge.target_node_id == node_a.node_id:
+                    neighbors_a.add(edge.source_node_id)
 
-            if edge.source_node_id == node_b.node_id:
-                neighbors_b.add(edge.target_node_id)
-            elif edge.target_node_id == node_b.node_id:
-                neighbors_b.add(edge.source_node_id)
+                if edge.source_node_id == node_b.node_id:
+                    neighbors_b.add(edge.target_node_id)
+                elif edge.target_node_id == node_b.node_id:
+                    neighbors_b.add(edge.source_node_id)
 
         shared_ids = neighbors_a & neighbors_b
         for shared_id in sorted(shared_ids):
@@ -731,6 +761,32 @@ class KnowledgeGraphEngine:
 
         return False, ""
 
+    @staticmethod
+    def _normalize_location_tokens(loc: str) -> set[str]:
+        """Normalize common city/country aliases before comparing physical location strings."""
+        aliases = {
+            "bangalore": "bengaluru",
+            "bombay": "mumbai",
+            "madras": "chennai",
+            "calcutta": "kolkata",
+            "nyc": "new york",
+            "sf": "san francisco",
+            "la": "los angeles",
+            "uk": "united kingdom",
+            "gb": "united kingdom",
+            "us": "united states",
+            "usa": "united states",
+        }
+        cleaned = loc.lower().replace(",", " ").replace("/", " ")
+        tokens: set[str] = set()
+        for raw_tok in cleaned.split():
+            tok = raw_tok.strip()
+            if len(tok) < 2:
+                continue
+            mapped = aliases.get(tok, tok)
+            tokens.update(mapped.split())
+        return tokens
+
     def _check_location_conflict(self, node_a: EntityNode, node_b: EntityNode) -> str | None:
         """Return conflict explanation if two nodes specify incompatible physical locations."""
         loc_a = str(node_a.attributes.get("location") or "").strip()
@@ -738,8 +794,8 @@ class KnowledgeGraphEngine:
         if not loc_a or not loc_b:
             return None
 
-        tokens_a = {t.strip().lower() for t in loc_a.replace(",", " ").split() if len(t.strip()) >= 2}
-        tokens_b = {t.strip().lower() for t in loc_b.replace(",", " ").split() if len(t.strip()) >= 2}
+        tokens_a = self._normalize_location_tokens(loc_a)
+        tokens_b = self._normalize_location_tokens(loc_b)
         if tokens_a and tokens_b and not (tokens_a & tokens_b):
             return f"conflicting declared locations ('{loc_a}' vs '{loc_b}')"
         return None
@@ -752,6 +808,7 @@ class KnowledgeGraphEngine:
             for n in self.nodes
             if n.entity_type in IDENTITY_ANCHOR_TYPES
         ]
+        neighbor_index = self._build_hard_selector_neighbor_index()
 
         # Precompute temporal profiles and avatar hashes for candidate nodes
         temporal_profiles: dict[str, TemporalProfile] = {}
@@ -760,7 +817,7 @@ class KnowledgeGraphEngine:
             t_prof = _extract_node_temporal_profile(node)
             if t_prof is not None and t_prof.sample_count > 0:
                 temporal_profiles[node.node_id] = t_prof
-            av_hash = self._extract_avatar_hash(node)
+            av_hash = self._extract_avatar_hash(node, neighbor_index=neighbor_index)
             if av_hash:
                 avatar_hashes[node.node_id] = av_hash
 
@@ -811,7 +868,9 @@ class KnowledgeGraphEngine:
                         temporal_profiles[node_b.node_id],
                     )
 
-                has_hard_selector, selector_reason = self._has_shared_hard_selector(node_a, node_b)
+                has_hard_selector, selector_reason = self._has_shared_hard_selector(
+                    node_a, node_b, neighbor_index=neighbor_index
+                )
                 loc_conflict = self._check_location_conflict(node_a, node_b)
 
                 # Check for strong temporal/timezone conflict (e.g., UTC+05:30 vs UTC-07:00)

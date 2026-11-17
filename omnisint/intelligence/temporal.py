@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Sequence
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -116,15 +116,14 @@ def build_temporal_profile(timestamps: Sequence[datetime | str]) -> TemporalProf
 
     hour_counts = [0] * 24
     explicit_offsets: list[float] = []
-    weekend_count = 0
+    parsed_utc_times: list[datetime] = []
 
     for raw_ts in timestamps:
         dt_utc, explicit_offset = parse_timestamp(raw_ts)
+        parsed_utc_times.append(dt_utc)
         hour_counts[dt_utc.hour] += 1
         if explicit_offset is not None:
             explicit_offsets.append(round(explicit_offset * 2) / 2.0)
-        if dt_utc.weekday() >= 5:
-            weekend_count += 1
 
     n = len(timestamps)
     histogram = [round(c / n, 4) for c in hour_counts]
@@ -135,6 +134,9 @@ def build_temporal_profile(timestamps: Sequence[datetime | str]) -> TemporalProf
         inferred_offset = float(most_common_offset)
     else:
         inferred_offset = _infer_offset_from_sleep_window(histogram)
+
+    offset_delta = timedelta(hours=inferred_offset)
+    weekend_count = sum(1 for dt_utc in parsed_utc_times if (dt_utc + offset_delta).weekday() >= 5)
 
     ranked_hours = sorted(range(24), key=lambda h: hour_counts[h], reverse=True)
     peak_hours = [h for h in ranked_hours[:3] if hour_counts[h] > 0]

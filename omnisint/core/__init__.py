@@ -1,11 +1,16 @@
 """Core data models, chain-of-custody ledger, SQLite storage, and async orchestrator."""
 
 from omnisint.core.custody import (
+    CHAIN_HASH_VERSION,
     GENESIS_CHAIN_HASH,
     CustodyLedger,
+    CustodySigner,
+    PayloadKind,
     canonicalize_payload,
     compute_chain_hash,
+    compute_item_chain_hash,
     compute_sha256,
+    payload_kind,
 )
 from omnisint.core.models import (
     AuditLogEntry,
@@ -20,26 +25,41 @@ from omnisint.core.models import (
     RelationshipEdge,
     RelationType,
 )
+from omnisint.core.orchestrator import (
+    PivotRequest,
+    ScanOrchestrator,
+    ScanProgressEvent,
+    infer_entity_type,
+)
 from omnisint.core.storage import CacheEntry, CaseStorage, make_cache_key
 
 __all__ = [
     "AuditLogEntry",
+    "CHAIN_HASH_VERSION",
     "CacheEntry",
     "Case",
     "CaseStatus",
     "CaseStorage",
     "CollectorResult",
     "CustodyLedger",
+    "CustodySigner",
     "EntityNode",
     "EntityType",
     "EvidenceItem",
     "GENESIS_CHAIN_HASH",
     "HierarchyTreeNode",
+    "PayloadKind",
     "PersonaCluster",
+    "PivotRequest",
     "RelationType",
     "RelationshipEdge",
+    "ScanOrchestrator",
+    "ScanProgressEvent",
     "canonicalize_payload",
     "compute_chain_hash",
+    "compute_item_chain_hash",
     "compute_sha256",
+    "infer_entity_type",
     "make_cache_key",
+    "payload_kind",
 ]

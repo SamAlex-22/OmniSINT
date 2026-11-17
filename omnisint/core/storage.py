@@ -18,6 +18,7 @@ from omnisint.core.custody import (
     canonicalize_payload,
     compute_chain_hash,
     compute_sha256,
+    payload_kind,
 )
 from omnisint.core.models import (
     AuditLogEntry,
@@ -312,11 +313,6 @@ class CaseStorage:
     def _row_to_evidence(cls, row: sqlite3.Row) -> EvidenceItem:
         """Convert a SQLite evidence_items row into an EvidenceItem."""
         decoded_payload = cls._decode_payload(row["raw_payload_json"], int(row["payload_is_json"]))
-        if isinstance(decoded_payload, list):
-            # EvidenceItem.raw_payload is str | dict[str, Any]; wrap or preserve string if list
-            raw_payload: str | dict[str, Any] = {"items": decoded_payload}
-        else:
-            raw_payload = decoded_payload
         return EvidenceItem(
             evidence_id=row["evidence_id"],
             case_id=row["case_id"],
@@ -326,7 +322,7 @@ class CaseStorage:
             prev_chain_hash=row["prev_chain_hash"],
             chain_hash=row["chain_hash"],
             collected_at_utc=datetime.fromisoformat(row["collected_at_utc"]),
-            raw_payload=raw_payload,
+            raw_payload=decoded_payload,
             mime_type=row["mime_type"],
             notes=row["notes"],
         )
@@ -1065,6 +1061,10 @@ class CaseStorage:
                 collector_name=item.collector_name,
                 source_uri=item.source_uri,
                 collected_at_iso=item.collected_at_utc.isoformat(),
+                evidence_id=item.evidence_id,
+                case_id=case_id,
+                mime_type=item.mime_type,
+                kind=payload_kind(item.raw_payload),
             )
             chained_item = EvidenceItem(
                 evidence_id=item.evidence_id,

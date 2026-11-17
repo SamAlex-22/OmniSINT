@@ -19,6 +19,12 @@ This document is written so that **anyone**—whether you are a first-time open-
 - [Milestone 3 (Task 3): Mathematical Disambiguation Part 1 — Shannon Entropy, Handle Rarity, Multi-Modal Similarity & Circadian Fingerprinting](#milestone-3-task-3-mathematical-disambiguation-part-1--shannon-entropy-handle-rarity-multi-modal-similarity--circadian-fingerprinting)
 - [Milestone 4 (Task 4): Mathematical Disambiguation Part 2 — NetworkX Knowledge Graph, Conflict-Aware Louvain Clustering & Information Hierarchy Tree](#milestone-4-task-4-mathematical-disambiguation-part-2--networkx-knowledge-graph-conflict-aware-louvain-clustering--information-hierarchy-tree)
 - [Milestone 5 (Task 5): Citation-Locked AI Analyst, Identity Confidence Matrix & Hallucination Guardrail](#milestone-5-task-5-citation-locked-ai-analyst-identity-confidence-matrix--hallucination-guardrail)
+- [Security, Custody & Accuracy Hardening (Post-Review Fixes)](#security-custody--accuracy-hardening-post-review-fixes)
+- [Milestone 6 (Task 6): Pluggable Collector Framework + Username & GitHub/PGP Collectors](#milestone-6-task-6-pluggable-collector-framework--username--githubpgp-collectors)
+- [Milestone 7 (Task 7): Infrastructure, Threat Intel & Search Dork Collectors](#milestone-7-task-7-infrastructure-threat-intel--search-dork-collectors)
+- [Milestone 8 (Task 8): Async Scan Orchestrator, Cross-Indicator Pivot Engine & STIX 2.1 / Markdown Exporters](#milestone-8-task-8-async-scan-orchestrator-cross-indicator-pivot-engine--stix-21--markdown-exporters)
+- [Milestone 9 (Task 9): FastAPI / WSGI Backend, WebSocket Live Stream & Cytoscape.js Interactive Web GUI](#milestone-9-task-9-fastapi--wsgi-backend-websocket-live-stream--cytoscapejs-interactive-web-gui)
+- [Milestone 10 (Task 10): CLI, Interactive Terminal Dashboard (TUI) & End-to-End Integration Suite](#milestone-10-task-10-cli-interactive-terminal-dashboard-tui--end-to-end-integration-suite)
 
 ---
 
@@ -451,3 +457,142 @@ When `AIAnalyst().analyze_case_sync(case)` runs on our `krypton_sec` case, it pr
 - `test_deterministic_ai_analyst_produces_citation_locked_brief_and_matrix`: Proves `AIAnalyst(provider="deterministic")` automatically triggers `KnowledgeGraphEngine` disambiguation when needed, builds a 2-persona `IdentityConfidenceMatrix` (`HIGH` confidence `UTC+05:30` vs separated `UTC-07:00`), populates `case.ai_executive_brief`, and passes `citation_audit.is_valid == True` with every node and evidence record cited.
 - `test_citation_audit_detects_and_sanitizes_hallucinated_ids`: Proves `audit_citations` flags fabricated `[node:ghost-node-999]` and `[evidence:fake-ev-123]` tags, and proves that when a mocked OpenAI LLM returns hallucinated tags, `AIAnalyst` redacts them to `[REDACTED-UNVERIFIED-NODE:...]` and appends the verified evidentiary appendix.
 - `test_gemini_openai_and_ollama_providers_with_mock_transport`: Proves the `gemini`, `openai`, and `ollama` provider adapters format requests and parse responses accurately, and proves that a missing API key gracefully falls back to `gemini->deterministic(fallback)`.
+
+---
+
+## Security, Custody & Accuracy Hardening (Post-Review Fixes)
+
+**Status:** Completed  
+**Modules Updated / Created:**
+- [omnisint/core/custody.py](file:///Users/alex/OmniSINT/omnisint/core/custody.py), [omnisint/core/models.py](file:///Users/alex/OmniSINT/omnisint/core/models.py), [omnisint/core/storage.py](file:///Users/alex/OmniSINT/omnisint/core/storage.py)
+- [omnisint/intelligence/ai_analyst.py](file:///Users/alex/OmniSINT/omnisint/intelligence/ai_analyst.py), [omnisint/intelligence/entropy.py](file:///Users/alex/OmniSINT/omnisint/intelligence/entropy.py), [omnisint/intelligence/temporal.py](file:///Users/alex/OmniSINT/omnisint/intelligence/temporal.py), [omnisint/intelligence/graph_engine.py](file:///Users/alex/OmniSINT/omnisint/intelligence/graph_engine.py)
+- [scripts/update_code_graph.py](file:///Users/alex/OmniSINT/scripts/update_code_graph.py), [LICENSE](file:///Users/alex/OmniSINT/LICENSE), [.github/workflows/ci.yml](file:///Users/alex/OmniSINT/.github/workflows/ci.yml)
+
+### What Was Fixed
+1. **Cryptographic Custody Binding & Ed25519 Ledger Signing (`custody.py`, `models.py`):**
+   - `compute_chain_hash` now hashes a canonical JSON payload (`CHAIN_HASH_VERSION = "omnisint-custody-v2"`) binding `evidence_id`, `case_id`, `mime_type`, and `payload_kind` (`json`, `text`, `bytes`), and `EvidenceItem.raw_payload` now supports JSON `list` payloads (needed by `crt.sh`).
+   - Added `CustodySigner` using Ed25519 keys (`cryptography`) so an investigator can sign a `CustodyLedger`'s head state and detect full-database chain rewrites.
+2. **Prompt-Injection Defense, Header Auth & Honest Citation Auditing (`ai_analyst.py`):**
+   - Moved the Gemini API key out of the URL query string into the `x-goog-api-key` HTTP header.
+   - Added `sanitize_untrusted_osint_text()` and `<untrusted_osint_data>` prompt boundaries to neutralize adversarial profile text.
+   - Replaced the blanket scope line with an organic `Supporting & Unassigned Graph Entities` subsection and recorded `raw_llm_citation_audit` + `fallback_error` separately on `AIAnalysisReport`.
+3. **Multinational Name Rarity, Local Weekday Ratios, Location Aliases & Indexing (`entropy.py`, `temporal.py`, `graph_engine.py`):**
+   - Expanded `COMMON_NAME_TOKENS` beyond Anglo-American names to include South Asian, East Asian, Middle Eastern, Hispanic, and European common names so namesakes like `rahul_sharma` are penalized appropriately.
+   - Computed `weekend_ratio` in the inferred local timezone rather than UTC.
+   - Added location alias normalization (`Bangalore`/`Bengaluru`, `NYC`/`New York`) and precomputed neighbor indexes inside `synthesize_similarity_edges`.
+4. **Open-Source Hygiene & Graphify Call-Graph Extraction (`LICENSE`, `.github/workflows/ci.yml`, `scripts/update_code_graph.py`):**
+   - Added MIT `LICENSE`, GitHub Actions CI across Python 3.11–3.13, and upgraded `update_code_graph.py` to record intra-project `calls` edges and filter stdlib/third-party noise out of `god_nodes`.
+
+---
+
+## Milestone 6 (Task 6): Pluggable Collector Framework + Username & GitHub/PGP Collectors
+
+**Status:** Completed  
+**Modules Created:**
+- [omnisint/collectors/base.py](file:///Users/alex/OmniSINT/omnisint/collectors/base.py)
+- [omnisint/collectors/username_collector.py](file:///Users/alex/OmniSINT/omnisint/collectors/username_collector.py)
+- [omnisint/collectors/github_collector.py](file:///Users/alex/OmniSINT/omnisint/collectors/github_collector.py)
+- [omnisint/collectors/\_\_init\_\_.py](file:///Users/alex/OmniSINT/omnisint/collectors/__init__.py)
+- [tests/test_identity_collectors.py](file:///Users/alex/OmniSINT/tests/test_identity_collectors.py)
+
+### 1. Why Does This Milestone Exist? (Plain-English Explanation)
+Every OSINT investigation needs passive data collection plugins that query public APIs **responsibly** without burning rate limits or losing forensic provenance.
+- **`BaseCollector` & `CollectorRegistry` (`base.py`):** Centralizes async rate limiting, exponential backoff retries, SQLite TTL caching (`CaseStorage`), and automatic SHA-256 `EvidenceItem` recording (`CustodyLedger`) so every collector plugin shares the exact same evidentiary pipeline.
+- **`UsernameCollector` (`username_collector.py`):** Probes public developer and social endpoints (`GitHub`, `GitLab`, `Reddit`, `Keybase`, `HackerNews`, `DevTo`) concurrently, emitting `USERNAME`, `SOCIAL_PROFILE`, and perceptual `AVATAR_HASH` (`dHash`) nodes linked back to custody evidence.
+- **`GitHubCollector` (`github_collector.py`):** Extracts GitHub profile attributes, owned repositories (`OWNS_REPO`), public event commit emails & local-timezone commit timestamps (`COMMITTED_TO`, `HAS_EMAIL`), company affiliations (`MEMBER_OF`), personal blog domains (`OWNS_DOMAIN`), and public SSH/PGP keys (`USES_KEY`).
+
+### 2. What the Unit Tests Prove (`tests/test_identity_collectors.py`)
+- `test_collector_registry_and_ttl_cache_deduplication`: Proves `CollectorRegistry` dispatches by `EntityType` and `CaseStorage` TTL caching prevents redundant network hits on repeated scans.
+- `test_username_collector_extracts_profiles_and_avatar_dhash`: Proves multi-platform profile discovery, `dHash` extraction from raw avatar bytes and profile metadata, and valid SHA-256 chain-of-custody verification.
+- `test_github_collector_extracts_commit_emails_repos_and_ssh_gpg_keys`: Proves extraction of profile data, repositories, `PushEvent` commit author emails (`krypton@alexsec.io`), SSH keys (`github.com/<user>.keys`), GPG key IDs & emails, and 5 chained `EvidenceItem` records.
+
+---
+
+## Milestone 7 (Task 7): Infrastructure, Threat Intel & Search Dork Collectors
+
+**Status:** Completed  
+**Modules Created / Updated:**
+- [omnisint/collectors/domain_ct_collector.py](file:///Users/alex/OmniSINT/omnisint/collectors/domain_ct_collector.py)
+- [omnisint/collectors/threat_intel.py](file:///Users/alex/OmniSINT/omnisint/collectors/threat_intel.py)
+- [omnisint/collectors/search_dork_collector.py](file:///Users/alex/OmniSINT/omnisint/collectors/search_dork_collector.py)
+- [omnisint/collectors/\_\_init\_\_.py](file:///Users/alex/OmniSINT/omnisint/collectors/__init__.py)
+- [tests/test_infra_collectors.py](file:///Users/alex/OmniSINT/tests/test_infra_collectors.py)
+
+### 1. Why Does This Milestone Exist? (Plain-English Explanation)
+Once an investigation uncovers a domain (`alexsec.io`) or IP address (`203.0.113.10`), analysts need passive infrastructure mapping without sending active probes directly to target hosts:
+- **`DomainCTCollector` (`domain_ct_collector.py`):** Queries Certificate Transparency logs (`crt.sh`), RDAP registration records (`rdap.org`), and DNS-over-HTTPS (`dns.google`) to extract subdomains, SSL certificates, resolved IPs, registrant organizations, and abuse/contact emails.
+- **`ThreatIntelCollector` (`threat_intel.py`):** Queries VirusTotal v3 domain and IP endpoints (or emits a deterministic offline posture record when no VT key is set) to map reputation verdicts, detection ratios, and passive DNS `A` records into `THREAT_INDICATOR` and `IP_ADDRESS` nodes.
+- **`SearchDorkCollector` (`search_dork_collector.py`):** Generates OSINT search dorks (`generate_dork_queries()`) and queries the Internet Archive Wayback Machine CDX API (`web.archive.org/cdx/search/cdx`) and optional Google CSE to recover archived or deleted URLs (`URL`, `MENTIONED_AT`).
+
+### 2. What the Unit Tests Prove (`tests/test_infra_collectors.py`)
+- `test_domain_ct_collector_extracts_subdomains_certs_rdap_and_dns`: Proves `crt.sh` list payloads, RDAP vCard extraction, passive DNS `A`-record parsing, and valid SHA-256 custody chaining.
+- `test_threat_intel_collector_virustotal_and_offline_fallback`: Proves VT v3 reputation parsing (`MALICIOUS`, detection counts, passive DNS IPs) and graceful offline fallback when `virustotal_api_key` is absent.
+- `test_search_dork_collector_wayback_and_cse`: Proves Wayback CDX snapshot parsing, Google CSE dork extraction, and `create_default_registry()` registering all 5 collectors.
+
+---
+
+## Milestone 8 (Task 8): Async Scan Orchestrator, Cross-Indicator Pivot Engine & STIX 2.1 / Markdown Exporters
+
+**Status:** Completed  
+**Modules Created / Updated:**
+- [omnisint/core/orchestrator.py](file:///Users/alex/OmniSINT/omnisint/core/orchestrator.py)
+- [omnisint/core/\_\_init\_\_.py](file:///Users/alex/OmniSINT/omnisint/core/__init__.py)
+- [omnisint/reporting/markdown_exporter.py](file:///Users/alex/OmniSINT/omnisint/reporting/markdown_exporter.py)
+- [omnisint/reporting/stix_exporter.py](file:///Users/alex/OmniSINT/omnisint/reporting/stix_exporter.py)
+- [omnisint/reporting/\_\_init\_\_.py](file:///Users/alex/OmniSINT/omnisint/reporting/__init__.py)
+- [tests/test_orchestrator_and_reporting.py](file:///Users/alex/OmniSINT/tests/test_orchestrator_and_reporting.py)
+
+### 1. Why Does This Milestone Exist? (Plain-English Explanation)
+Individual collectors only inspect one indicator at a time. To run real investigations, OmniSINT needs an automated brain that chains indicators together and exports findings into formats security teams already consume:
+- **`ScanOrchestrator` (`orchestrator.py`):** Automatically classifies seed queries (`infer_entity_type`), runs matching collectors concurrently, merges results into `CaseStorage` while preserving SHA-256 hash chaining, pivots automatically across newly discovered domains/IPs/emails (`max_hops`), records `PIVOT_EXECUTED` audit events on manual node pivots (`pivot_on_node`), runs `KnowledgeGraphEngine`, and generates the `AIAnalyst` dossier.
+- **`MarkdownExporter` (`markdown_exporter.py`):** Outputs a self-contained investigative Markdown dossier featuring Case metadata, Chain-of-Custody verification status (plus optional Ed25519 signature), the citation-locked AI brief, Mermaid + ASCII Information Hierarchy Trees, and the SHA-256 evidence table.
+- **`STIXExporter` (`stix_exporter.py`):** Converts resolved `PersonaCluster`s, `EntityNode`s, `RelationshipEdge`s, and custody notes into a deterministic OASIS **STIX 2.1 JSON Bundle** ready for OpenCTI, MISP, and SIEM ingestion.
+
+### 2. What the Unit Tests Prove (`tests/test_orchestrator_and_reporting.py`)
+- `test_multi_hop_scan_orchestrator_pivots_and_exporters`: Exercises a full 2-hop scan starting from username `krypton_sec_x7` $\rightarrow$ automatically discovering `alexsec.io` $\rightarrow$ pivoting into `crt.sh`, passive DNS, VirusTotal, and Wayback Machine $\rightarrow$ verifying intact SQLite SHA-256 custody (fixing list-payload hydration round-trip fidelity in `storage.py`) $\rightarrow$ executing a manual `pivot_on_node` $\rightarrow$ exporting a signed Markdown dossier and valid STIX 2.1 JSON bundle.
+
+---
+
+## Milestone 9 (Task 9): FastAPI / WSGI Backend, WebSocket Live Stream & Cytoscape.js Interactive Web GUI
+
+**Status:** Completed  
+**Modules Created:**
+- [omnisint/api/routes/cases.py](file:///Users/alex/OmniSINT/omnisint/api/routes/cases.py)
+- [omnisint/api/app.py](file:///Users/alex/OmniSINT/omnisint/api/app.py)
+- [omnisint/api/\_\_init\_\_.py](file:///Users/alex/OmniSINT/omnisint/api/__init__.py)
+- [web/index.html](file:///Users/alex/OmniSINT/web/index.html)
+- [tests/test_api.py](file:///Users/alex/OmniSINT/tests/test_api.py)
+
+### 1. Why Does This Milestone Exist? (Plain-English Explanation)
+Inspecting dozens of interconnected accounts, domains, and persona clusters is vastly clearer in an interactive visual graph:
+- **`OmniSINTAPIService` & `ProgressBroadcaster` (`omnisint/api/routes/cases.py`):** Provides a framework-agnostic async backend supporting `/api/health`, `/api/cases`, `/api/cases/{id}/scan`, `/api/cases/{id}/pivot`, `/api/cases/{id}/graph`, `/api/cases/{id}/custody`, and `/api/cases/{id}/export/{markdown|stix}`, plus a WebSocket pub/sub hub for live scan progress events.
+- **Dual ASGI / WSGI Server (`omnisint/api/app.py`):** Exposes a native `FastAPI` + WebSocket app when `fastapi` is installed, and a 100% API-compatible `Flask` WSGI application fallback when running in lean environments without `fastapi`.
+- **Interactive Cytoscape.js Studio (`web/index.html`):** Features Force-Graph vs. Information Hierarchy Tree layout toggling, Persona Disambiguation filter pills, Node Entropy/Rarity/Confidence inspection, One-Click Node Pivoting, live SHA-256 Custody verification badges, and Markdown / STIX 2.1 report exports.
+
+### 2. What the Unit Tests Prove (`tests/test_api.py`)
+- `test_api_case_scan_graph_pivot_custody_and_exports`: Tests the complete HTTP lifecycle end-to-end (`GET /api/health`, `GET /`, `POST /api/cases`, `POST /api/cases/{id}/scan`, `GET /api/cases/{id}/graph`, `GET /api/cases/{id}/custody`, `POST /api/cases/{id}/pivot`, `GET /api/cases/{id}/export/markdown`, `GET /api/cases/{id}/export/stix`, and 404 error handling).
+
+---
+
+## Milestone 10 (Task 10): CLI, Interactive Terminal Dashboard (TUI) & End-to-End Integration Suite
+
+**Status:** Completed  
+**Modules Created:**
+- [omnisint/cli/main.py](file:///Users/alex/OmniSINT/omnisint/cli/main.py)
+- [omnisint/cli/tui.py](file:///Users/alex/OmniSINT/omnisint/cli/tui.py)
+- [omnisint/cli/\_\_init\_\_.py](file:///Users/alex/OmniSINT/omnisint/cli/__init__.py)
+- [tests/test_cli_e2e.py](file:///Users/alex/OmniSINT/tests/test_cli_e2e.py)
+
+### 1. Why Does This Milestone Exist? (Plain-English Explanation)
+Security operators working over SSH or inside automated CI/SOAR pipelines need full control from the terminal:
+- **OmniSINT CLI (`omnisint/cli/main.py`):** Exposes `demo`, `scan`, `case list`, `case show`, `case verify`, `pivot`, `report --format markdown|stix`, `tui`, and `serve` via `click`, with a built-in `build_demo_collision_case()` scenario demonstrating colliding namesakes (`alex_dev` Bengaluru `UTC+05:30` vs Seattle `UTC-07:00`, plus uncorroborated `john_smith` separation).
+- **Interactive Terminal Dashboard (`OmniSINTTUIDashboard` in `omnisint/cli/tui.py`):** Multi-panel terminal interface supporting persona cycling (`N`/`P`), node inspection, and 4 views (`hierarchy`, `matrix`, `custody`, `brief`), running natively inside `textual` when installed and cleanly in headless snapshot mode everywhere else.
+
+### 2. What the Unit Tests Prove (`tests/test_cli_e2e.py`)
+- `test_demo_case_separates_colliding_personas_and_exports_reports`: Exercises `omnisint demo`, SQLite persistence, `case list`, `case show`, `case verify`, `report --format stix`, `tui --snapshot`, Markdown/STIX exports, and verifies that tampering a payload row in SQLite causes `omnisint case verify` to fail with a non-zero exit code.
+- `test_tui_dashboard_interactive_views_and_persona_navigation`: Tests persona navigation and switching across `hierarchy`, `matrix`, `custody`, and `brief` views.
+
+
+
+
+

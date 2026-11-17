@@ -6,7 +6,12 @@ import unittest
 
 from pydantic import ValidationError
 
-from omnisint.core.custody import GENESIS_CHAIN_HASH, CustodyLedger, compute_sha256
+from omnisint.core.custody import (
+    GENESIS_CHAIN_HASH,
+    CustodyLedger,
+    CustodySigner,
+    compute_sha256,
+)
 from omnisint.core.models import (
     Case,
     CaseStatus,
@@ -133,6 +138,60 @@ class TestModelsAndCustody(unittest.TestCase):
         payload_a = {"b": 2, "a": 1, "nested": {"z": 9, "y": 8}}
         payload_b = {"nested": {"y": 8, "z": 9}, "a": 1, "b": 2}
         self.assertEqual(compute_sha256(payload_a), compute_sha256(payload_b))
+
+    def test_custody_binds_evidence_id_case_id_kind_and_list_payloads(self) -> None:
+        ledger = CustodyLedger(case_id="case-binding-1")
+        ev_list = ledger.record_evidence(
+            collector_name="domain_ct_collector",
+            source_uri="https://crt.sh/?q=alexsec.io&output=json",
+            raw_payload=[{"common_name": "api.alexsec.io"}],
+        )
+        self.assertIsInstance(ev_list.raw_payload, list)
+        self.assertTrue(ledger.verify_item(ev_list))
+
+        # Swapping evidence_id or case_id must fail verification
+        tampered_id = ev_list.model_copy(update={"evidence_id": "forged-ev-id"})
+        self.assertFalse(ledger.verify_item(tampered_id))
+        tampered_case = ev_list.model_copy(update={"case_id": "other-case"})
+        self.assertFalse(ledger.verify_item(tampered_case))
+
+        # Raw JSON string vs parsed dict must have distinct chain hashes via payload_kind
+        ev_dict = ledger.record_evidence(
+            collector_name="test",
+            source_uri="https://example.org/a",
+            raw_payload={"a": 1},
+        )
+        ledger2 = CustodyLedger(case_id="case-binding-2")
+        ev_str = ledger2.record_evidence(
+            collector_name="test",
+            source_uri="https://example.org/a",
+            raw_payload='{"a":1}',
+        )
+        self.assertEqual(ev_dict.sha256_hash, ev_str.sha256_hash)
+        self.assertNotEqual(ev_dict.chain_hash, ev_str.chain_hash)
+
+    def test_custody_signer_ed25519_signs_and_detects_chain_rewrite(self) -> None:
+        ledger = CustodyLedger(case_id="case-signed")
+        ledger.record_evidence(
+            collector_name="github_collector",
+            source_uri="https://api.github.com/users/alex_sec",
+            raw_payload={"login": "alex_sec"},
+        )
+        signer = CustodySigner()
+        sig_hex = signer.sign_ledger(ledger)
+        pub_hex = signer.public_key_hex
+
+        self.assertTrue(CustodySigner.verify_signature(ledger, sig_hex, pub_hex))
+
+        # Even if an attacker rewrites the entire chain consistently, signature verification fails
+        rebuilt = CustodyLedger(case_id="case-signed")
+        rebuilt.record_evidence(
+            collector_name="github_collector",
+            source_uri="https://api.github.com/users/alex_sec",
+            raw_payload={"login": "attacker_rewrite"},
+        )
+        self.assertTrue(rebuilt.verify_chain()[0])
+        self.assertFalse(CustodySigner.verify_signature(rebuilt, sig_hex, pub_hex))
 
 
 if __name__ == "__main__":

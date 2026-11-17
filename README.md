@@ -178,11 +178,11 @@ In professional threat intelligence, corporate investigations, and law enforceme
 
 #### How It Works
 1. **Deterministic Canonicalization (`canonicalize_payload`):** JSON dictionaries have no guaranteed key order in memory (`{"b": 1, "a": 2}` vs `{"a": 2, "b": 1}`). OmniSINT serializes structured payloads with `sort_keys=True, separators=(",", ":")` into canonical UTF-8 bytes before hashing so the exact same data always yields the exact same 64-character hex SHA-256 digest.
-2. **Blockchain-Style Hash Chaining (`compute_chain_hash`, `CustodyLedger`):**
+2. **Blockchain-Style Hash Chaining & Ed25519 Ledger Signing (`compute_chain_hash`, `CustodyLedger`, `CustodySigner`):**
    - Item #1 links to `GENESIS_CHAIN_HASH` (`"0" * 64`).
-   - Item #$k$ computes its `chain_hash` over:
-     $$\text{chain\_hash}_k = \text{SHA256}\left(\text{prev\_chain\_hash}_{k-1} \;\|\; \text{evidence\_id}_k \;\|\; \text{sha256\_hash}_k \;\|\; \text{collected\_at\_utc}_k \;\|\; \text{collector\_name}_k \;\|\; \text{source\_uri}_k\right)$$
-3. **Tamper Detection (`verify_item`, `verify_chain`):** Recomputes every payload hash and sequential link. If anyone alters a payload in memory or in SQLite, `verify_chain()` immediately returns `(False, ["Evidence <id>: payload SHA-256 mismatch..."])`.
+   - Item #$k$ computes its `chain_hash` (`CHAIN_HASH_VERSION = "omnisint-custody-v2"`) over a canonical JSON object binding `prev_chain_hash`, `evidence_id`, `case_id`, `payload_sha256`, `payload_kind` (`json`, `text`, or `bytes`), `mime_type`, `collector_name`, `source_uri`, and `collected_at_utc`.
+   - `CustodySigner` signs the ledger's `(case_id, head_chain_hash, item_count)` using **Ed25519** (`cryptography`), catching full-database chain rewrites as well as single-record edits.
+3. **Tamper Detection (`verify_item`, `verify_chain`):** Recomputes every payload hash and sequential link. If anyone alters a payload in memory or in SQLite, `verify_chain()` immediately returns `(False, [...])` pinpointing the tampered `evidence_id`.
 
 ---
 
@@ -289,7 +289,7 @@ Investigators need an executive-ready intelligence dossier with an **Identity Co
 ## 6. Quickstart & Installation Guide
 
 ### Prerequisites
-- **Python 3.11+** (tested on Python 3.11, 3.12, 3.13, and 3.14)
+- **Python 3.11+** (verified locally on Python 3.13; GitHub Actions CI configured for Python 3.11–3.13)
 - **macOS, Linux, or Windows (WSL2)**
 
 ### Step 1: Clone the Repository & Install Dependencies
@@ -321,12 +321,16 @@ OMNISINT_GITHUB_TOKEN=                # Optional GitHub PAT for higher rate limi
 OMNISINT_VIRUSTOTAL_API_KEY=          # Optional VirusTotal v3 API key
 ```
 
-### Step 3: Run the Verification Test Suite
-All unit and integration tests are deterministic and run completely offline in `< 0.1s`:
+### Step 3: Run the Verification Test Suite & CLI Demo
+All unit and integration tests are deterministic and run completely offline:
 ```bash
-pytest -v
-# Or using Python's built-in unittest runner:
+# Run the test suite
 python3 -m unittest discover -s tests -v
+
+# Run the built-in colliding-namesake disambiguation demo via CLI
+python3 -m omnisint.cli.main demo --db demo.db --output-md dossier.md --output-stix bundle.stix.json
+python3 -m omnisint.cli.main case verify demo-collision-case --db demo.db
+python3 -m omnisint.cli.main tui demo-collision-case --db demo.db --snapshot
 ```
 
 ---
@@ -452,11 +456,11 @@ OmniSINT/
 - [x] **Task 3:** Mathematical Disambiguation Part 1 — Shannon Entropy, Handle Rarity & Multi-Modal Similarity (`omnisint/intelligence/entropy.py`, `omnisint/intelligence/similarity.py`, `omnisint/intelligence/temporal.py`)
 - [x] **Task 4:** Mathematical Disambiguation Part 2 — NetworkX Knowledge Graph, Louvain Persona Clustering & Hierarchy Tree (`omnisint/intelligence/graph_engine.py`)
 - [x] **Task 5:** Citation-Locked AI Analyst & Persona Dossier Synthesizer (`omnisint/intelligence/ai_analyst.py`)
-- [ ] **Task 6:** Pluggable Collector Framework + Username & GitHub/PGP Collectors (`omnisint/collectors/base.py`, `username_collector.py`, `github_collector.py`)
-- [ ] **Task 7:** Infrastructure, Threat Intel & Search Dork Collectors (`domain_ct_collector.py`, `threat_intel.py`, `search_dork_collector.py`)
-- [ ] **Task 8:** Async Scan Orchestrator, Cross-Indicator Pivot Engine & STIX 2.1 / Markdown Exporters (`omnisint/core/orchestrator.py`, `omnisint/reporting/`)
-- [ ] **Task 9:** FastAPI Backend, WebSocket Live Stream & Cytoscape.js Interactive Web GUI (`omnisint/api/`, `web/index.html`)
-- [ ] **Task 10:** Typer CLI & Textual Interactive Terminal Dashboard (`omnisint/cli/main.py`, `omnisint/cli/tui.py`) + End-to-End Integration Suite
+- [x] **Task 6:** Pluggable Collector Framework + Username & GitHub/PGP Collectors (`omnisint/collectors/base.py`, `username_collector.py`, `github_collector.py`)
+- [x] **Task 7:** Infrastructure, Threat Intel & Search Dork Collectors (`domain_ct_collector.py`, `threat_intel.py`, `search_dork_collector.py`)
+- [x] **Task 8:** Async Scan Orchestrator, Cross-Indicator Pivot Engine & STIX 2.1 / Markdown Exporters (`omnisint/core/orchestrator.py`, `omnisint/reporting/`)
+- [x] **Task 9:** FastAPI / WSGI Backend, WebSocket Live Stream & Cytoscape.js Interactive Web GUI (`omnisint/api/`, `web/index.html`)
+- [x] **Task 10:** Click/Typer CLI & Interactive Terminal Dashboard (`omnisint/cli/main.py`, `omnisint/cli/tui.py`) + End-to-End Integration Suite
 
 ---
 

@@ -1,58 +1,58 @@
 {
-  "generated_at_utc": "2026-11-17T17:29:32.239708+00:00",
+  "generated_at_utc": "2026-11-17T20:47:41.986150+00:00",
   "stats": {
-    "total_nodes": 105,
-    "total_edges": 216,
+    "total_nodes": 182,
+    "total_edges": 756,
     "communities_count": 10
   },
   "god_nodes": [
     {
       "id": "omnisint.core.models",
-      "degree": 30
-    },
-    {
-      "id": "omnisint.intelligence.similarity",
-      "degree": 23
-    },
-    {
-      "id": "omnisint.intelligence.ai_analyst",
-      "degree": 21
-    },
-    {
-      "id": "omnisint.intelligence.entropy",
-      "degree": 20
-    },
-    {
-      "id": "omnisint.intelligence.graph_engine",
-      "degree": 20
-    },
-    {
-      "id": "BaseModel",
-      "degree": 19
-    },
-    {
-      "id": "omnisint.intelligence.temporal",
-      "degree": 19
-    },
-    {
-      "id": "omnisint.core.storage",
-      "degree": 16
-    },
-    {
-      "id": "__future__",
-      "degree": 15
+      "degree": 45
     },
     {
       "id": "omnisint.core.custody",
-      "degree": 14
+      "degree": 34
     },
     {
-      "id": "typing",
-      "degree": 10
+      "id": "omnisint.core.storage.CaseStorage",
+      "degree": 32
     },
     {
-      "id": "scripts.update_code_graph",
-      "degree": 10
+      "id": "omnisint.cli.main",
+      "degree": 31
+    },
+    {
+      "id": "omnisint.core.storage",
+      "degree": 30
+    },
+    {
+      "id": "omnisint.core.custody.CustodyLedger",
+      "degree": 27
+    },
+    {
+      "id": "omnisint.collectors.base",
+      "degree": 26
+    },
+    {
+      "id": "omnisint.intelligence.graph_engine",
+      "degree": 25
+    },
+    {
+      "id": "omnisint.intelligence.ai_analyst",
+      "degree": 25
+    },
+    {
+      "id": "omnisint.intelligence.similarity",
+      "degree": 25
+    },
+    {
+      "id": "omnisint.intelligence.entropy",
+      "degree": 24
+    },
+    {
+      "id": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "degree": 23
     }
   ],
   "communities": {
@@ -61,13 +61,64 @@
     ],
     "api": [
       "omnisint.api",
-      "omnisint.api.routes"
+      "omnisint.api.app",
+      "omnisint.api.app._run_coro_sync",
+      "omnisint.api.app.create_app",
+      "omnisint.api.app.get_default_app",
+      "omnisint.api.routes",
+      "omnisint.api.routes.cases",
+      "omnisint.api.routes.cases.CreateCaseRequest",
+      "omnisint.api.routes.cases.ScanRequest",
+      "omnisint.api.routes.cases.PivotNodeRequest",
+      "omnisint.api.routes.cases.CustodyVerificationResponse",
+      "omnisint.api.routes.cases.GraphPayloadResponse",
+      "omnisint.api.routes.cases.ProgressBroadcaster",
+      "omnisint.api.routes.cases.OmniSINTAPIService",
+      "omnisint.api.routes.cases.build_fastapi_router",
+      "omnisint.api.routes.cases.json_dumps_safe"
     ],
     "cli": [
-      "omnisint.cli"
+      "omnisint.cli",
+      "omnisint.cli.main",
+      "omnisint.cli.main.build_demo_collision_case",
+      "omnisint.cli.main._resolve_db_path",
+      "omnisint.cli.main.app",
+      "omnisint.cli.main.cmd_demo",
+      "omnisint.cli.main.cmd_scan",
+      "omnisint.cli.main.case_group",
+      "omnisint.cli.main.cmd_case_list",
+      "omnisint.cli.main.cmd_case_show",
+      "omnisint.cli.main.cmd_case_verify",
+      "omnisint.cli.main.cmd_pivot",
+      "omnisint.cli.main.cmd_report",
+      "omnisint.cli.main.cmd_tui",
+      "omnisint.cli.main.cmd_serve",
+      "omnisint.cli.main.run_cli",
+      "omnisint.cli.tui",
+      "omnisint.cli.tui.OmniSINTTUIDashboard",
+      "omnisint.cli.tui.launch_tui"
     ],
     "collectors": [
-      "omnisint.collectors"
+      "omnisint.collectors",
+      "omnisint.collectors.create_default_registry",
+      "omnisint.collectors.base",
+      "omnisint.collectors.base.HttpResponseData",
+      "omnisint.collectors.base.CollectorConfig",
+      "omnisint.collectors.base._default_urllib_get",
+      "omnisint.collectors.base.BaseCollector",
+      "omnisint.collectors.base.CollectorRegistry",
+      "omnisint.collectors.domain_ct_collector",
+      "omnisint.collectors.domain_ct_collector.DomainCTCollector",
+      "omnisint.collectors.github_collector",
+      "omnisint.collectors.github_collector.GitHubCollector",
+      "omnisint.collectors.search_dork_collector",
+      "omnisint.collectors.search_dork_collector.generate_dork_queries",
+      "omnisint.collectors.search_dork_collector.SearchDorkCollector",
+      "omnisint.collectors.threat_intel",
+      "omnisint.collectors.threat_intel.ThreatIntelCollector",
+      "omnisint.collectors.username_collector",
+      "omnisint.collectors.username_collector.PlatformSpec",
+      "omnisint.collectors.username_collector.UsernameCollector"
     ],
     "config": [
       "omnisint.config",
@@ -77,10 +128,13 @@
     "core": [
       "omnisint.core",
       "omnisint.core.custody",
+      "omnisint.core.custody.payload_kind",
       "omnisint.core.custody.canonicalize_payload",
       "omnisint.core.custody.compute_sha256",
       "omnisint.core.custody.compute_chain_hash",
+      "omnisint.core.custody.compute_item_chain_hash",
       "omnisint.core.custody.CustodyLedger",
+      "omnisint.core.custody.CustodySigner",
       "omnisint.core.models",
       "omnisint.core.models.utc_now",
       "omnisint.core.models.new_uuid",
@@ -95,6 +149,11 @@
       "omnisint.core.models.PersonaCluster",
       "omnisint.core.models.CollectorResult",
       "omnisint.core.models.Case",
+      "omnisint.core.orchestrator",
+      "omnisint.core.orchestrator.ScanProgressEvent",
+      "omnisint.core.orchestrator.PivotRequest",
+      "omnisint.core.orchestrator.infer_entity_type",
+      "omnisint.core.orchestrator.ScanOrchestrator",
       "omnisint.core.storage",
       "omnisint.core.storage.make_cache_key",
       "omnisint.core.storage.CacheEntry",
@@ -103,6 +162,7 @@
     "intelligence": [
       "omnisint.intelligence",
       "omnisint.intelligence.ai_analyst",
+      "omnisint.intelligence.ai_analyst.sanitize_untrusted_osint_text",
       "omnisint.intelligence.ai_analyst.IdentityMatrixEntry",
       "omnisint.intelligence.ai_analyst.CitationAuditResult",
       "omnisint.intelligence.ai_analyst.AIAnalysisReport",
@@ -160,10 +220,17 @@
       "omnisint.intelligence.temporal.correlate_timestamps"
     ],
     "reporting": [
-      "omnisint.reporting"
+      "omnisint.reporting",
+      "omnisint.reporting.markdown_exporter",
+      "omnisint.reporting.markdown_exporter._hierarchy_tree_to_mermaid",
+      "omnisint.reporting.markdown_exporter.MarkdownExporter",
+      "omnisint.reporting.stix_exporter",
+      "omnisint.reporting.stix_exporter._stix_id",
+      "omnisint.reporting.stix_exporter.STIXExporter"
     ],
     "scripts": [
       "scripts.update_code_graph",
+      "scripts.update_code_graph._resolve_call_target",
       "scripts.update_code_graph.extract_module_info",
       "scripts.update_code_graph.build_graph",
       "scripts.update_code_graph.write_outputs"
@@ -172,12 +239,22 @@
       "tests",
       "tests.test_ai_analyst",
       "tests.test_ai_analyst.TestAIAnalyst",
+      "tests.test_api",
+      "tests.test_api.TestOmniSINTAPI",
+      "tests.test_cli_e2e",
+      "tests.test_cli_e2e.TestCLIEndToEnd",
       "tests.test_entropy_and_similarity",
       "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
       "tests.test_graph_engine",
       "tests.test_graph_engine.TestKnowledgeGraphEngine",
+      "tests.test_identity_collectors",
+      "tests.test_identity_collectors.TestIdentityCollectors",
+      "tests.test_infra_collectors",
+      "tests.test_infra_collectors.TestInfraCollectors",
       "tests.test_models_and_custody",
       "tests.test_models_and_custody.TestModelsAndCustody",
+      "tests.test_orchestrator_and_reporting",
+      "tests.test_orchestrator_and_reporting.TestOrchestratorAndReporting",
       "tests.test_storage",
       "tests.test_storage.TestCaseStorage"
     ]
@@ -198,6 +275,37 @@
       "docstring": "FastAPI REST & WebSocket backend for OmniSINT."
     },
     {
+      "id": "omnisint.api.app",
+      "type": "module",
+      "file": "omnisint/api/app.py",
+      "community": "api",
+      "docstring": "FastAPI (or Flask WSGI fallback) web server and WebSocket live stream for OmniSINT."
+    },
+    {
+      "id": "omnisint.api.app._run_coro_sync",
+      "type": "function",
+      "file": "omnisint/api/app.py",
+      "line": 42,
+      "community": "api",
+      "docstring": "Run an async coroutine cleanly from synchronous Flask handlers."
+    },
+    {
+      "id": "omnisint.api.app.create_app",
+      "type": "function",
+      "file": "omnisint/api/app.py",
+      "line": 55,
+      "community": "api",
+      "docstring": "Create the OmniSINT ASGI (FastAPI) or WSGI (Flask fallback) web application."
+    },
+    {
+      "id": "omnisint.api.app.get_default_app",
+      "type": "function",
+      "file": "omnisint/api/app.py",
+      "line": 182,
+      "community": "api",
+      "docstring": "Factory returning a default configured OmniSINT web application."
+    },
+    {
       "id": "omnisint.api.routes",
       "type": "module",
       "file": "omnisint/api/routes/__init__.py",
@@ -205,18 +313,465 @@
       "docstring": "API route modules for OmniSINT."
     },
     {
+      "id": "omnisint.api.routes.cases",
+      "type": "module",
+      "file": "omnisint/api/routes/cases.py",
+      "community": "api",
+      "docstring": "REST & WebSocket Case, Scan, Graph, Pivot, Custody & Reporting route handlers for OmniSINT."
+    },
+    {
+      "id": "omnisint.api.routes.cases.CreateCaseRequest",
+      "type": "class",
+      "file": "omnisint/api/routes/cases.py",
+      "line": 31,
+      "community": "api",
+      "methods": [],
+      "docstring": "Payload to create a new OSINT investigation Case."
+    },
+    {
+      "id": "omnisint.api.routes.cases.ScanRequest",
+      "type": "class",
+      "file": "omnisint/api/routes/cases.py",
+      "line": 42,
+      "community": "api",
+      "methods": [],
+      "docstring": "Payload to trigger a multi-collector OSINT scan inside a Case."
+    },
+    {
+      "id": "omnisint.api.routes.cases.PivotNodeRequest",
+      "type": "class",
+      "file": "omnisint/api/routes/cases.py",
+      "line": 54,
+      "community": "api",
+      "methods": [],
+      "docstring": "Payload to execute a one-click pivot on an existing EntityNode."
+    },
+    {
+      "id": "omnisint.api.routes.cases.CustodyVerificationResponse",
+      "type": "class",
+      "file": "omnisint/api/routes/cases.py",
+      "line": 65,
+      "community": "api",
+      "methods": [],
+      "docstring": "Cryptographic Chain of Custody verification response payload."
+    },
+    {
+      "id": "omnisint.api.routes.cases.GraphPayloadResponse",
+      "type": "class",
+      "file": "omnisint/api/routes/cases.py",
+      "line": 79,
+      "community": "api",
+      "methods": [],
+      "docstring": "Cytoscape.js elements + Persona Clusters + Hierarchy Trees for UI rendering."
+    },
+    {
+      "id": "omnisint.api.routes.cases.ProgressBroadcaster",
+      "type": "class",
+      "file": "omnisint/api/routes/cases.py",
+      "line": 90,
+      "community": "api",
+      "methods": [
+        "__init__",
+        "subscribe",
+        "unsubscribe",
+        "publish"
+      ],
+      "docstring": "In-memory pub/sub hub streaming ScanProgressEvents to WebSocket subscribers."
+    },
+    {
+      "id": "omnisint.api.routes.cases.OmniSINTAPIService",
+      "type": "class",
+      "file": "omnisint/api/routes/cases.py",
+      "line": 117,
+      "community": "api",
+      "methods": [
+        "__init__",
+        "ensure_ready",
+        "list_cases",
+        "create_case",
+        "get_case",
+        "run_scan",
+        "pivot_node",
+        "get_graph_payload",
+        "verify_custody",
+        "export_report"
+      ],
+      "docstring": "Framework-agnostic async service layer backing FastAPI and Flask endpoints."
+    },
+    {
+      "id": "omnisint.api.routes.cases.build_fastapi_router",
+      "type": "function",
+      "file": "omnisint/api/routes/cases.py",
+      "line": 278,
+      "community": "api",
+      "docstring": "Build a FastAPI APIRouter wired to `service` when FastAPI is installed."
+    },
+    {
+      "id": "omnisint.api.routes.cases.json_dumps_safe",
+      "type": "function",
+      "file": "omnisint/api/routes/cases.py",
+      "line": 349,
+      "community": "api",
+      "docstring": "Serialize Pydantic models or JSON objects safely."
+    },
+    {
       "id": "omnisint.cli",
       "type": "module",
       "file": "omnisint/cli/__init__.py",
       "community": "cli",
-      "docstring": "Typer CLI and Textual interactive TUI for OmniSINT."
+      "docstring": "CLI and interactive terminal dashboard (TUI) for OmniSINT."
+    },
+    {
+      "id": "omnisint.cli.main",
+      "type": "module",
+      "file": "omnisint/cli/main.py",
+      "community": "cli",
+      "docstring": "Command-line interface (`omnisint`) for scans, case custody verification, pivoting, TUI, and reporting."
+    },
+    {
+      "id": "omnisint.cli.main.build_demo_collision_case",
+      "type": "function",
+      "file": "omnisint/cli/main.py",
+      "line": 31,
+      "community": "cli",
+      "docstring": "Construct and analyze a realistic offline OSINT collision scenario separating distinct personas."
+    },
+    {
+      "id": "omnisint.cli.main._resolve_db_path",
+      "type": "function",
+      "file": "omnisint/cli/main.py",
+      "line": 174,
+      "community": "cli",
+      "docstring": ""
+    },
+    {
+      "id": "omnisint.cli.main.app",
+      "type": "function",
+      "file": "omnisint/cli/main.py",
+      "line": 179,
+      "community": "cli",
+      "docstring": "OmniSINT top-level CLI group."
+    },
+    {
+      "id": "omnisint.cli.main.cmd_demo",
+      "type": "function",
+      "file": "omnisint/cli/main.py",
+      "line": 187,
+      "community": "cli",
+      "docstring": "Run an offline colliding-namesake disambiguation demonstration."
+    },
+    {
+      "id": "omnisint.cli.main.cmd_scan",
+      "type": "function",
+      "file": "omnisint/cli/main.py",
+      "line": 218,
+      "community": "cli",
+      "docstring": "Execute a multi-collector OSINT scan and resolve persona hierarchy trees."
+    },
+    {
+      "id": "omnisint.cli.main.case_group",
+      "type": "function",
+      "file": "omnisint/cli/main.py",
+      "line": 240,
+      "community": "cli",
+      "docstring": "Inspect and verify persisted investigation Cases."
+    },
+    {
+      "id": "omnisint.cli.main.cmd_case_list",
+      "type": "function",
+      "file": "omnisint/cli/main.py",
+      "line": 246,
+      "community": "cli",
+      "docstring": "List all Cases stored in SQLite."
+    },
+    {
+      "id": "omnisint.cli.main.cmd_case_show",
+      "type": "function",
+      "file": "omnisint/cli/main.py",
+      "line": 268,
+      "community": "cli",
+      "docstring": "Show details, hierarchy trees, and brief for CASE_ID."
+    },
+    {
+      "id": "omnisint.cli.main.cmd_case_verify",
+      "type": "function",
+      "file": "omnisint/cli/main.py",
+      "line": 292,
+      "community": "cli",
+      "docstring": "Cryptographically verify the SHA-256 Chain of Custody for CASE_ID."
+    },
+    {
+      "id": "omnisint.cli.main.cmd_pivot",
+      "type": "function",
+      "file": "omnisint/cli/main.py",
+      "line": 323,
+      "community": "cli",
+      "docstring": "Pivot on NODE_ID inside CASE_ID and re-resolve persona clusters."
+    },
+    {
+      "id": "omnisint.cli.main.cmd_report",
+      "type": "function",
+      "file": "omnisint/cli/main.py",
+      "line": 354,
+      "community": "cli",
+      "docstring": "Export CASE_ID as a Markdown investigative dossier or STIX 2.1 JSON bundle."
+    },
+    {
+      "id": "omnisint.cli.main.cmd_tui",
+      "type": "function",
+      "file": "omnisint/cli/main.py",
+      "line": 383,
+      "community": "cli",
+      "docstring": "Launch the interactive OmniSINT terminal dashboard."
+    },
+    {
+      "id": "omnisint.cli.main.cmd_serve",
+      "type": "function",
+      "file": "omnisint/cli/main.py",
+      "line": 407,
+      "community": "cli",
+      "docstring": "Start the OmniSINT Web GUI & REST API server."
+    },
+    {
+      "id": "omnisint.cli.main.run_cli",
+      "type": "function",
+      "file": "omnisint/cli/main.py",
+      "line": 420,
+      "community": "cli",
+      "docstring": "Invoke the OmniSINT CLI programmatically and return `(exit_code, output)`."
+    },
+    {
+      "id": "omnisint.cli.tui",
+      "type": "module",
+      "file": "omnisint/cli/tui.py",
+      "community": "cli",
+      "docstring": "Textual interactive terminal dashboard (with deterministic headless snapshot fallback) for OmniSINT."
+    },
+    {
+      "id": "omnisint.cli.tui.OmniSINTTUIDashboard",
+      "type": "class",
+      "file": "omnisint/cli/tui.py",
+      "line": 26,
+      "community": "cli",
+      "methods": [
+        "__init__",
+        "active_persona",
+        "active_node",
+        "select_persona",
+        "next_persona",
+        "prev_persona",
+        "select_node",
+        "set_view_mode",
+        "render_screen"
+      ],
+      "docstring": "Stateful interactive terminal dashboard controller for OmniSINT Cases."
+    },
+    {
+      "id": "omnisint.cli.tui.launch_tui",
+      "type": "function",
+      "file": "omnisint/cli/tui.py",
+      "line": 211,
+      "community": "cli",
+      "docstring": "Launch the Textual TUI when available & interactive, or return rendered dashboard text."
     },
     {
       "id": "omnisint.collectors",
       "type": "module",
       "file": "omnisint/collectors/__init__.py",
       "community": "collectors",
-      "docstring": "Pluggable passive OSINT collectors."
+      "docstring": "Pluggable passive OSINT collectors and registry."
+    },
+    {
+      "id": "omnisint.collectors.create_default_registry",
+      "type": "function",
+      "file": "omnisint/collectors/__init__.py",
+      "line": 25,
+      "community": "collectors",
+      "docstring": "Create a CollectorRegistry pre-populated with all OmniSINT passive collectors."
+    },
+    {
+      "id": "omnisint.collectors.base",
+      "type": "module",
+      "file": "omnisint/collectors/base.py",
+      "community": "collectors",
+      "docstring": "Abstract BaseCollector, rate-limiting, caching, custody integration, and CollectorRegistry."
+    },
+    {
+      "id": "omnisint.collectors.base.HttpResponseData",
+      "type": "class",
+      "file": "omnisint/collectors/base.py",
+      "line": 30,
+      "community": "collectors",
+      "methods": [],
+      "docstring": "Normalized HTTP response returned by collector transports."
+    },
+    {
+      "id": "omnisint.collectors.base.CollectorConfig",
+      "type": "class",
+      "file": "omnisint/collectors/base.py",
+      "line": 46,
+      "community": "collectors",
+      "methods": [],
+      "docstring": "Runtime configuration for passive OSINT collectors."
+    },
+    {
+      "id": "omnisint.collectors.base._default_urllib_get",
+      "type": "async_function",
+      "file": "omnisint/collectors/base.py",
+      "line": 61,
+      "community": "collectors",
+      "docstring": "Perform an async HTTP GET via httpx (when installed) or stdlib urllib in a worker thread."
+    },
+    {
+      "id": "omnisint.collectors.base.BaseCollector",
+      "type": "class",
+      "file": "omnisint/collectors/base.py",
+      "line": 120,
+      "community": "collectors",
+      "methods": [
+        "__init__",
+        "supports",
+        "_respect_rate_limit",
+        "_normalize_transport_output",
+        "fetch_with_custody",
+        "_record_custody_item",
+        "collect"
+      ],
+      "docstring": "Abstract base class for all passive OmniSINT OSINT collectors."
+    },
+    {
+      "id": "omnisint.collectors.base.CollectorRegistry",
+      "type": "class",
+      "file": "omnisint/collectors/base.py",
+      "line": 291,
+      "community": "collectors",
+      "methods": [
+        "__init__",
+        "register",
+        "unregister",
+        "get",
+        "list_collectors",
+        "get_for_entity_type"
+      ],
+      "docstring": "Registry for discovering and dispatching OmniSINT Collector plugins."
+    },
+    {
+      "id": "omnisint.collectors.domain_ct_collector",
+      "type": "module",
+      "file": "omnisint/collectors/domain_ct_collector.py",
+      "community": "collectors",
+      "docstring": "Passive Certificate Transparency (crt.sh), RDAP/WHOIS, and passive DNS collector."
+    },
+    {
+      "id": "omnisint.collectors.domain_ct_collector.DomainCTCollector",
+      "type": "class",
+      "file": "omnisint/collectors/domain_ct_collector.py",
+      "line": 37,
+      "community": "collectors",
+      "methods": [
+        "__init__",
+        "_normalize_domain",
+        "_extract_rdap_entities",
+        "collect"
+      ],
+      "docstring": "Collects Certificate Transparency logs (crt.sh), RDAP registration data, and passive DNS records."
+    },
+    {
+      "id": "omnisint.collectors.github_collector",
+      "type": "module",
+      "file": "omnisint/collectors/github_collector.py",
+      "community": "collectors",
+      "docstring": "Passive GitHub profile, repository, commit author email, and SSH/PGP key collector."
+    },
+    {
+      "id": "omnisint.collectors.github_collector.GitHubCollector",
+      "type": "class",
+      "file": "omnisint/collectors/github_collector.py",
+      "line": 23,
+      "community": "collectors",
+      "methods": [
+        "__init__",
+        "_github_headers",
+        "_extract_domain_from_url",
+        "collect"
+      ],
+      "docstring": "Collects GitHub profile metadata, repositories, commit emails/timestamps, and SSH/PGP keys."
+    },
+    {
+      "id": "omnisint.collectors.search_dork_collector",
+      "type": "module",
+      "file": "omnisint/collectors/search_dork_collector.py",
+      "community": "collectors",
+      "docstring": "Pluggable search dork generator, Wayback Machine CDX archive & Google CSE collector."
+    },
+    {
+      "id": "omnisint.collectors.search_dork_collector.generate_dork_queries",
+      "type": "function",
+      "file": "omnisint/collectors/search_dork_collector.py",
+      "line": 23,
+      "community": "collectors",
+      "docstring": "Generate targeted passive OSINT search dork strings for a handle, email, or domain."
+    },
+    {
+      "id": "omnisint.collectors.search_dork_collector.SearchDorkCollector",
+      "type": "class",
+      "file": "omnisint/collectors/search_dork_collector.py",
+      "line": 46,
+      "community": "collectors",
+      "methods": [
+        "__init__",
+        "collect"
+      ],
+      "docstring": "Queries Wayback Machine CDX archives and optional Google CSE for historical & dorked mentions."
+    },
+    {
+      "id": "omnisint.collectors.threat_intel",
+      "type": "module",
+      "file": "omnisint/collectors/threat_intel.py",
+      "community": "collectors",
+      "docstring": "Passive Threat Intelligence collector (VirusTotal v3 & passive DNS/reputation indicators)."
+    },
+    {
+      "id": "omnisint.collectors.threat_intel.ThreatIntelCollector",
+      "type": "class",
+      "file": "omnisint/collectors/threat_intel.py",
+      "line": 22,
+      "community": "collectors",
+      "methods": [
+        "__init__",
+        "_is_ip_address",
+        "collect"
+      ],
+      "docstring": "Collects VirusTotal reputation, threat indicators, and passive DNS infrastructure links."
+    },
+    {
+      "id": "omnisint.collectors.username_collector",
+      "type": "module",
+      "file": "omnisint/collectors/username_collector.py",
+      "community": "collectors",
+      "docstring": "Passive multi-platform username discovery & profile/avatar collector (Sherlock-compatible)."
+    },
+    {
+      "id": "omnisint.collectors.username_collector.PlatformSpec",
+      "type": "class",
+      "file": "omnisint/collectors/username_collector.py",
+      "line": 26,
+      "community": "collectors",
+      "methods": [],
+      "docstring": "Definition of a passive platform check for UsernameCollector."
+    },
+    {
+      "id": "omnisint.collectors.username_collector.UsernameCollector",
+      "type": "class",
+      "file": "omnisint/collectors/username_collector.py",
+      "line": 71,
+      "community": "collectors",
+      "methods": [
+        "__init__",
+        "_parse_platform_payload",
+        "collect"
+      ],
+      "docstring": "Sherlock-style async multi-platform username discovery, metadata, and avatar dHash collector."
     },
     {
       "id": "omnisint.config",
@@ -254,21 +809,29 @@
       "type": "module",
       "file": "omnisint/core/custody.py",
       "community": "core",
-      "docstring": "OSINT Pilot-grade Chain of Custody & SHA-256 Evidentiary Ledger for OmniSINT."
+      "docstring": "SHA-256 chain-of-custody ledger for OmniSINT evidence."
+    },
+    {
+      "id": "omnisint.core.custody.payload_kind",
+      "type": "function",
+      "file": "omnisint/core/custody.py",
+      "line": 41,
+      "community": "core",
+      "docstring": "Return the structural kind of a raw payload (\"json\", \"text\", or \"bytes\")."
     },
     {
       "id": "omnisint.core.custody.canonicalize_payload",
       "type": "function",
       "file": "omnisint/core/custody.py",
-      "line": 14,
+      "line": 50,
       "community": "core",
-      "docstring": "Serialize any raw OSINT payload into deterministic canonical UTF-8 bytes."
+      "docstring": "Serialize a raw OSINT payload into deterministic canonical bytes."
     },
     {
       "id": "omnisint.core.custody.compute_sha256",
       "type": "function",
       "file": "omnisint/core/custody.py",
-      "line": 23,
+      "line": 64,
       "community": "core",
       "docstring": "Compute hex-encoded SHA-256 digest of a canonicalized payload."
     },
@@ -276,15 +839,23 @@
       "id": "omnisint.core.custody.compute_chain_hash",
       "type": "function",
       "file": "omnisint/core/custody.py",
-      "line": 28,
+      "line": 69,
       "community": "core",
-      "docstring": "Compute tamper-evident chained SHA-256 digest linking previous evidence record."
+      "docstring": "Compute the tamper-evident chained SHA-256 digest for one evidence record."
+    },
+    {
+      "id": "omnisint.core.custody.compute_item_chain_hash",
+      "type": "function",
+      "file": "omnisint/core/custody.py",
+      "line": 104,
+      "community": "core",
+      "docstring": "Recompute the chain hash for an EvidenceItem (optionally against a different predecessor)."
     },
     {
       "id": "omnisint.core.custody.CustodyLedger",
       "type": "class",
       "file": "omnisint/core/custody.py",
-      "line": 40,
+      "line": 119,
       "community": "core",
       "methods": [
         "__init__",
@@ -296,7 +867,24 @@
         "verify_item",
         "verify_chain"
       ],
-      "docstring": "Manages cryptographic evidence acquisition, hash chaining, and audit trail for a Case."
+      "docstring": "Manages evidence acquisition, hash chaining, and the audit trail for a Case."
+    },
+    {
+      "id": "omnisint.core.custody.CustodySigner",
+      "type": "class",
+      "file": "omnisint/core/custody.py",
+      "line": 253,
+      "community": "core",
+      "methods": [
+        "__init__",
+        "algorithm",
+        "private_key_hex",
+        "public_key_hex",
+        "_ledger_message",
+        "sign_ledger",
+        "verify_signature"
+      ],
+      "docstring": "Signs and verifies a CustodyLedger head state using Ed25519 (or HMAC-SHA256 fallback)."
     },
     {
       "id": "omnisint.core.models",
@@ -426,6 +1014,56 @@
       "docstring": "Top-level OSINT Pilot investigative container."
     },
     {
+      "id": "omnisint.core.orchestrator",
+      "type": "module",
+      "file": "omnisint/core/orchestrator.py",
+      "community": "core",
+      "docstring": "Async scan orchestrator and multi-hop cross-indicator pivot engine for OmniSINT."
+    },
+    {
+      "id": "omnisint.core.orchestrator.ScanProgressEvent",
+      "type": "class",
+      "file": "omnisint/core/orchestrator.py",
+      "line": 27,
+      "community": "core",
+      "methods": [],
+      "docstring": "Real-time progress event emitted during scans and node pivots."
+    },
+    {
+      "id": "omnisint.core.orchestrator.PivotRequest",
+      "type": "class",
+      "file": "omnisint/core/orchestrator.py",
+      "line": 42,
+      "community": "core",
+      "methods": [],
+      "docstring": "Parameters for pivoting an investigation from an existing EntityNode."
+    },
+    {
+      "id": "omnisint.core.orchestrator.infer_entity_type",
+      "type": "function",
+      "file": "omnisint/core/orchestrator.py",
+      "line": 57,
+      "community": "core",
+      "docstring": "Heuristically classify a raw OSINT seed string into a canonical EntityType."
+    },
+    {
+      "id": "omnisint.core.orchestrator.ScanOrchestrator",
+      "type": "class",
+      "file": "omnisint/core/orchestrator.py",
+      "line": 78,
+      "community": "core",
+      "methods": [
+        "__init__",
+        "_emit_progress",
+        "_select_collectors",
+        "_execute_collectors_for_query",
+        "_finalize_intelligence",
+        "run_scan",
+        "pivot_on_node"
+      ],
+      "docstring": "Coordinates passive collectors, multi-hop pivots, storage persistence, graph clustering, and AI analysis."
+    },
+    {
       "id": "omnisint.core.storage",
       "type": "module",
       "file": "omnisint/core/storage.py",
@@ -436,7 +1074,7 @@
       "id": "omnisint.core.storage.make_cache_key",
       "type": "function",
       "file": "omnisint/core/storage.py",
-      "line": 36,
+      "line": 37,
       "community": "core",
       "docstring": "Generate a deterministic SHA-256 cache key for a collector request."
     },
@@ -444,7 +1082,7 @@
       "id": "omnisint.core.storage.CacheEntry",
       "type": "class",
       "file": "omnisint/core/storage.py",
-      "line": 53,
+      "line": 54,
       "community": "core",
       "methods": [
         "is_expired"
@@ -455,7 +1093,7 @@
       "id": "omnisint.core.storage.CaseStorage",
       "type": "class",
       "file": "omnisint/core/storage.py",
-      "line": 73,
+      "line": 74,
       "community": "core",
       "methods": [
         "__init__",
@@ -523,10 +1161,18 @@
       "docstring": "Citation-locked AI Entity Disambiguation Analyst & Persona Dossier Synthesizer for OmniSINT."
     },
     {
+      "id": "omnisint.intelligence.ai_analyst.sanitize_untrusted_osint_text",
+      "type": "function",
+      "file": "omnisint/intelligence/ai_analyst.py",
+      "line": 43,
+      "community": "intelligence",
+      "docstring": "Strip control characters and prompt-injection patterns from collected OSINT text."
+    },
+    {
       "id": "omnisint.intelligence.ai_analyst.IdentityMatrixEntry",
       "type": "class",
       "file": "omnisint/intelligence/ai_analyst.py",
-      "line": 45,
+      "line": 66,
       "community": "intelligence",
       "methods": [],
       "docstring": "Single row in the resolved Identity Confidence Matrix for a PersonaCluster."
@@ -535,7 +1181,7 @@
       "id": "omnisint.intelligence.ai_analyst.CitationAuditResult",
       "type": "class",
       "file": "omnisint/intelligence/ai_analyst.py",
-      "line": 63,
+      "line": 84,
       "community": "intelligence",
       "methods": [],
       "docstring": "Verification audit of node_id and evidence_id citations in an AI intelligence brief."
@@ -544,7 +1190,7 @@
       "id": "omnisint.intelligence.ai_analyst.AIAnalysisReport",
       "type": "class",
       "file": "omnisint/intelligence/ai_analyst.py",
-      "line": 77,
+      "line": 98,
       "community": "intelligence",
       "methods": [],
       "docstring": "Comprehensive citation-locked intelligence analysis report for a Case."
@@ -553,7 +1199,7 @@
       "id": "omnisint.intelligence.ai_analyst.classify_confidence_tier",
       "type": "function",
       "file": "omnisint/intelligence/ai_analyst.py",
-      "line": 93,
+      "line": 116,
       "community": "intelligence",
       "docstring": "Classify a numeric [0.0, 1.0] confidence score into HIGH, MEDIUM, or LOW."
     },
@@ -561,7 +1207,7 @@
       "id": "omnisint.intelligence.ai_analyst.extract_citations",
       "type": "function",
       "file": "omnisint/intelligence/ai_analyst.py",
-      "line": 102,
+      "line": 125,
       "community": "intelligence",
       "docstring": "Extract all unique [node:<id>] and [evidence:<id>] references from an analytical text."
     },
@@ -569,7 +1215,7 @@
       "id": "omnisint.intelligence.ai_analyst.audit_citations",
       "type": "function",
       "file": "omnisint/intelligence/ai_analyst.py",
-      "line": 109,
+      "line": 132,
       "community": "intelligence",
       "docstring": "Verify that all cited node_ids and evidence_ids exist in the case and every persona is cited."
     },
@@ -577,7 +1223,7 @@
       "id": "omnisint.intelligence.ai_analyst.sanitize_hallucinated_citations",
       "type": "function",
       "file": "omnisint/intelligence/ai_analyst.py",
-      "line": 167,
+      "line": 190,
       "community": "intelligence",
       "docstring": "Replace any hallucinated [node:<id>] or [evidence:<id>] tags with explicit redaction markers."
     },
@@ -585,7 +1231,7 @@
       "id": "omnisint.intelligence.ai_analyst._default_http_post_json",
       "type": "async_function",
       "file": "omnisint/intelligence/ai_analyst.py",
-      "line": 187,
+      "line": 210,
       "community": "intelligence",
       "docstring": "Perform an async JSON POST request using standard library urllib inside a worker thread."
     },
@@ -593,7 +1239,7 @@
       "id": "omnisint.intelligence.ai_analyst.AIAnalyst",
       "type": "class",
       "file": "omnisint/intelligence/ai_analyst.py",
-      "line": 206,
+      "line": 229,
       "community": "intelligence",
       "methods": [
         "__init__",
@@ -618,7 +1264,7 @@
       "id": "omnisint.intelligence.entropy.HandleEntropyMetrics",
       "type": "class",
       "file": "omnisint/intelligence/entropy.py",
-      "line": 232,
+      "line": 288,
       "community": "intelligence",
       "methods": [],
       "docstring": "Comprehensive information-theoretic and collision-risk metrics for an OSINT handle."
@@ -627,7 +1273,7 @@
       "id": "omnisint.intelligence.entropy.strip_email_domain",
       "type": "function",
       "file": "omnisint/intelligence/entropy.py",
-      "line": 247,
+      "line": 303,
       "community": "intelligence",
       "docstring": "Return the local part if value is an email address, else the stripped string."
     },
@@ -635,7 +1281,7 @@
       "id": "omnisint.intelligence.entropy.tokenize_handle",
       "type": "function",
       "file": "omnisint/intelligence/entropy.py",
-      "line": 255,
+      "line": 311,
       "community": "intelligence",
       "docstring": "Split a handle into lowercase alphanumeric sub-tokens across delimiters, camelCase, and digits."
     },
@@ -643,7 +1289,7 @@
       "id": "omnisint.intelligence.entropy.shannon_entropy",
       "type": "function",
       "file": "omnisint/intelligence/entropy.py",
-      "line": 262,
+      "line": 318,
       "community": "intelligence",
       "docstring": "Compute Shannon entropy H(X) in bits per character for a string."
     },
@@ -651,7 +1297,7 @@
       "id": "omnisint.intelligence.entropy.information_bits",
       "type": "function",
       "file": "omnisint/intelligence/entropy.py",
-      "line": 273,
+      "line": 329,
       "community": "intelligence",
       "docstring": "Compute total Shannon information content I(X) = |X| * H(X) in bits."
     },
@@ -659,7 +1305,7 @@
       "id": "omnisint.intelligence.entropy._unusual_bigram_ratio",
       "type": "function",
       "file": "omnisint/intelligence/entropy.py",
-      "line": 281,
+      "line": 337,
       "community": "intelligence",
       "docstring": "Compute fraction of character bigrams that are NOT top-50 common English bigrams."
     },
@@ -667,7 +1313,7 @@
       "id": "omnisint.intelligence.entropy.compute_rarity_score",
       "type": "function",
       "file": "omnisint/intelligence/entropy.py",
-      "line": 290,
+      "line": 346,
       "community": "intelligence",
       "docstring": "Compute a normalized [0.0, 1.0] rarity score for a handle or username."
     },
@@ -675,7 +1321,7 @@
       "id": "omnisint.intelligence.entropy.estimate_collision_probability",
       "type": "function",
       "file": "omnisint/intelligence/entropy.py",
-      "line": 363,
+      "line": 419,
       "community": "intelligence",
       "docstring": "Estimate the probability [0.0, 1.0] that two accounts with this handle belong to different people."
     },
@@ -683,7 +1329,7 @@
       "id": "omnisint.intelligence.entropy.analyze_handle_entropy",
       "type": "function",
       "file": "omnisint/intelligence/entropy.py",
-      "line": 368,
+      "line": 424,
       "community": "intelligence",
       "docstring": "Perform full entropy, token, rarity, and collision-risk analysis on a handle."
     },
@@ -691,7 +1337,7 @@
       "id": "omnisint.intelligence.entropy.enrich_node_entropy",
       "type": "function",
       "file": "omnisint/intelligence/entropy.py",
-      "line": 389,
+      "line": 445,
       "community": "intelligence",
       "docstring": "Populate `entropy_score` and `rarity_score` on an EntityNode using its value."
     },
@@ -797,7 +1443,9 @@
         "_extract_avatar_hash",
         "_extract_handle_string",
         "_record_conflict",
+        "_build_hard_selector_neighbor_index",
         "_has_shared_hard_selector",
+        "_normalize_location_tokens",
         "_check_location_conflict",
         "synthesize_similarity_edges",
         "_build_clustering_adjacency",
@@ -817,7 +1465,7 @@
       "id": "omnisint.intelligence.graph_engine.render_hierarchy_ascii",
       "type": "function",
       "file": "omnisint/intelligence/graph_engine.py",
-      "line": 1619,
+      "line": 1678,
       "community": "intelligence",
       "docstring": "Render a HierarchyTreeNode into an investigative Unicode box-drawing hierarchy tree."
     },
@@ -994,7 +1642,7 @@
       "id": "omnisint.intelligence.temporal.hourly_cosine_similarity",
       "type": "function",
       "file": "omnisint/intelligence/temporal.py",
-      "line": 154,
+      "line": 156,
       "community": "intelligence",
       "docstring": "Compute exact cosine similarity in [0.0, 1.0] between two 24-hour activity vectors."
     },
@@ -1002,7 +1650,7 @@
       "id": "omnisint.intelligence.temporal._smooth_histogram",
       "type": "function",
       "file": "omnisint/intelligence/temporal.py",
-      "line": 167,
+      "line": 169,
       "community": "intelligence",
       "docstring": "Apply circular [0.25, 0.50, 0.25] 3-hour kernel smoothing to account for +/- 1h jitter."
     },
@@ -1010,7 +1658,7 @@
       "id": "omnisint.intelligence.temporal.correlate_temporal_profiles",
       "type": "function",
       "file": "omnisint/intelligence/temporal.py",
-      "line": 175,
+      "line": 177,
       "community": "intelligence",
       "docstring": "Compare two TemporalProfiles across circadian rhythm, timezone offset, and weekend cadence."
     },
@@ -1018,7 +1666,7 @@
       "id": "omnisint.intelligence.temporal.correlate_timestamps",
       "type": "function",
       "file": "omnisint/intelligence/temporal.py",
-      "line": 237,
+      "line": 239,
       "community": "intelligence",
       "docstring": "Build temporal profiles from two timestamp sequences and compute their correlation."
     },
@@ -1030,6 +1678,62 @@
       "docstring": "Investigative dossier and STIX 2.1 reporting exporters."
     },
     {
+      "id": "omnisint.reporting.markdown_exporter",
+      "type": "module",
+      "file": "omnisint/reporting/markdown_exporter.py",
+      "community": "reporting",
+      "docstring": "Investigative Markdown dossier exporter with Hierarchy Trees & SHA-256 Chain of Custody tables."
+    },
+    {
+      "id": "omnisint.reporting.markdown_exporter._hierarchy_tree_to_mermaid",
+      "type": "function",
+      "file": "omnisint/reporting/markdown_exporter.py",
+      "line": 10,
+      "community": "reporting",
+      "docstring": "Convert a PersonaCluster HierarchyTreeNode into a Mermaid flowchart TD diagram."
+    },
+    {
+      "id": "omnisint.reporting.markdown_exporter.MarkdownExporter",
+      "type": "class",
+      "file": "omnisint/reporting/markdown_exporter.py",
+      "line": 37,
+      "community": "reporting",
+      "methods": [
+        "export"
+      ],
+      "docstring": "Exports an OmniSINT Case into a complete, evidentiary Markdown investigative dossier."
+    },
+    {
+      "id": "omnisint.reporting.stix_exporter",
+      "type": "module",
+      "file": "omnisint/reporting/stix_exporter.py",
+      "community": "reporting",
+      "docstring": "OASIS STIX 2.1 Threat Intelligence bundle exporter for OmniSINT Cases."
+    },
+    {
+      "id": "omnisint.reporting.stix_exporter._stix_id",
+      "type": "function",
+      "file": "omnisint/reporting/stix_exporter.py",
+      "line": 17,
+      "community": "reporting",
+      "docstring": "Generate a deterministic STIX 2.1 identifier `<stix_type>--<uuidv5>`."
+    },
+    {
+      "id": "omnisint.reporting.stix_exporter.STIXExporter",
+      "type": "class",
+      "file": "omnisint/reporting/stix_exporter.py",
+      "line": 22,
+      "community": "reporting",
+      "methods": [
+        "_node_to_stix_object",
+        "_persona_to_stix_identity",
+        "_edge_to_stix_relationship",
+        "export_bundle",
+        "export_json"
+      ],
+      "docstring": "Exports a resolved OmniSINT Case into an OASIS STIX 2.1 JSON Bundle."
+    },
+    {
       "id": "scripts.update_code_graph",
       "type": "module",
       "file": "scripts/update_code_graph.py",
@@ -1037,10 +1741,18 @@
       "docstring": "Deterministic AST & Graphify Context Knowledge Graph Builder for OmniSINT."
     },
     {
-      "id": "scripts.update_code_graph.extract_module_info",
+      "id": "scripts.update_code_graph._resolve_call_target",
       "type": "function",
       "file": "scripts/update_code_graph.py",
       "line": 25,
+      "community": "scripts",
+      "docstring": "Resolve simple function or imported symbol calls into candidate qualified IDs."
+    },
+    {
+      "id": "scripts.update_code_graph.extract_module_info",
+      "type": "function",
+      "file": "scripts/update_code_graph.py",
+      "line": 39,
       "community": "scripts",
       "docstring": "Parse a Python file into AST nodes (module, classes, functions) and structural edges."
     },
@@ -1048,7 +1760,7 @@
       "id": "scripts.update_code_graph.build_graph",
       "type": "function",
       "file": "scripts/update_code_graph.py",
-      "line": 97,
+      "line": 138,
       "community": "scripts",
       "docstring": "Scan workspace and build the structured codebase knowledge graph."
     },
@@ -1056,9 +1768,9 @@
       "id": "scripts.update_code_graph.write_outputs",
       "type": "function",
       "file": "scripts/update_code_graph.py",
-      "line": 140,
+      "line": 192,
       "community": "scripts",
-      "docstring": "Write graph.json and human/agent-readable GRAPH_REPORT.md."
+      "docstring": "Write graph.json and GRAPH_REPORT.md only when structural graph contents change."
     },
     {
       "id": "tests",
@@ -1078,7 +1790,7 @@
       "id": "tests.test_ai_analyst.TestAIAnalyst",
       "type": "class",
       "file": "tests/test_ai_analyst.py",
-      "line": 25,
+      "line": 26,
       "community": "tests",
       "methods": [
         "_build_disambiguation_case",
@@ -1087,6 +1799,43 @@
         "test_gemini_openai_and_ollama_providers_with_mock_transport"
       ],
       "docstring": "Test suite for citation-locked AIAnalyst, Identity Confidence Matrix, and LLM providers."
+    },
+    {
+      "id": "tests.test_api",
+      "type": "module",
+      "file": "tests/test_api.py",
+      "community": "tests",
+      "docstring": "Unit tests for Task 9: REST API & Cytoscape.js Web GUI endpoints."
+    },
+    {
+      "id": "tests.test_api.TestOmniSINTAPI",
+      "type": "class",
+      "file": "tests/test_api.py",
+      "line": 16,
+      "community": "tests",
+      "methods": [
+        "test_api_case_scan_graph_pivot_custody_and_exports"
+      ],
+      "docstring": "Offline integration tests for the OmniSINT Web API and Cytoscape.js UI serving."
+    },
+    {
+      "id": "tests.test_cli_e2e",
+      "type": "module",
+      "file": "tests/test_cli_e2e.py",
+      "community": "tests",
+      "docstring": "End-to-end integration tests for Task 10: CLI, TUI Dashboard, Custody Verification & Reporting."
+    },
+    {
+      "id": "tests.test_cli_e2e.TestCLIEndToEnd",
+      "type": "class",
+      "file": "tests/test_cli_e2e.py",
+      "line": 19,
+      "community": "tests",
+      "methods": [
+        "test_demo_case_separates_colliding_personas_and_exports_reports",
+        "test_tui_dashboard_interactive_views_and_persona_navigation"
+      ],
+      "docstring": "End-to-end CLI and interactive TUI integration tests."
     },
     {
       "id": "tests.test_entropy_and_similarity",
@@ -1128,9 +1877,50 @@
         "test_similarity_edge_synthesis_for_rare_and_corroborated_handles",
         "test_colliding_namesake_separation_into_distinct_persona_clusters",
         "test_apply_to_case_updates_nodes_edges_and_personas",
-        "test_uncorroborated_common_names_separate_without_false_positive_merge"
+        "test_uncorroborated_common_names_separate_without_false_positive_merge",
+        "test_location_alias_normalization_avoids_false_conflict"
       ],
       "docstring": "Test suite for KnowledgeGraphEngine disambiguation, Louvain clustering, and Hierarchy Tree."
+    },
+    {
+      "id": "tests.test_identity_collectors",
+      "type": "module",
+      "file": "tests/test_identity_collectors.py",
+      "community": "tests",
+      "docstring": "Unit tests for Task 6: Pluggable Collector Framework, UsernameCollector & GitHubCollector."
+    },
+    {
+      "id": "tests.test_identity_collectors.TestIdentityCollectors",
+      "type": "class",
+      "file": "tests/test_identity_collectors.py",
+      "line": 20,
+      "community": "tests",
+      "methods": [
+        "test_collector_registry_and_ttl_cache_deduplication",
+        "test_username_collector_extracts_profiles_and_avatar_dhash",
+        "test_github_collector_extracts_commit_emails_repos_and_ssh_gpg_keys"
+      ],
+      "docstring": "Offline deterministic tests for BaseCollector, CollectorRegistry, UsernameCollector, and GitHubCollector."
+    },
+    {
+      "id": "tests.test_infra_collectors",
+      "type": "module",
+      "file": "tests/test_infra_collectors.py",
+      "community": "tests",
+      "docstring": "Unit tests for Task 7: DomainCTCollector, ThreatIntelCollector, and SearchDorkCollector."
+    },
+    {
+      "id": "tests.test_infra_collectors.TestInfraCollectors",
+      "type": "class",
+      "file": "tests/test_infra_collectors.py",
+      "line": 22,
+      "community": "tests",
+      "methods": [
+        "test_domain_ct_collector_extracts_subdomains_certs_rdap_and_dns",
+        "test_threat_intel_collector_virustotal_and_offline_fallback",
+        "test_search_dork_collector_wayback_and_cse"
+      ],
+      "docstring": "Offline deterministic tests for DomainCTCollector, ThreatIntelCollector, and SearchDorkCollector."
     },
     {
       "id": "tests.test_models_and_custody",
@@ -1143,7 +1933,7 @@
       "id": "tests.test_models_and_custody.TestModelsAndCustody",
       "type": "class",
       "file": "tests/test_models_and_custody.py",
-      "line": 22,
+      "line": 27,
       "community": "tests",
       "methods": [
         "test_entity_node_defaults_and_canonical_key",
@@ -1151,9 +1941,29 @@
         "test_hierarchy_tree_and_persona_cluster_serialization",
         "test_custody_ledger_hash_chaining_and_verification",
         "test_custody_ledger_detects_tampering",
-        "test_compute_sha256_canonical_json_key_order"
+        "test_compute_sha256_canonical_json_key_order",
+        "test_custody_binds_evidence_id_case_id_kind_and_list_payloads",
+        "test_custody_signer_ed25519_signs_and_detects_chain_rewrite"
       ],
       "docstring": "Test suite for OmniSINT core models and cryptographic chain of custody."
+    },
+    {
+      "id": "tests.test_orchestrator_and_reporting",
+      "type": "module",
+      "file": "tests/test_orchestrator_and_reporting.py",
+      "community": "tests",
+      "docstring": "Unit tests for Task 8: Async Scan Orchestrator, Pivot Engine, Markdown & STIX 2.1 Exporters."
+    },
+    {
+      "id": "tests.test_orchestrator_and_reporting.TestOrchestratorAndReporting",
+      "type": "class",
+      "file": "tests/test_orchestrator_and_reporting.py",
+      "line": 26,
+      "community": "tests",
+      "methods": [
+        "test_multi_hop_scan_orchestrator_pivots_and_exporters"
+      ],
+      "docstring": "End-to-end offline tests for ScanOrchestrator multi-hop pivoting and Markdown/STIX 2.1 export."
     },
     {
       "id": "tests.test_storage",
@@ -1178,6 +1988,1266 @@
     }
   ],
   "edges": [
+    {
+      "source": "omnisint.api",
+      "target": "omnisint.api.app",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api",
+      "target": "omnisint.api.routes.cases",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.app",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.app",
+      "target": "asyncio",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.app",
+      "target": "pathlib",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.app",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.app",
+      "target": "pydantic",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.app",
+      "target": "omnisint.api.routes.cases",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.app",
+      "target": "omnisint.core.orchestrator",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.app",
+      "target": "omnisint.core.storage",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.app",
+      "target": "omnisint.api.app._run_coro_sync",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.api.app",
+      "target": "omnisint.api.app.create_app",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.api.app.create_app",
+      "target": "omnisint.api.routes.cases.OmniSINTAPIService",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.api.app.create_app",
+      "target": "omnisint.api.app._run_coro_sync",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.api.app.create_app",
+      "target": "omnisint.api.routes.cases.build_fastapi_router",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.api.app",
+      "target": "omnisint.api.app.get_default_app",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.api.app.get_default_app",
+      "target": "omnisint.api.app.create_app",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "asyncio",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "json",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "pydantic",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "omnisint.core.custody",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "omnisint.core.orchestrator",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "omnisint.core.storage",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "omnisint.intelligence.graph_engine",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "omnisint.reporting",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "omnisint.api.routes.cases.CreateCaseRequest",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.api.routes.cases.CreateCaseRequest",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "omnisint.api.routes.cases.ScanRequest",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.api.routes.cases.ScanRequest",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "omnisint.api.routes.cases.PivotNodeRequest",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.api.routes.cases.PivotNodeRequest",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "omnisint.api.routes.cases.CustodyVerificationResponse",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.api.routes.cases.CustodyVerificationResponse",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "omnisint.api.routes.cases.GraphPayloadResponse",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.api.routes.cases.GraphPayloadResponse",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "omnisint.api.routes.cases.ProgressBroadcaster",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "omnisint.api.routes.cases.OmniSINTAPIService",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.api.routes.cases.OmniSINTAPIService",
+      "target": "omnisint.api.routes.cases.GraphPayloadResponse",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.api.routes.cases.OmniSINTAPIService",
+      "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.api.routes.cases.OmniSINTAPIService",
+      "target": "omnisint.api.routes.cases.CustodyVerificationResponse",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.api.routes.cases.OmniSINTAPIService",
+      "target": "omnisint.core.storage.CaseStorage",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.api.routes.cases.OmniSINTAPIService",
+      "target": "omnisint.api.routes.cases.ProgressBroadcaster",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.api.routes.cases.OmniSINTAPIService",
+      "target": "omnisint.core.orchestrator.ScanOrchestrator",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "omnisint.api.routes.cases.build_fastapi_router",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "omnisint.api.routes.cases.json_dumps_safe",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.cli",
+      "target": "omnisint.cli.main",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli",
+      "target": "omnisint.cli.tui",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "asyncio",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "pathlib",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "click",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.api",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.cli.tui",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.config",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.core.custody",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.core.orchestrator",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.core.storage",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.intelligence.ai_analyst",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.intelligence.graph_engine",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.intelligence.similarity",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.reporting",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.cli.main.build_demo_collision_case",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.cli.main.build_demo_collision_case",
+      "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.build_demo_collision_case",
+      "target": "omnisint.intelligence.similarity.compute_dhash_from_pixels",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.build_demo_collision_case",
+      "target": "omnisint.core.models.Case",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.build_demo_collision_case",
+      "target": "omnisint.core.models.EntityNode",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.build_demo_collision_case",
+      "target": "omnisint.core.models.RelationshipEdge",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.build_demo_collision_case",
+      "target": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.build_demo_collision_case",
+      "target": "omnisint.intelligence.ai_analyst.AIAnalyst",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.cli.main._resolve_db_path",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.cli.main._resolve_db_path",
+      "target": "omnisint.config.get_settings",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.cli.main.app",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.cli.main.cmd_demo",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_demo",
+      "target": "omnisint.cli.main.build_demo_collision_case",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_demo",
+      "target": "omnisint.core.storage.CaseStorage",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_demo",
+      "target": "omnisint.intelligence.graph_engine.render_hierarchy_ascii",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.cli.main.cmd_scan",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_scan",
+      "target": "omnisint.cli.main._resolve_db_path",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_scan",
+      "target": "omnisint.core.storage.CaseStorage",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_scan",
+      "target": "omnisint.core.orchestrator.ScanOrchestrator",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_scan",
+      "target": "omnisint.intelligence.graph_engine.render_hierarchy_ascii",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.cli.main.case_group",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.cli.main.cmd_case_list",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_case_list",
+      "target": "omnisint.cli.main._resolve_db_path",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_case_list",
+      "target": "omnisint.core.storage.CaseStorage",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.cli.main.cmd_case_show",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_case_show",
+      "target": "omnisint.cli.main._resolve_db_path",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_case_show",
+      "target": "omnisint.core.storage.CaseStorage",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_case_show",
+      "target": "omnisint.intelligence.graph_engine.render_hierarchy_ascii",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.cli.main.cmd_case_verify",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_case_verify",
+      "target": "omnisint.cli.main._resolve_db_path",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_case_verify",
+      "target": "omnisint.core.storage.CaseStorage",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.cli.main.cmd_pivot",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_pivot",
+      "target": "omnisint.cli.main._resolve_db_path",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_pivot",
+      "target": "omnisint.core.storage.CaseStorage",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_pivot",
+      "target": "omnisint.core.orchestrator.ScanOrchestrator",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.cli.main.cmd_report",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_report",
+      "target": "omnisint.cli.main._resolve_db_path",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_report",
+      "target": "omnisint.core.storage.CaseStorage",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.cli.main.cmd_tui",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_tui",
+      "target": "omnisint.cli.tui.launch_tui",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_tui",
+      "target": "omnisint.cli.main._resolve_db_path",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_tui",
+      "target": "omnisint.cli.main.build_demo_collision_case",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_tui",
+      "target": "omnisint.core.storage.CaseStorage",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.cli.main.cmd_serve",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_serve",
+      "target": "omnisint.cli.main._resolve_db_path",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_serve",
+      "target": "omnisint.core.storage.CaseStorage",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.cli.main.run_cli",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.cli.tui",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.tui",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.tui",
+      "target": "omnisint.core.custody",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.tui",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.tui",
+      "target": "omnisint.intelligence.ai_analyst",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.tui",
+      "target": "omnisint.intelligence.graph_engine",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.tui",
+      "target": "omnisint.cli.tui.OmniSINTTUIDashboard",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.cli.tui.OmniSINTTUIDashboard",
+      "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.tui.OmniSINTTUIDashboard",
+      "target": "omnisint.intelligence.ai_analyst.AIAnalyst",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.tui.OmniSINTTUIDashboard",
+      "target": "omnisint.intelligence.graph_engine.render_hierarchy_ascii",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.tui",
+      "target": "omnisint.cli.tui.launch_tui",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.cli.tui.launch_tui",
+      "target": "omnisint.cli.tui.OmniSINTTUIDashboard",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors",
+      "target": "omnisint.collectors.base",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors",
+      "target": "omnisint.collectors.domain_ct_collector",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors",
+      "target": "omnisint.collectors.github_collector",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors",
+      "target": "omnisint.collectors.search_dork_collector",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors",
+      "target": "omnisint.collectors.threat_intel",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors",
+      "target": "omnisint.collectors.username_collector",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors",
+      "target": "omnisint.config",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors",
+      "target": "omnisint.collectors.create_default_registry",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.create_default_registry",
+      "target": "omnisint.collectors.base.CollectorRegistry",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.create_default_registry",
+      "target": "omnisint.collectors.username_collector.UsernameCollector",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.create_default_registry",
+      "target": "omnisint.collectors.github_collector.GitHubCollector",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.create_default_registry",
+      "target": "omnisint.collectors.domain_ct_collector.DomainCTCollector",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.create_default_registry",
+      "target": "omnisint.collectors.threat_intel.ThreatIntelCollector",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.create_default_registry",
+      "target": "omnisint.collectors.search_dork_collector.SearchDorkCollector",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.base",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.base",
+      "target": "asyncio",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.base",
+      "target": "json",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.base",
+      "target": "time",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.base",
+      "target": "urllib.error",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.base",
+      "target": "urllib.parse",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.base",
+      "target": "urllib.request",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.base",
+      "target": "abc",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.base",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.base",
+      "target": "pydantic",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.base",
+      "target": "omnisint.config",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.base",
+      "target": "omnisint.core.custody",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.base",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.base",
+      "target": "omnisint.core.storage",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.base",
+      "target": "omnisint.collectors.base.HttpResponseData",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.base.HttpResponseData",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.collectors.base",
+      "target": "omnisint.collectors.base.CollectorConfig",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.base.CollectorConfig",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.collectors.base",
+      "target": "omnisint.collectors.base._default_urllib_get",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.base._default_urllib_get",
+      "target": "omnisint.collectors.base.HttpResponseData",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.base",
+      "target": "omnisint.collectors.base.BaseCollector",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.base.BaseCollector",
+      "target": "ABC",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.collectors.base.BaseCollector",
+      "target": "omnisint.collectors.base.HttpResponseData",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.base.BaseCollector",
+      "target": "omnisint.config.get_settings",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.base.BaseCollector",
+      "target": "omnisint.collectors.base.CollectorConfig",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.base.BaseCollector",
+      "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.base",
+      "target": "omnisint.collectors.base.CollectorRegistry",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.domain_ct_collector",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.domain_ct_collector",
+      "target": "ipaddress",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.domain_ct_collector",
+      "target": "urllib.parse",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.domain_ct_collector",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.domain_ct_collector",
+      "target": "omnisint.collectors.base",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.domain_ct_collector",
+      "target": "omnisint.config",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.domain_ct_collector",
+      "target": "omnisint.core.custody",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.domain_ct_collector",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.domain_ct_collector",
+      "target": "omnisint.core.storage",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.domain_ct_collector",
+      "target": "omnisint.intelligence.entropy",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.domain_ct_collector",
+      "target": "omnisint.collectors.domain_ct_collector.DomainCTCollector",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.domain_ct_collector.DomainCTCollector",
+      "target": "BaseCollector",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.collectors.domain_ct_collector.DomainCTCollector",
+      "target": "omnisint.core.models.EntityNode",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.domain_ct_collector.DomainCTCollector",
+      "target": "omnisint.core.models.CollectorResult",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.domain_ct_collector.DomainCTCollector",
+      "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.domain_ct_collector.DomainCTCollector",
+      "target": "omnisint.intelligence.entropy.analyze_handle_entropy",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.domain_ct_collector.DomainCTCollector",
+      "target": "omnisint.core.models.RelationshipEdge",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.github_collector",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.github_collector",
+      "target": "urllib.parse",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.github_collector",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.github_collector",
+      "target": "omnisint.collectors.base",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.github_collector",
+      "target": "omnisint.config",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.github_collector",
+      "target": "omnisint.core.custody",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.github_collector",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.github_collector",
+      "target": "omnisint.core.storage",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.github_collector",
+      "target": "omnisint.intelligence.entropy",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.github_collector",
+      "target": "omnisint.collectors.github_collector.GitHubCollector",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.github_collector.GitHubCollector",
+      "target": "BaseCollector",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.collectors.github_collector.GitHubCollector",
+      "target": "omnisint.intelligence.entropy.analyze_handle_entropy",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.github_collector.GitHubCollector",
+      "target": "omnisint.core.models.EntityNode",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.github_collector.GitHubCollector",
+      "target": "omnisint.core.models.CollectorResult",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.github_collector.GitHubCollector",
+      "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.github_collector.GitHubCollector",
+      "target": "omnisint.core.models.RelationshipEdge",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector",
+      "target": "urllib.parse",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector",
+      "target": "omnisint.collectors.base",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector",
+      "target": "omnisint.config",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector",
+      "target": "omnisint.core.custody",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector",
+      "target": "omnisint.core.storage",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector",
+      "target": "omnisint.intelligence.entropy",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector",
+      "target": "omnisint.collectors.search_dork_collector.generate_dork_queries",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector",
+      "target": "omnisint.collectors.search_dork_collector.SearchDorkCollector",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector.SearchDorkCollector",
+      "target": "BaseCollector",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector.SearchDorkCollector",
+      "target": "omnisint.intelligence.entropy.analyze_handle_entropy",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector.SearchDorkCollector",
+      "target": "omnisint.core.models.EntityNode",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector.SearchDorkCollector",
+      "target": "omnisint.core.models.CollectorResult",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector.SearchDorkCollector",
+      "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector.SearchDorkCollector",
+      "target": "omnisint.collectors.search_dork_collector.generate_dork_queries",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector.SearchDorkCollector",
+      "target": "omnisint.core.models.RelationshipEdge",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.threat_intel",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.threat_intel",
+      "target": "ipaddress",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.threat_intel",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.threat_intel",
+      "target": "omnisint.collectors.base",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.threat_intel",
+      "target": "omnisint.config",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.threat_intel",
+      "target": "omnisint.core.custody",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.threat_intel",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.threat_intel",
+      "target": "omnisint.core.storage",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.threat_intel",
+      "target": "omnisint.collectors.threat_intel.ThreatIntelCollector",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.threat_intel.ThreatIntelCollector",
+      "target": "BaseCollector",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.collectors.threat_intel.ThreatIntelCollector",
+      "target": "omnisint.core.models.EntityNode",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.threat_intel.ThreatIntelCollector",
+      "target": "omnisint.core.models.CollectorResult",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.threat_intel.ThreatIntelCollector",
+      "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.threat_intel.ThreatIntelCollector",
+      "target": "omnisint.core.models.RelationshipEdge",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "asyncio",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "pydantic",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "omnisint.collectors.base",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "omnisint.config",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "omnisint.core.custody",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "omnisint.core.storage",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "omnisint.intelligence.entropy",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "omnisint.intelligence.similarity",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "omnisint.collectors.username_collector.PlatformSpec",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.username_collector.PlatformSpec",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "omnisint.collectors.username_collector.UsernameCollector",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.username_collector.UsernameCollector",
+      "target": "BaseCollector",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.collectors.username_collector.UsernameCollector",
+      "target": "omnisint.intelligence.entropy.analyze_handle_entropy",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.username_collector.UsernameCollector",
+      "target": "omnisint.core.models.EntityNode",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.username_collector.UsernameCollector",
+      "target": "omnisint.core.models.CollectorResult",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.username_collector.UsernameCollector",
+      "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.username_collector.UsernameCollector",
+      "target": "omnisint.core.models.RelationshipEdge",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.username_collector.UsernameCollector",
+      "target": "omnisint.intelligence.similarity.compute_dhash_from_bytes",
+      "relation": "calls"
+    },
     {
       "source": "omnisint.config",
       "target": "__future__",
@@ -1219,6 +3289,11 @@
       "relation": "defines"
     },
     {
+      "source": "omnisint.config.get_settings",
+      "target": "omnisint.config.OmniSINTSettings",
+      "relation": "calls"
+    },
+    {
       "source": "omnisint.core",
       "target": "omnisint.core.custody",
       "relation": "imports"
@@ -1226,6 +3301,11 @@
     {
       "source": "omnisint.core",
       "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core",
+      "target": "omnisint.core.orchestrator",
       "relation": "imports"
     },
     {
@@ -1245,7 +3325,17 @@
     },
     {
       "source": "omnisint.core.custody",
+      "target": "hmac",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.custody",
       "target": "json",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.custody",
+      "target": "secrets",
       "relation": "imports"
     },
     {
@@ -1260,6 +3350,11 @@
     },
     {
       "source": "omnisint.core.custody",
+      "target": "omnisint.core.custody.payload_kind",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.custody",
       "target": "omnisint.core.custody.canonicalize_payload",
       "relation": "defines"
     },
@@ -1269,13 +3364,78 @@
       "relation": "defines"
     },
     {
+      "source": "omnisint.core.custody.compute_sha256",
+      "target": "omnisint.core.custody.canonicalize_payload",
+      "relation": "calls"
+    },
+    {
       "source": "omnisint.core.custody",
       "target": "omnisint.core.custody.compute_chain_hash",
       "relation": "defines"
     },
     {
       "source": "omnisint.core.custody",
+      "target": "omnisint.core.custody.compute_item_chain_hash",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.custody.compute_item_chain_hash",
+      "target": "omnisint.core.custody.compute_chain_hash",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.custody.compute_item_chain_hash",
+      "target": "omnisint.core.custody.payload_kind",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.custody",
       "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.custody.CustodyLedger",
+      "target": "omnisint.core.models.utc_now",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.custody.CustodyLedger",
+      "target": "omnisint.core.models.new_uuid",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.custody.CustodyLedger",
+      "target": "omnisint.core.custody.compute_sha256",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.custody.CustodyLedger",
+      "target": "omnisint.core.custody.compute_chain_hash",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.custody.CustodyLedger",
+      "target": "omnisint.core.models.EvidenceItem",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.custody.CustodyLedger",
+      "target": "omnisint.core.models.AuditLogEntry",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.custody.CustodyLedger",
+      "target": "omnisint.core.custody.compute_item_chain_hash",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.custody.CustodyLedger",
+      "target": "omnisint.core.custody.payload_kind",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.custody",
+      "target": "omnisint.core.custody.CustodySigner",
       "relation": "defines"
     },
     {
@@ -1429,6 +3589,131 @@
       "relation": "inherits"
     },
     {
+      "source": "omnisint.core.orchestrator",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.orchestrator",
+      "target": "asyncio",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.orchestrator",
+      "target": "ipaddress",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.orchestrator",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.orchestrator",
+      "target": "pydantic",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.orchestrator",
+      "target": "omnisint.collectors",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.orchestrator",
+      "target": "omnisint.core.custody",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.orchestrator",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.orchestrator",
+      "target": "omnisint.core.storage",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.orchestrator",
+      "target": "omnisint.intelligence.ai_analyst",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.orchestrator",
+      "target": "omnisint.intelligence.graph_engine",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.orchestrator",
+      "target": "omnisint.core.orchestrator.ScanProgressEvent",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.orchestrator.ScanProgressEvent",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.core.orchestrator.ScanProgressEvent",
+      "target": "omnisint.core.models.utc_now",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.orchestrator",
+      "target": "omnisint.core.orchestrator.PivotRequest",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.orchestrator.PivotRequest",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.core.orchestrator",
+      "target": "omnisint.core.orchestrator.infer_entity_type",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.orchestrator",
+      "target": "omnisint.core.orchestrator.ScanOrchestrator",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.orchestrator.ScanOrchestrator",
+      "target": "omnisint.collectors.create_default_registry",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.orchestrator.ScanOrchestrator",
+      "target": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.orchestrator.ScanOrchestrator",
+      "target": "omnisint.intelligence.ai_analyst.AIAnalyst",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.orchestrator.ScanOrchestrator",
+      "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.orchestrator.ScanOrchestrator",
+      "target": "omnisint.core.orchestrator.infer_entity_type",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.orchestrator.ScanOrchestrator",
+      "target": "omnisint.core.models.AuditLogEntry",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.orchestrator.ScanOrchestrator",
+      "target": "omnisint.core.orchestrator.ScanProgressEvent",
+      "relation": "calls"
+    },
+    {
       "source": "omnisint.core.storage",
       "target": "__future__",
       "relation": "imports"
@@ -1489,6 +3774,11 @@
       "relation": "defines"
     },
     {
+      "source": "omnisint.core.storage.make_cache_key",
+      "target": "omnisint.core.custody.compute_sha256",
+      "relation": "calls"
+    },
+    {
       "source": "omnisint.core.storage",
       "target": "omnisint.core.storage.CacheEntry",
       "relation": "defines"
@@ -1499,9 +3789,94 @@
       "relation": "inherits"
     },
     {
+      "source": "omnisint.core.storage.CacheEntry",
+      "target": "omnisint.core.models.utc_now",
+      "relation": "calls"
+    },
+    {
       "source": "omnisint.core.storage",
       "target": "omnisint.core.storage.CaseStorage",
       "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.storage.CaseStorage",
+      "target": "omnisint.config.get_settings",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.storage.CaseStorage",
+      "target": "omnisint.core.models.EntityNode",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.storage.CaseStorage",
+      "target": "omnisint.core.models.RelationshipEdge",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.storage.CaseStorage",
+      "target": "omnisint.core.models.EvidenceItem",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.storage.CaseStorage",
+      "target": "omnisint.core.models.AuditLogEntry",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.storage.CaseStorage",
+      "target": "omnisint.core.models.Case",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.storage.CaseStorage",
+      "target": "omnisint.core.models.utc_now",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.storage.CaseStorage",
+      "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.storage.CaseStorage",
+      "target": "omnisint.core.storage.CacheEntry",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.storage.CaseStorage",
+      "target": "omnisint.core.storage.make_cache_key",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.storage.CaseStorage",
+      "target": "omnisint.core.custody.compute_sha256",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.storage.CaseStorage",
+      "target": "omnisint.core.custody.compute_chain_hash",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.storage.CaseStorage",
+      "target": "omnisint.core.custody.canonicalize_payload",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.storage.CaseStorage",
+      "target": "omnisint.core.models.EntityType",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.storage.CaseStorage",
+      "target": "omnisint.core.models.CaseStatus",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.storage.CaseStorage",
+      "target": "omnisint.core.custody.payload_kind",
+      "relation": "calls"
     },
     {
       "source": "omnisint.intelligence",
@@ -1580,6 +3955,11 @@
     },
     {
       "source": "omnisint.intelligence.ai_analyst",
+      "target": "omnisint.intelligence.ai_analyst.sanitize_untrusted_osint_text",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst",
       "target": "omnisint.intelligence.ai_analyst.IdentityMatrixEntry",
       "relation": "defines"
     },
@@ -1624,6 +4004,16 @@
       "relation": "defines"
     },
     {
+      "source": "omnisint.intelligence.ai_analyst.audit_citations",
+      "target": "omnisint.intelligence.ai_analyst.extract_citations",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst.audit_citations",
+      "target": "omnisint.intelligence.ai_analyst.CitationAuditResult",
+      "relation": "calls"
+    },
+    {
       "source": "omnisint.intelligence.ai_analyst",
       "target": "omnisint.intelligence.ai_analyst.sanitize_hallucinated_citations",
       "relation": "defines"
@@ -1637,6 +4027,56 @@
       "source": "omnisint.intelligence.ai_analyst",
       "target": "omnisint.intelligence.ai_analyst.AIAnalyst",
       "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst.AIAnalyst",
+      "target": "omnisint.intelligence.ai_analyst.extract_citations",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst.AIAnalyst",
+      "target": "omnisint.intelligence.ai_analyst.audit_citations",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst.AIAnalyst",
+      "target": "omnisint.intelligence.ai_analyst.AIAnalysisReport",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst.AIAnalyst",
+      "target": "omnisint.config.get_settings",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst.AIAnalyst",
+      "target": "omnisint.intelligence.ai_analyst.classify_confidence_tier",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst.AIAnalyst",
+      "target": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst.AIAnalyst",
+      "target": "omnisint.intelligence.ai_analyst.IdentityMatrixEntry",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst.AIAnalyst",
+      "target": "omnisint.intelligence.graph_engine.render_hierarchy_ascii",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst.AIAnalyst",
+      "target": "omnisint.intelligence.ai_analyst.sanitize_untrusted_osint_text",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.ai_analyst.AIAnalyst",
+      "target": "omnisint.intelligence.ai_analyst.sanitize_hallucinated_citations",
+      "relation": "calls"
     },
     {
       "source": "omnisint.intelligence.entropy",
@@ -1689,14 +4129,34 @@
       "relation": "defines"
     },
     {
+      "source": "omnisint.intelligence.entropy.tokenize_handle",
+      "target": "omnisint.intelligence.entropy.strip_email_domain",
+      "relation": "calls"
+    },
+    {
       "source": "omnisint.intelligence.entropy",
       "target": "omnisint.intelligence.entropy.shannon_entropy",
       "relation": "defines"
     },
     {
+      "source": "omnisint.intelligence.entropy.shannon_entropy",
+      "target": "omnisint.intelligence.entropy.strip_email_domain",
+      "relation": "calls"
+    },
+    {
       "source": "omnisint.intelligence.entropy",
       "target": "omnisint.intelligence.entropy.information_bits",
       "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.entropy.information_bits",
+      "target": "omnisint.intelligence.entropy.strip_email_domain",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.entropy.information_bits",
+      "target": "omnisint.intelligence.entropy.shannon_entropy",
+      "relation": "calls"
     },
     {
       "source": "omnisint.intelligence.entropy",
@@ -1709,9 +4169,34 @@
       "relation": "defines"
     },
     {
+      "source": "omnisint.intelligence.entropy.compute_rarity_score",
+      "target": "omnisint.intelligence.entropy.strip_email_domain",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.entropy.compute_rarity_score",
+      "target": "omnisint.intelligence.entropy.tokenize_handle",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.entropy.compute_rarity_score",
+      "target": "omnisint.intelligence.entropy.shannon_entropy",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.entropy.compute_rarity_score",
+      "target": "omnisint.intelligence.entropy._unusual_bigram_ratio",
+      "relation": "calls"
+    },
+    {
       "source": "omnisint.intelligence.entropy",
       "target": "omnisint.intelligence.entropy.estimate_collision_probability",
       "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.entropy.estimate_collision_probability",
+      "target": "omnisint.intelligence.entropy.compute_rarity_score",
+      "relation": "calls"
     },
     {
       "source": "omnisint.intelligence.entropy",
@@ -1719,9 +4204,44 @@
       "relation": "defines"
     },
     {
+      "source": "omnisint.intelligence.entropy.analyze_handle_entropy",
+      "target": "omnisint.intelligence.entropy.strip_email_domain",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.entropy.analyze_handle_entropy",
+      "target": "omnisint.intelligence.entropy.tokenize_handle",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.entropy.analyze_handle_entropy",
+      "target": "omnisint.intelligence.entropy.shannon_entropy",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.entropy.analyze_handle_entropy",
+      "target": "omnisint.intelligence.entropy.information_bits",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.entropy.analyze_handle_entropy",
+      "target": "omnisint.intelligence.entropy.compute_rarity_score",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.entropy.analyze_handle_entropy",
+      "target": "omnisint.intelligence.entropy.HandleEntropyMetrics",
+      "relation": "calls"
+    },
+    {
       "source": "omnisint.intelligence.entropy",
       "target": "omnisint.intelligence.entropy.enrich_node_entropy",
       "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.entropy.enrich_node_entropy",
+      "target": "omnisint.intelligence.entropy.analyze_handle_entropy",
+      "relation": "calls"
     },
     {
       "source": "omnisint.intelligence.graph_engine",
@@ -1799,6 +4319,26 @@
       "relation": "defines"
     },
     {
+      "source": "omnisint.intelligence.graph_engine._extract_node_temporal_profile",
+      "target": "omnisint.intelligence.temporal.TemporalProfile",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine._extract_node_temporal_profile",
+      "target": "omnisint.intelligence.temporal.build_temporal_profile",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine._extract_node_temporal_profile",
+      "target": "omnisint.intelligence.graph_engine._parse_explicit_tz_offset",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine._extract_node_temporal_profile",
+      "target": "omnisint.intelligence.temporal.format_utc_offset",
+      "relation": "calls"
+    },
+    {
       "source": "omnisint.intelligence.graph_engine",
       "target": "omnisint.intelligence.graph_engine.compute_modularity",
       "relation": "defines"
@@ -1812,6 +4352,96 @@
       "source": "omnisint.intelligence.graph_engine",
       "target": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
       "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "target": "omnisint.intelligence.entropy.strip_email_domain",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "target": "omnisint.intelligence.graph_engine.compute_modularity",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "target": "omnisint.core.models.PersonaCluster",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "target": "omnisint.core.models.HierarchyTreeNode",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "target": "omnisint.intelligence.graph_engine.GraphDisambiguationReport",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "target": "omnisint.intelligence.graph_engine.DisambiguationConfig",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "target": "omnisint.intelligence.graph_engine._FallbackWeightedGraph",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "target": "omnisint.intelligence.entropy.analyze_handle_entropy",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "target": "omnisint.intelligence.graph_engine._extract_node_temporal_profile",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "target": "omnisint.intelligence.graph_engine.louvain_communities_deterministic",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "target": "omnisint.intelligence.temporal.build_temporal_profile",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "target": "omnisint.intelligence.entropy.enrich_node_entropy",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "target": "omnisint.intelligence.similarity.compare_handles",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "target": "omnisint.intelligence.similarity.avatar_hash_similarity",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "target": "omnisint.intelligence.temporal.correlate_temporal_profiles",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "target": "omnisint.intelligence.graph_engine._parse_explicit_tz_offset",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "target": "omnisint.core.models.RelationshipEdge",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "target": "omnisint.intelligence.temporal.format_utc_offset",
+      "relation": "calls"
     },
     {
       "source": "omnisint.intelligence.graph_engine",
@@ -1859,6 +4489,11 @@
       "relation": "defines"
     },
     {
+      "source": "omnisint.intelligence.similarity.normalize_leet",
+      "target": "omnisint.intelligence.entropy.strip_email_domain",
+      "relation": "calls"
+    },
+    {
       "source": "omnisint.intelligence.similarity",
       "target": "omnisint.intelligence.similarity.levenshtein_distance",
       "relation": "defines"
@@ -1869,9 +4504,24 @@
       "relation": "defines"
     },
     {
+      "source": "omnisint.intelligence.similarity.normalized_levenshtein",
+      "target": "omnisint.intelligence.similarity.levenshtein_distance",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.similarity.normalized_levenshtein",
+      "target": "omnisint.intelligence.entropy.strip_email_domain",
+      "relation": "calls"
+    },
+    {
       "source": "omnisint.intelligence.similarity",
       "target": "omnisint.intelligence.similarity.jaro_similarity",
       "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.similarity.jaro_similarity",
+      "target": "omnisint.intelligence.entropy.strip_email_domain",
+      "relation": "calls"
     },
     {
       "source": "omnisint.intelligence.similarity",
@@ -1879,14 +4529,39 @@
       "relation": "defines"
     },
     {
+      "source": "omnisint.intelligence.similarity.jaro_winkler_similarity",
+      "target": "omnisint.intelligence.similarity.jaro_similarity",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.similarity.jaro_winkler_similarity",
+      "target": "omnisint.intelligence.entropy.strip_email_domain",
+      "relation": "calls"
+    },
+    {
       "source": "omnisint.intelligence.similarity",
       "target": "omnisint.intelligence.similarity._subtoken_coverage_score",
       "relation": "defines"
     },
     {
+      "source": "omnisint.intelligence.similarity._subtoken_coverage_score",
+      "target": "omnisint.intelligence.similarity.normalized_levenshtein",
+      "relation": "calls"
+    },
+    {
       "source": "omnisint.intelligence.similarity",
       "target": "omnisint.intelligence.similarity.token_swap_similarity",
       "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.similarity.token_swap_similarity",
+      "target": "omnisint.intelligence.entropy.tokenize_handle",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.similarity.token_swap_similarity",
+      "target": "omnisint.intelligence.similarity._subtoken_coverage_score",
+      "relation": "calls"
     },
     {
       "source": "omnisint.intelligence.similarity",
@@ -1899,6 +4574,11 @@
       "relation": "defines"
     },
     {
+      "source": "omnisint.intelligence.similarity.compute_dhash_from_bytes",
+      "target": "omnisint.intelligence.similarity.compute_dhash_from_pixels",
+      "relation": "calls"
+    },
+    {
       "source": "omnisint.intelligence.similarity",
       "target": "omnisint.intelligence.similarity.hamming_distance_hex",
       "relation": "defines"
@@ -1909,9 +4589,49 @@
       "relation": "defines"
     },
     {
+      "source": "omnisint.intelligence.similarity.avatar_hash_similarity",
+      "target": "omnisint.intelligence.similarity.hamming_distance_hex",
+      "relation": "calls"
+    },
+    {
       "source": "omnisint.intelligence.similarity",
       "target": "omnisint.intelligence.similarity.compare_handles",
       "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.similarity.compare_handles",
+      "target": "omnisint.intelligence.similarity.jaro_winkler_similarity",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.similarity.compare_handles",
+      "target": "omnisint.intelligence.similarity.normalized_levenshtein",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.similarity.compare_handles",
+      "target": "omnisint.intelligence.similarity.token_swap_similarity",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.similarity.compare_handles",
+      "target": "omnisint.intelligence.similarity.normalize_leet",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.similarity.compare_handles",
+      "target": "omnisint.intelligence.entropy.compute_rarity_score",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.similarity.compare_handles",
+      "target": "omnisint.intelligence.similarity.SimilarityResult",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.similarity.compare_handles",
+      "target": "omnisint.intelligence.similarity.avatar_hash_similarity",
+      "relation": "calls"
     },
     {
       "source": "omnisint.intelligence.temporal",
@@ -1984,6 +4704,26 @@
       "relation": "defines"
     },
     {
+      "source": "omnisint.intelligence.temporal.build_temporal_profile",
+      "target": "omnisint.intelligence.temporal.TemporalProfile",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.temporal.build_temporal_profile",
+      "target": "omnisint.intelligence.temporal.parse_timestamp",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.temporal.build_temporal_profile",
+      "target": "omnisint.intelligence.temporal._infer_offset_from_sleep_window",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.temporal.build_temporal_profile",
+      "target": "omnisint.intelligence.temporal.format_utc_offset",
+      "relation": "calls"
+    },
+    {
       "source": "omnisint.intelligence.temporal",
       "target": "omnisint.intelligence.temporal.hourly_cosine_similarity",
       "relation": "defines"
@@ -1999,9 +4739,144 @@
       "relation": "defines"
     },
     {
+      "source": "omnisint.intelligence.temporal.correlate_temporal_profiles",
+      "target": "omnisint.intelligence.temporal.hourly_cosine_similarity",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.temporal.correlate_temporal_profiles",
+      "target": "omnisint.intelligence.temporal.TemporalCorrelationResult",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.temporal.correlate_temporal_profiles",
+      "target": "omnisint.intelligence.temporal._smooth_histogram",
+      "relation": "calls"
+    },
+    {
       "source": "omnisint.intelligence.temporal",
       "target": "omnisint.intelligence.temporal.correlate_timestamps",
       "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.temporal.correlate_timestamps",
+      "target": "omnisint.intelligence.temporal.build_temporal_profile",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.temporal.correlate_timestamps",
+      "target": "omnisint.intelligence.temporal.correlate_temporal_profiles",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.reporting",
+      "target": "omnisint.reporting.markdown_exporter",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.reporting",
+      "target": "omnisint.reporting.stix_exporter",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.reporting.markdown_exporter",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.reporting.markdown_exporter",
+      "target": "omnisint.core.custody",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.reporting.markdown_exporter",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.reporting.markdown_exporter",
+      "target": "omnisint.intelligence.graph_engine",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.reporting.markdown_exporter",
+      "target": "omnisint.reporting.markdown_exporter._hierarchy_tree_to_mermaid",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.reporting.markdown_exporter",
+      "target": "omnisint.reporting.markdown_exporter.MarkdownExporter",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.reporting.markdown_exporter.MarkdownExporter",
+      "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.reporting.markdown_exporter.MarkdownExporter",
+      "target": "omnisint.intelligence.graph_engine.render_hierarchy_ascii",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.reporting.markdown_exporter.MarkdownExporter",
+      "target": "omnisint.reporting.markdown_exporter._hierarchy_tree_to_mermaid",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.reporting.stix_exporter",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.reporting.stix_exporter",
+      "target": "ipaddress",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.reporting.stix_exporter",
+      "target": "json",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.reporting.stix_exporter",
+      "target": "uuid",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.reporting.stix_exporter",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.reporting.stix_exporter",
+      "target": "omnisint.core.custody",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.reporting.stix_exporter",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.reporting.stix_exporter",
+      "target": "omnisint.reporting.stix_exporter._stix_id",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.reporting.stix_exporter",
+      "target": "omnisint.reporting.stix_exporter.STIXExporter",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.reporting.stix_exporter.STIXExporter",
+      "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.reporting.stix_exporter.STIXExporter",
+      "target": "omnisint.reporting.stix_exporter._stix_id",
+      "relation": "calls"
     },
     {
       "source": "scripts.update_code_graph",
@@ -2040,13 +4915,28 @@
     },
     {
       "source": "scripts.update_code_graph",
+      "target": "scripts.update_code_graph._resolve_call_target",
+      "relation": "defines"
+    },
+    {
+      "source": "scripts.update_code_graph",
       "target": "scripts.update_code_graph.extract_module_info",
       "relation": "defines"
+    },
+    {
+      "source": "scripts.update_code_graph.extract_module_info",
+      "target": "scripts.update_code_graph._resolve_call_target",
+      "relation": "calls"
     },
     {
       "source": "scripts.update_code_graph",
       "target": "scripts.update_code_graph.build_graph",
       "relation": "defines"
+    },
+    {
+      "source": "scripts.update_code_graph.build_graph",
+      "target": "scripts.update_code_graph.extract_module_info",
+      "relation": "calls"
     },
     {
       "source": "scripts.update_code_graph",
@@ -2099,6 +4989,181 @@
       "relation": "inherits"
     },
     {
+      "source": "tests.test_ai_analyst.TestAIAnalyst",
+      "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_ai_analyst.TestAIAnalyst",
+      "target": "omnisint.intelligence.similarity.compute_dhash_from_pixels",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_ai_analyst.TestAIAnalyst",
+      "target": "omnisint.core.models.Case",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_ai_analyst.TestAIAnalyst",
+      "target": "omnisint.intelligence.ai_analyst.AIAnalyst",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_ai_analyst.TestAIAnalyst",
+      "target": "omnisint.intelligence.ai_analyst.audit_citations",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_ai_analyst.TestAIAnalyst",
+      "target": "omnisint.intelligence.ai_analyst.sanitize_hallucinated_citations",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_ai_analyst.TestAIAnalyst",
+      "target": "omnisint.intelligence.ai_analyst.sanitize_untrusted_osint_text",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_ai_analyst.TestAIAnalyst",
+      "target": "omnisint.intelligence.ai_analyst.extract_citations",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_ai_analyst.TestAIAnalyst",
+      "target": "omnisint.core.models.EntityNode",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_ai_analyst.TestAIAnalyst",
+      "target": "omnisint.core.models.RelationshipEdge",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_api",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_api",
+      "target": "asyncio",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_api",
+      "target": "json",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_api",
+      "target": "unittest",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_api",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_api",
+      "target": "omnisint.api",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_api",
+      "target": "omnisint.collectors",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_api",
+      "target": "omnisint.core.orchestrator",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_api",
+      "target": "omnisint.core.storage",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_api",
+      "target": "tests.test_api.TestOmniSINTAPI",
+      "relation": "defines"
+    },
+    {
+      "source": "tests.test_api.TestOmniSINTAPI",
+      "target": "unittest.TestCase",
+      "relation": "inherits"
+    },
+    {
+      "source": "tests.test_api.TestOmniSINTAPI",
+      "target": "omnisint.core.storage.CaseStorage",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_api.TestOmniSINTAPI",
+      "target": "omnisint.collectors.create_default_registry",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_api.TestOmniSINTAPI",
+      "target": "omnisint.core.orchestrator.ScanOrchestrator",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_cli_e2e",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_cli_e2e",
+      "target": "asyncio",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_cli_e2e",
+      "target": "json",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_cli_e2e",
+      "target": "tempfile",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_cli_e2e",
+      "target": "unittest",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_cli_e2e",
+      "target": "pathlib",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_cli_e2e",
+      "target": "omnisint.cli",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_cli_e2e",
+      "target": "omnisint.core.storage",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_cli_e2e",
+      "target": "tests.test_cli_e2e.TestCLIEndToEnd",
+      "relation": "defines"
+    },
+    {
+      "source": "tests.test_cli_e2e.TestCLIEndToEnd",
+      "target": "unittest.TestCase",
+      "relation": "inherits"
+    },
+    {
+      "source": "tests.test_cli_e2e.TestCLIEndToEnd",
+      "target": "omnisint.core.storage.CaseStorage",
+      "relation": "calls"
+    },
+    {
       "source": "tests.test_entropy_and_similarity",
       "target": "__future__",
       "relation": "imports"
@@ -2139,6 +5204,96 @@
       "relation": "inherits"
     },
     {
+      "source": "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "target": "omnisint.intelligence.entropy.analyze_handle_entropy",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "target": "omnisint.core.models.EntityNode",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "target": "omnisint.intelligence.entropy.enrich_node_entropy",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "target": "omnisint.intelligence.similarity.jaro_winkler_similarity",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "target": "omnisint.intelligence.similarity.normalized_levenshtein",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "target": "omnisint.intelligence.similarity.token_swap_similarity",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "target": "omnisint.intelligence.similarity.compute_dhash_from_pixels",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "target": "omnisint.intelligence.similarity.compute_dhash_from_bytes",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "target": "omnisint.intelligence.similarity.compare_handles",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "target": "omnisint.intelligence.temporal.build_temporal_profile",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "target": "omnisint.intelligence.temporal.correlate_timestamps",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "target": "omnisint.intelligence.entropy.tokenize_handle",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "target": "omnisint.intelligence.entropy.shannon_entropy",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "target": "omnisint.intelligence.entropy.estimate_collision_probability",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "target": "omnisint.intelligence.similarity.hamming_distance_hex",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "target": "omnisint.intelligence.similarity.avatar_hash_similarity",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "target": "omnisint.intelligence.entropy.compute_rarity_score",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal",
+      "target": "omnisint.intelligence.temporal.hourly_cosine_similarity",
+      "relation": "calls"
+    },
+    {
       "source": "tests.test_graph_engine",
       "target": "__future__",
       "relation": "imports"
@@ -2174,6 +5329,186 @@
       "relation": "inherits"
     },
     {
+      "source": "tests.test_graph_engine.TestKnowledgeGraphEngine",
+      "target": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_graph_engine.TestKnowledgeGraphEngine",
+      "target": "omnisint.core.models.EntityNode",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_graph_engine.TestKnowledgeGraphEngine",
+      "target": "omnisint.intelligence.similarity.compute_dhash_from_pixels",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_graph_engine.TestKnowledgeGraphEngine",
+      "target": "omnisint.intelligence.graph_engine.render_hierarchy_ascii",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_graph_engine.TestKnowledgeGraphEngine",
+      "target": "omnisint.core.models.Case",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_graph_engine.TestKnowledgeGraphEngine",
+      "target": "omnisint.core.models.RelationshipEdge",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_identity_collectors",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_identity_collectors",
+      "target": "unittest",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_identity_collectors",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_identity_collectors",
+      "target": "omnisint.collectors.base",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_identity_collectors",
+      "target": "omnisint.collectors.github_collector",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_identity_collectors",
+      "target": "omnisint.collectors.username_collector",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_identity_collectors",
+      "target": "omnisint.core.custody",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_identity_collectors",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_identity_collectors",
+      "target": "omnisint.core.storage",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_identity_collectors",
+      "target": "tests.test_identity_collectors.TestIdentityCollectors",
+      "relation": "defines"
+    },
+    {
+      "source": "tests.test_identity_collectors.TestIdentityCollectors",
+      "target": "unittest.IsolatedAsyncioTestCase",
+      "relation": "inherits"
+    },
+    {
+      "source": "tests.test_identity_collectors.TestIdentityCollectors",
+      "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_identity_collectors.TestIdentityCollectors",
+      "target": "omnisint.collectors.username_collector.UsernameCollector",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_identity_collectors.TestIdentityCollectors",
+      "target": "omnisint.collectors.github_collector.GitHubCollector",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_identity_collectors.TestIdentityCollectors",
+      "target": "omnisint.collectors.base.HttpResponseData",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_identity_collectors.TestIdentityCollectors",
+      "target": "omnisint.core.storage.CaseStorage",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_identity_collectors.TestIdentityCollectors",
+      "target": "omnisint.collectors.base.CollectorConfig",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_identity_collectors.TestIdentityCollectors",
+      "target": "omnisint.collectors.base.CollectorRegistry",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_infra_collectors",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_infra_collectors",
+      "target": "unittest",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_infra_collectors",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_infra_collectors",
+      "target": "omnisint.collectors",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_infra_collectors",
+      "target": "omnisint.config",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_infra_collectors",
+      "target": "omnisint.core.custody",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_infra_collectors",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_infra_collectors",
+      "target": "tests.test_infra_collectors.TestInfraCollectors",
+      "relation": "defines"
+    },
+    {
+      "source": "tests.test_infra_collectors.TestInfraCollectors",
+      "target": "unittest.IsolatedAsyncioTestCase",
+      "relation": "inherits"
+    },
+    {
+      "source": "tests.test_infra_collectors.TestInfraCollectors",
+      "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_infra_collectors.TestInfraCollectors",
+      "target": "omnisint.config.OmniSINTSettings",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_infra_collectors.TestInfraCollectors",
+      "target": "omnisint.collectors.create_default_registry",
+      "relation": "calls"
+    },
+    {
       "source": "tests.test_models_and_custody",
       "target": "__future__",
       "relation": "imports"
@@ -2207,6 +5542,141 @@
       "source": "tests.test_models_and_custody.TestModelsAndCustody",
       "target": "unittest.TestCase",
       "relation": "inherits"
+    },
+    {
+      "source": "tests.test_models_and_custody.TestModelsAndCustody",
+      "target": "omnisint.core.models.EntityNode",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_models_and_custody.TestModelsAndCustody",
+      "target": "omnisint.core.models.HierarchyTreeNode",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_models_and_custody.TestModelsAndCustody",
+      "target": "omnisint.core.models.PersonaCluster",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_models_and_custody.TestModelsAndCustody",
+      "target": "omnisint.core.models.Case",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_models_and_custody.TestModelsAndCustody",
+      "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_models_and_custody.TestModelsAndCustody",
+      "target": "omnisint.core.custody.CustodySigner",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_models_and_custody.TestModelsAndCustody",
+      "target": "omnisint.core.models.RelationshipEdge",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_models_and_custody.TestModelsAndCustody",
+      "target": "omnisint.core.custody.compute_sha256",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_orchestrator_and_reporting",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_orchestrator_and_reporting",
+      "target": "json",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_orchestrator_and_reporting",
+      "target": "unittest",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_orchestrator_and_reporting",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_orchestrator_and_reporting",
+      "target": "omnisint.collectors",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_orchestrator_and_reporting",
+      "target": "omnisint.config",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_orchestrator_and_reporting",
+      "target": "omnisint.core.custody",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_orchestrator_and_reporting",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_orchestrator_and_reporting",
+      "target": "omnisint.core.orchestrator",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_orchestrator_and_reporting",
+      "target": "omnisint.core.storage",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_orchestrator_and_reporting",
+      "target": "omnisint.reporting",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_orchestrator_and_reporting",
+      "target": "tests.test_orchestrator_and_reporting.TestOrchestratorAndReporting",
+      "relation": "defines"
+    },
+    {
+      "source": "tests.test_orchestrator_and_reporting.TestOrchestratorAndReporting",
+      "target": "unittest.IsolatedAsyncioTestCase",
+      "relation": "inherits"
+    },
+    {
+      "source": "tests.test_orchestrator_and_reporting.TestOrchestratorAndReporting",
+      "target": "omnisint.config.OmniSINTSettings",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_orchestrator_and_reporting.TestOrchestratorAndReporting",
+      "target": "omnisint.collectors.create_default_registry",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_orchestrator_and_reporting.TestOrchestratorAndReporting",
+      "target": "omnisint.core.orchestrator.infer_entity_type",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_orchestrator_and_reporting.TestOrchestratorAndReporting",
+      "target": "omnisint.core.storage.CaseStorage",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_orchestrator_and_reporting.TestOrchestratorAndReporting",
+      "target": "omnisint.core.orchestrator.ScanOrchestrator",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_orchestrator_and_reporting.TestOrchestratorAndReporting",
+      "target": "omnisint.core.custody.CustodySigner",
+      "relation": "calls"
     },
     {
       "source": "tests.test_storage",
@@ -2257,6 +5727,46 @@
       "source": "tests.test_storage.TestCaseStorage",
       "target": "unittest.IsolatedAsyncioTestCase",
       "relation": "inherits"
+    },
+    {
+      "source": "tests.test_storage.TestCaseStorage",
+      "target": "omnisint.core.storage.CaseStorage",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_storage.TestCaseStorage",
+      "target": "omnisint.core.models.EntityNode",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_storage.TestCaseStorage",
+      "target": "omnisint.core.models.RelationshipEdge",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_storage.TestCaseStorage",
+      "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_storage.TestCaseStorage",
+      "target": "omnisint.core.models.CollectorResult",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_storage.TestCaseStorage",
+      "target": "omnisint.core.storage.make_cache_key",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_storage.TestCaseStorage",
+      "target": "omnisint.core.models.HierarchyTreeNode",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_storage.TestCaseStorage",
+      "target": "omnisint.core.models.PersonaCluster",
+      "relation": "calls"
     }
   ]
 }

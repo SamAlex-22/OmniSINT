@@ -88,7 +88,7 @@ class EvidenceItem(BaseModel):
     prev_chain_hash: str = Field(default="0" * 64, min_length=64, max_length=64)
     chain_hash: str = Field(..., min_length=64, max_length=64)
     collected_at_utc: datetime = Field(default_factory=utc_now)
-    raw_payload: str | dict[str, Any]
+    raw_payload: str | dict[str, Any] | list[Any]
     mime_type: str = "application/json"
     notes: str = ""
 

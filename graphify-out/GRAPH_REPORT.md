@@ -1,49 +1,103 @@
 # OmniSINT — Graphify Codebase Knowledge Report
 
-- **Generated (UTC):** `2026-11-17T17:29:32.239708+00:00`
-- **Total AST Nodes:** `105`
-- **Total Structural Edges:** `216`
+- **Generated (UTC):** `2026-11-17T20:47:41.986150+00:00`
+- **Total AST Nodes:** `182`
+- **Total Structural Edges:** `756`
 - **Architectural Communities:** `10`
 
 ## 1. High-Centrality 'God Nodes' (Core Abstractions)
 | Node ID | Degree (Connections) |
 | :--- | :--- |
-| `omnisint.core.models` | 30 |
-| `omnisint.intelligence.similarity` | 23 |
-| `omnisint.intelligence.ai_analyst` | 21 |
-| `omnisint.intelligence.entropy` | 20 |
-| `omnisint.intelligence.graph_engine` | 20 |
-| `BaseModel` | 19 |
-| `omnisint.intelligence.temporal` | 19 |
-| `omnisint.core.storage` | 16 |
-| `__future__` | 15 |
-| `omnisint.core.custody` | 14 |
-| `typing` | 10 |
-| `scripts.update_code_graph` | 10 |
+| `omnisint.core.models` | 45 |
+| `omnisint.core.custody` | 34 |
+| `omnisint.core.storage.CaseStorage` | 32 |
+| `omnisint.cli.main` | 31 |
+| `omnisint.core.storage` | 30 |
+| `omnisint.core.custody.CustodyLedger` | 27 |
+| `omnisint.collectors.base` | 26 |
+| `omnisint.intelligence.graph_engine` | 25 |
+| `omnisint.intelligence.ai_analyst` | 25 |
+| `omnisint.intelligence.similarity` | 25 |
+| `omnisint.intelligence.entropy` | 24 |
+| `omnisint.intelligence.graph_engine.KnowledgeGraphEngine` | 23 |
 
 ## 2. Architectural Communities & Symbols
-### Community: `api` (2 nodes)
+### Community: `api` (16 nodes)
 - **`omnisint.api`** (`module` in `omnisint/api/__init__.py`) — FastAPI REST & WebSocket backend for OmniSINT.
+- **`omnisint.api.app`** (`module` in `omnisint/api/app.py`) — FastAPI (or Flask WSGI fallback) web server and WebSocket live stream for OmniSINT.
+- **`omnisint.api.app._run_coro_sync`** (`function` in `omnisint/api/app.py`) — Run an async coroutine cleanly from synchronous Flask handlers.
+- **`omnisint.api.app.create_app`** (`function` in `omnisint/api/app.py`) — Create the OmniSINT ASGI (FastAPI) or WSGI (Flask fallback) web application.
+- **`omnisint.api.app.get_default_app`** (`function` in `omnisint/api/app.py`) — Factory returning a default configured OmniSINT web application.
 - **`omnisint.api.routes`** (`module` in `omnisint/api/routes/__init__.py`) — API route modules for OmniSINT.
+- **`omnisint.api.routes.cases`** (`module` in `omnisint/api/routes/cases.py`) — REST & WebSocket Case, Scan, Graph, Pivot, Custody & Reporting route handlers for OmniSINT.
+- **`omnisint.api.routes.cases.CreateCaseRequest`** (`class` in `omnisint/api/routes/cases.py`) — Payload to create a new OSINT investigation Case.
+- **`omnisint.api.routes.cases.ScanRequest`** (`class` in `omnisint/api/routes/cases.py`) — Payload to trigger a multi-collector OSINT scan inside a Case.
+- **`omnisint.api.routes.cases.PivotNodeRequest`** (`class` in `omnisint/api/routes/cases.py`) — Payload to execute a one-click pivot on an existing EntityNode.
+- **`omnisint.api.routes.cases.CustodyVerificationResponse`** (`class` in `omnisint/api/routes/cases.py`) — Cryptographic Chain of Custody verification response payload.
+- **`omnisint.api.routes.cases.GraphPayloadResponse`** (`class` in `omnisint/api/routes/cases.py`) — Cytoscape.js elements + Persona Clusters + Hierarchy Trees for UI rendering.
+- **`omnisint.api.routes.cases.ProgressBroadcaster`** (`class` in `omnisint/api/routes/cases.py`) — In-memory pub/sub hub streaming ScanProgressEvents to WebSocket subscribers.
+- **`omnisint.api.routes.cases.OmniSINTAPIService`** (`class` in `omnisint/api/routes/cases.py`) — Framework-agnostic async service layer backing FastAPI and Flask endpoints.
+- **`omnisint.api.routes.cases.build_fastapi_router`** (`function` in `omnisint/api/routes/cases.py`) — Build a FastAPI APIRouter wired to `service` when FastAPI is installed.
+- **`omnisint.api.routes.cases.json_dumps_safe`** (`function` in `omnisint/api/routes/cases.py`) — Serialize Pydantic models or JSON objects safely.
 
-### Community: `cli` (1 nodes)
-- **`omnisint.cli`** (`module` in `omnisint/cli/__init__.py`) — Typer CLI and Textual interactive TUI for OmniSINT.
+### Community: `cli` (19 nodes)
+- **`omnisint.cli`** (`module` in `omnisint/cli/__init__.py`) — CLI and interactive terminal dashboard (TUI) for OmniSINT.
+- **`omnisint.cli.main`** (`module` in `omnisint/cli/main.py`) — Command-line interface (`omnisint`) for scans, case custody verification, pivoting, TUI, and reporting.
+- **`omnisint.cli.main.build_demo_collision_case`** (`function` in `omnisint/cli/main.py`) — Construct and analyze a realistic offline OSINT collision scenario separating distinct personas.
+- **`omnisint.cli.main._resolve_db_path`** (`function` in `omnisint/cli/main.py`)
+- **`omnisint.cli.main.app`** (`function` in `omnisint/cli/main.py`) — OmniSINT top-level CLI group.
+- **`omnisint.cli.main.cmd_demo`** (`function` in `omnisint/cli/main.py`) — Run an offline colliding-namesake disambiguation demonstration.
+- **`omnisint.cli.main.cmd_scan`** (`function` in `omnisint/cli/main.py`) — Execute a multi-collector OSINT scan and resolve persona hierarchy trees.
+- **`omnisint.cli.main.case_group`** (`function` in `omnisint/cli/main.py`) — Inspect and verify persisted investigation Cases.
+- **`omnisint.cli.main.cmd_case_list`** (`function` in `omnisint/cli/main.py`) — List all Cases stored in SQLite.
+- **`omnisint.cli.main.cmd_case_show`** (`function` in `omnisint/cli/main.py`) — Show details, hierarchy trees, and brief for CASE_ID.
+- **`omnisint.cli.main.cmd_case_verify`** (`function` in `omnisint/cli/main.py`) — Cryptographically verify the SHA-256 Chain of Custody for CASE_ID.
+- **`omnisint.cli.main.cmd_pivot`** (`function` in `omnisint/cli/main.py`) — Pivot on NODE_ID inside CASE_ID and re-resolve persona clusters.
+- **`omnisint.cli.main.cmd_report`** (`function` in `omnisint/cli/main.py`) — Export CASE_ID as a Markdown investigative dossier or STIX 2.1 JSON bundle.
+- **`omnisint.cli.main.cmd_tui`** (`function` in `omnisint/cli/main.py`) — Launch the interactive OmniSINT terminal dashboard.
+- **`omnisint.cli.main.cmd_serve`** (`function` in `omnisint/cli/main.py`) — Start the OmniSINT Web GUI & REST API server.
+- **`omnisint.cli.main.run_cli`** (`function` in `omnisint/cli/main.py`) — Invoke the OmniSINT CLI programmatically and return `(exit_code, output)`.
+- **`omnisint.cli.tui`** (`module` in `omnisint/cli/tui.py`) — Textual interactive terminal dashboard (with deterministic headless snapshot fallback) for OmniSINT.
+- **`omnisint.cli.tui.OmniSINTTUIDashboard`** (`class` in `omnisint/cli/tui.py`) — Stateful interactive terminal dashboard controller for OmniSINT Cases.
+- **`omnisint.cli.tui.launch_tui`** (`function` in `omnisint/cli/tui.py`) — Launch the Textual TUI when available & interactive, or return rendered dashboard text.
 
-### Community: `collectors` (1 nodes)
-- **`omnisint.collectors`** (`module` in `omnisint/collectors/__init__.py`) — Pluggable passive OSINT collectors.
+### Community: `collectors` (20 nodes)
+- **`omnisint.collectors`** (`module` in `omnisint/collectors/__init__.py`) — Pluggable passive OSINT collectors and registry.
+- **`omnisint.collectors.create_default_registry`** (`function` in `omnisint/collectors/__init__.py`) — Create a CollectorRegistry pre-populated with all OmniSINT passive collectors.
+- **`omnisint.collectors.base`** (`module` in `omnisint/collectors/base.py`) — Abstract BaseCollector, rate-limiting, caching, custody integration, and CollectorRegistry.
+- **`omnisint.collectors.base.HttpResponseData`** (`class` in `omnisint/collectors/base.py`) — Normalized HTTP response returned by collector transports.
+- **`omnisint.collectors.base.CollectorConfig`** (`class` in `omnisint/collectors/base.py`) — Runtime configuration for passive OSINT collectors.
+- **`omnisint.collectors.base._default_urllib_get`** (`async_function` in `omnisint/collectors/base.py`) — Perform an async HTTP GET via httpx (when installed) or stdlib urllib in a worker thread.
+- **`omnisint.collectors.base.BaseCollector`** (`class` in `omnisint/collectors/base.py`) — Abstract base class for all passive OmniSINT OSINT collectors.
+- **`omnisint.collectors.base.CollectorRegistry`** (`class` in `omnisint/collectors/base.py`) — Registry for discovering and dispatching OmniSINT Collector plugins.
+- **`omnisint.collectors.domain_ct_collector`** (`module` in `omnisint/collectors/domain_ct_collector.py`) — Passive Certificate Transparency (crt.sh), RDAP/WHOIS, and passive DNS collector.
+- **`omnisint.collectors.domain_ct_collector.DomainCTCollector`** (`class` in `omnisint/collectors/domain_ct_collector.py`) — Collects Certificate Transparency logs (crt.sh), RDAP registration data, and passive DNS records.
+- **`omnisint.collectors.github_collector`** (`module` in `omnisint/collectors/github_collector.py`) — Passive GitHub profile, repository, commit author email, and SSH/PGP key collector.
+- **`omnisint.collectors.github_collector.GitHubCollector`** (`class` in `omnisint/collectors/github_collector.py`) — Collects GitHub profile metadata, repositories, commit emails/timestamps, and SSH/PGP keys.
+- **`omnisint.collectors.search_dork_collector`** (`module` in `omnisint/collectors/search_dork_collector.py`) — Pluggable search dork generator, Wayback Machine CDX archive & Google CSE collector.
+- **`omnisint.collectors.search_dork_collector.generate_dork_queries`** (`function` in `omnisint/collectors/search_dork_collector.py`) — Generate targeted passive OSINT search dork strings for a handle, email, or domain.
+- **`omnisint.collectors.search_dork_collector.SearchDorkCollector`** (`class` in `omnisint/collectors/search_dork_collector.py`) — Queries Wayback Machine CDX archives and optional Google CSE for historical & dorked mentions.
+- **`omnisint.collectors.threat_intel`** (`module` in `omnisint/collectors/threat_intel.py`) — Passive Threat Intelligence collector (VirusTotal v3 & passive DNS/reputation indicators).
+- **`omnisint.collectors.threat_intel.ThreatIntelCollector`** (`class` in `omnisint/collectors/threat_intel.py`) — Collects VirusTotal reputation, threat indicators, and passive DNS infrastructure links.
+- **`omnisint.collectors.username_collector`** (`module` in `omnisint/collectors/username_collector.py`) — Passive multi-platform username discovery & profile/avatar collector (Sherlock-compatible).
+- **`omnisint.collectors.username_collector.PlatformSpec`** (`class` in `omnisint/collectors/username_collector.py`) — Definition of a passive platform check for UsernameCollector.
+- **`omnisint.collectors.username_collector.UsernameCollector`** (`class` in `omnisint/collectors/username_collector.py`) — Sherlock-style async multi-platform username discovery, metadata, and avatar dHash collector.
 
 ### Community: `config` (3 nodes)
 - **`omnisint.config`** (`module` in `omnisint/config.py`) — Centralized Pydantic v2 configuration for OmniSINT.
 - **`omnisint.config.OmniSINTSettings`** (`class` in `omnisint/config.py`) — Application-wide settings loaded from environment variables or defaults.
 - **`omnisint.config.get_settings`** (`function` in `omnisint/config.py`) — Return a fresh settings instance.
 
-### Community: `core` (24 nodes)
+### Community: `core` (32 nodes)
 - **`omnisint.core`** (`module` in `omnisint/core/__init__.py`) — Core data models, chain-of-custody ledger, SQLite storage, and async orchestrator.
-- **`omnisint.core.custody`** (`module` in `omnisint/core/custody.py`) — OSINT Pilot-grade Chain of Custody & SHA-256 Evidentiary Ledger for OmniSINT.
-- **`omnisint.core.custody.canonicalize_payload`** (`function` in `omnisint/core/custody.py`) — Serialize any raw OSINT payload into deterministic canonical UTF-8 bytes.
+- **`omnisint.core.custody`** (`module` in `omnisint/core/custody.py`) — SHA-256 chain-of-custody ledger for OmniSINT evidence.
+- **`omnisint.core.custody.payload_kind`** (`function` in `omnisint/core/custody.py`) — Return the structural kind of a raw payload ("json", "text", or "bytes").
+- **`omnisint.core.custody.canonicalize_payload`** (`function` in `omnisint/core/custody.py`) — Serialize a raw OSINT payload into deterministic canonical bytes.
 - **`omnisint.core.custody.compute_sha256`** (`function` in `omnisint/core/custody.py`) — Compute hex-encoded SHA-256 digest of a canonicalized payload.
-- **`omnisint.core.custody.compute_chain_hash`** (`function` in `omnisint/core/custody.py`) — Compute tamper-evident chained SHA-256 digest linking previous evidence record.
-- **`omnisint.core.custody.CustodyLedger`** (`class` in `omnisint/core/custody.py`) — Manages cryptographic evidence acquisition, hash chaining, and audit trail for a Case.
+- **`omnisint.core.custody.compute_chain_hash`** (`function` in `omnisint/core/custody.py`) — Compute the tamper-evident chained SHA-256 digest for one evidence record.
+- **`omnisint.core.custody.compute_item_chain_hash`** (`function` in `omnisint/core/custody.py`) — Recompute the chain hash for an EvidenceItem (optionally against a different predecessor).
+- **`omnisint.core.custody.CustodyLedger`** (`class` in `omnisint/core/custody.py`) — Manages evidence acquisition, hash chaining, and the audit trail for a Case.
+- **`omnisint.core.custody.CustodySigner`** (`class` in `omnisint/core/custody.py`) — Signs and verifies a CustodyLedger head state using Ed25519 (or HMAC-SHA256 fallback).
 - **`omnisint.core.models`** (`module` in `omnisint/core/models.py`) — Unified Pydantic v2 ontology for OmniSINT Entities, Edges, Cases, and Chain of Custody.
 - **`omnisint.core.models.utc_now`** (`function` in `omnisint/core/models.py`) — Return current timezone-aware UTC datetime.
 - **`omnisint.core.models.new_uuid`** (`function` in `omnisint/core/models.py`) — Return a fresh UUIDv4 string.
@@ -58,14 +112,20 @@
 - **`omnisint.core.models.PersonaCluster`** (`class` in `omnisint/core/models.py`) — Disambiguated candidate identity cluster separating colliding namesakes.
 - **`omnisint.core.models.CollectorResult`** (`class` in `omnisint/core/models.py`) — Standardized output returned by any OmniSINT Collector plugin.
 - **`omnisint.core.models.Case`** (`class` in `omnisint/core/models.py`) — Top-level OSINT Pilot investigative container.
+- **`omnisint.core.orchestrator`** (`module` in `omnisint/core/orchestrator.py`) — Async scan orchestrator and multi-hop cross-indicator pivot engine for OmniSINT.
+- **`omnisint.core.orchestrator.ScanProgressEvent`** (`class` in `omnisint/core/orchestrator.py`) — Real-time progress event emitted during scans and node pivots.
+- **`omnisint.core.orchestrator.PivotRequest`** (`class` in `omnisint/core/orchestrator.py`) — Parameters for pivoting an investigation from an existing EntityNode.
+- **`omnisint.core.orchestrator.infer_entity_type`** (`function` in `omnisint/core/orchestrator.py`) — Heuristically classify a raw OSINT seed string into a canonical EntityType.
+- **`omnisint.core.orchestrator.ScanOrchestrator`** (`class` in `omnisint/core/orchestrator.py`) — Coordinates passive collectors, multi-hop pivots, storage persistence, graph clustering, and AI analysis.
 - **`omnisint.core.storage`** (`module` in `omnisint/core/storage.py`) — Async SQLite Case Store & TTL Response Cache for OmniSINT.
 - **`omnisint.core.storage.make_cache_key`** (`function` in `omnisint/core/storage.py`) — Generate a deterministic SHA-256 cache key for a collector request.
 - **`omnisint.core.storage.CacheEntry`** (`class` in `omnisint/core/storage.py`) — Cached collector response record with TTL metadata and SHA-256 integrity hash.
 - **`omnisint.core.storage.CaseStorage`** (`class` in `omnisint/core/storage.py`) — Async SQLite persistence engine for Cases, Graph Entities/Edges, Custody Ledger, and HTTP Cache.
 
-### Community: `intelligence` (57 nodes)
+### Community: `intelligence` (58 nodes)
 - **`omnisint.intelligence`** (`module` in `omnisint/intelligence/__init__.py`) — Mathematical and AI entity-resolution modules (entropy, similarity, temporal, graph, LLM).
 - **`omnisint.intelligence.ai_analyst`** (`module` in `omnisint/intelligence/ai_analyst.py`) — Citation-locked AI Entity Disambiguation Analyst & Persona Dossier Synthesizer for OmniSINT.
+- **`omnisint.intelligence.ai_analyst.sanitize_untrusted_osint_text`** (`function` in `omnisint/intelligence/ai_analyst.py`) — Strip control characters and prompt-injection patterns from collected OSINT text.
 - **`omnisint.intelligence.ai_analyst.IdentityMatrixEntry`** (`class` in `omnisint/intelligence/ai_analyst.py`) — Single row in the resolved Identity Confidence Matrix for a PersonaCluster.
 - **`omnisint.intelligence.ai_analyst.CitationAuditResult`** (`class` in `omnisint/intelligence/ai_analyst.py`) — Verification audit of node_id and evidence_id citations in an AI intelligence brief.
 - **`omnisint.intelligence.ai_analyst.AIAnalysisReport`** (`class` in `omnisint/intelligence/ai_analyst.py`) — Comprehensive citation-locked intelligence analysis report for a Case.
@@ -125,24 +185,41 @@
 ### Community: `omnisint` (1 nodes)
 - **`omnisint`** (`module` in `omnisint/__init__.py`) — OmniSINT — OSINT Aggregation, Case Management, and AI Entity-Resolution Platform.
 
-### Community: `reporting` (1 nodes)
+### Community: `reporting` (7 nodes)
 - **`omnisint.reporting`** (`module` in `omnisint/reporting/__init__.py`) — Investigative dossier and STIX 2.1 reporting exporters.
+- **`omnisint.reporting.markdown_exporter`** (`module` in `omnisint/reporting/markdown_exporter.py`) — Investigative Markdown dossier exporter with Hierarchy Trees & SHA-256 Chain of Custody tables.
+- **`omnisint.reporting.markdown_exporter._hierarchy_tree_to_mermaid`** (`function` in `omnisint/reporting/markdown_exporter.py`) — Convert a PersonaCluster HierarchyTreeNode into a Mermaid flowchart TD diagram.
+- **`omnisint.reporting.markdown_exporter.MarkdownExporter`** (`class` in `omnisint/reporting/markdown_exporter.py`) — Exports an OmniSINT Case into a complete, evidentiary Markdown investigative dossier.
+- **`omnisint.reporting.stix_exporter`** (`module` in `omnisint/reporting/stix_exporter.py`) — OASIS STIX 2.1 Threat Intelligence bundle exporter for OmniSINT Cases.
+- **`omnisint.reporting.stix_exporter._stix_id`** (`function` in `omnisint/reporting/stix_exporter.py`) — Generate a deterministic STIX 2.1 identifier `<stix_type>--<uuidv5>`.
+- **`omnisint.reporting.stix_exporter.STIXExporter`** (`class` in `omnisint/reporting/stix_exporter.py`) — Exports a resolved OmniSINT Case into an OASIS STIX 2.1 JSON Bundle.
 
-### Community: `scripts` (4 nodes)
+### Community: `scripts` (5 nodes)
 - **`scripts.update_code_graph`** (`module` in `scripts/update_code_graph.py`) — Deterministic AST & Graphify Context Knowledge Graph Builder for OmniSINT.
+- **`scripts.update_code_graph._resolve_call_target`** (`function` in `scripts/update_code_graph.py`) — Resolve simple function or imported symbol calls into candidate qualified IDs.
 - **`scripts.update_code_graph.extract_module_info`** (`function` in `scripts/update_code_graph.py`) — Parse a Python file into AST nodes (module, classes, functions) and structural edges.
 - **`scripts.update_code_graph.build_graph`** (`function` in `scripts/update_code_graph.py`) — Scan workspace and build the structured codebase knowledge graph.
-- **`scripts.update_code_graph.write_outputs`** (`function` in `scripts/update_code_graph.py`) — Write graph.json and human/agent-readable GRAPH_REPORT.md.
+- **`scripts.update_code_graph.write_outputs`** (`function` in `scripts/update_code_graph.py`) — Write graph.json and GRAPH_REPORT.md only when structural graph contents change.
 
-### Community: `tests` (11 nodes)
+### Community: `tests` (21 nodes)
 - **`tests`** (`module` in `tests/__init__.py`) — Pytest test suite for OmniSINT.
 - **`tests.test_ai_analyst`** (`module` in `tests/test_ai_analyst.py`) — Unit tests for Task 5: Citation-Locked AI Analyst & Persona Dossier Synthesizer.
 - **`tests.test_ai_analyst.TestAIAnalyst`** (`class` in `tests/test_ai_analyst.py`) — Test suite for citation-locked AIAnalyst, Identity Confidence Matrix, and LLM providers.
+- **`tests.test_api`** (`module` in `tests/test_api.py`) — Unit tests for Task 9: REST API & Cytoscape.js Web GUI endpoints.
+- **`tests.test_api.TestOmniSINTAPI`** (`class` in `tests/test_api.py`) — Offline integration tests for the OmniSINT Web API and Cytoscape.js UI serving.
+- **`tests.test_cli_e2e`** (`module` in `tests/test_cli_e2e.py`) — End-to-end integration tests for Task 10: CLI, TUI Dashboard, Custody Verification & Reporting.
+- **`tests.test_cli_e2e.TestCLIEndToEnd`** (`class` in `tests/test_cli_e2e.py`) — End-to-end CLI and interactive TUI integration tests.
 - **`tests.test_entropy_and_similarity`** (`module` in `tests/test_entropy_and_similarity.py`) — Unit tests for Task 3: Shannon Entropy, Handle Rarity, Multi-Modal Similarity & Temporal Correlation.
 - **`tests.test_entropy_and_similarity.TestEntropySimilarityAndTemporal`** (`class` in `tests/test_entropy_and_similarity.py`) — Test suite for mathematical entity disambiguation primitives (Task 3).
 - **`tests.test_graph_engine`** (`module` in `tests/test_graph_engine.py`) — Unit tests for Task 4: NetworkX Knowledge Graph, Louvain Persona Clustering & Hierarchy Tree.
 - **`tests.test_graph_engine.TestKnowledgeGraphEngine`** (`class` in `tests/test_graph_engine.py`) — Test suite for KnowledgeGraphEngine disambiguation, Louvain clustering, and Hierarchy Tree.
+- **`tests.test_identity_collectors`** (`module` in `tests/test_identity_collectors.py`) — Unit tests for Task 6: Pluggable Collector Framework, UsernameCollector & GitHubCollector.
+- **`tests.test_identity_collectors.TestIdentityCollectors`** (`class` in `tests/test_identity_collectors.py`) — Offline deterministic tests for BaseCollector, CollectorRegistry, UsernameCollector, and GitHubCollector.
+- **`tests.test_infra_collectors`** (`module` in `tests/test_infra_collectors.py`) — Unit tests for Task 7: DomainCTCollector, ThreatIntelCollector, and SearchDorkCollector.
+- **`tests.test_infra_collectors.TestInfraCollectors`** (`class` in `tests/test_infra_collectors.py`) — Offline deterministic tests for DomainCTCollector, ThreatIntelCollector, and SearchDorkCollector.
 - **`tests.test_models_and_custody`** (`module` in `tests/test_models_and_custody.py`) — Unit tests for Task 1: Core Ontology & OSINT Pilot Chain-of-Custody Engine.
 - **`tests.test_models_and_custody.TestModelsAndCustody`** (`class` in `tests/test_models_and_custody.py`) — Test suite for OmniSINT core models and cryptographic chain of custody.
+- **`tests.test_orchestrator_and_reporting`** (`module` in `tests/test_orchestrator_and_reporting.py`) — Unit tests for Task 8: Async Scan Orchestrator, Pivot Engine, Markdown & STIX 2.1 Exporters.
+- **`tests.test_orchestrator_and_reporting.TestOrchestratorAndReporting`** (`class` in `tests/test_orchestrator_and_reporting.py`) — End-to-end offline tests for ScanOrchestrator multi-hop pivoting and Markdown/STIX 2.1 export.
 - **`tests.test_storage`** (`module` in `tests/test_storage.py`) — Unit tests for Task 2: Async SQLite Case Store & TTL Response Cache.
 - **`tests.test_storage.TestCaseStorage`** (`class` in `tests/test_storage.py`) — Test suite for async SQLite case persistence, graph deduplication, custody chain, and TTL cache.
