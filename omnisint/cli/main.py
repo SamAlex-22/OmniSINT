@@ -10,6 +10,14 @@ import click
 
 from omnisint.api import create_app
 from omnisint.cli.tui import launch_tui
+from omnisint.collectors import (
+    DEFAULT_PLATFORM_SPECS,
+    PlatformSpec,
+    ScraplingCollector,
+    create_default_registry,
+    load_sherlock_specs,
+    load_whatsmyname_specs,
+)
 from omnisint.config import get_settings
 from omnisint.core.custody import CustodyLedger
 from omnisint.core.models import (
@@ -210,18 +218,90 @@ def cmd_demo(db: str | None, output_md: str | None, output_stix: str | None) -> 
         click.echo(f"Wrote STIX 2.1 bundle -> {output_stix}")
 
 
+def _build_platform_specs(
+    sherlock_file: str | None,
+    wmn_file: str | None,
+    max_sites: int,
+) -> list[PlatformSpec] | None:
+    """Combine built-in JSON platform specs with optional Sherlock/WhatsMyName registries."""
+    if not sherlock_file and not wmn_file:
+        return None
+    combined: list[PlatformSpec] = list(DEFAULT_PLATFORM_SPECS)
+    seen = {spec.platform.strip().lower() for spec in combined}
+    if sherlock_file:
+        for spec in load_sherlock_specs(sherlock_file, max_sites=max_sites):
+            key = spec.platform.strip().lower()
+            if key not in seen:
+                seen.add(key)
+                combined.append(spec)
+    if wmn_file:
+        for spec in load_whatsmyname_specs(wmn_file, max_sites=max_sites):
+            key = spec.platform.strip().lower()
+            if key not in seen:
+                seen.add(key)
+                combined.append(spec)
+    return combined
+
+
 @app.command("scan")
 @click.argument("query")
 @click.option("--title", default=None, help="Investigation title.")
 @click.option("--hops", default=2, show_default=True, type=int, help="Maximum pivot hops.")
 @click.option("--db", default=None, help="SQLite database path.")
-def cmd_scan(query: str, title: str | None, hops: int, db: str | None) -> None:
+@click.option(
+    "--sherlock-file",
+    default=None,
+    type=click.Path(exists=True, dir_okay=False),
+    help="Path to Sherlock data.json site registry.",
+)
+@click.option(
+    "--wmn-file",
+    default=None,
+    type=click.Path(exists=True, dir_okay=False),
+    help="Path to WhatsMyName wmn-data.json site registry.",
+)
+@click.option(
+    "--max-sites",
+    default=50,
+    show_default=True,
+    type=int,
+    help="Maximum sites loaded per external Sherlock/WMN file.",
+)
+@click.option(
+    "--scrapling/--no-scrapling",
+    default=False,
+    show_default=True,
+    help="Enable Scrapling public page & profile scraper.",
+)
+@click.option(
+    "--dynamic/--no-dynamic",
+    default=False,
+    show_default=True,
+    help="Use Scrapling DynamicFetcher (Playwright Chromium) for JS-rendered pages.",
+)
+def cmd_scan(
+    query: str,
+    title: str | None,
+    hops: int,
+    db: str | None,
+    sherlock_file: str | None,
+    wmn_file: str | None,
+    max_sites: int,
+    scrapling: bool,
+    dynamic: bool,
+) -> None:
     """Execute a multi-collector OSINT scan and resolve persona hierarchy trees."""
     db_path = _resolve_db_path(db)
+    platforms = _build_platform_specs(sherlock_file=sherlock_file, wmn_file=wmn_file, max_sites=max_sites)
 
     async def _run() -> Case:
         async with CaseStorage(db_path) as store:
-            orchestrator = ScanOrchestrator(storage=store)
+            registry = create_default_registry(
+                include_scrapling=scrapling or dynamic,
+                scrapling_dynamic=dynamic,
+                username_platforms=platforms,
+            )
+            orchestrator = ScanOrchestrator(storage=store, registry=registry)
             case, _ = await orchestrator.run_scan(
                 query=query,
                 title=title,
@@ -234,6 +314,78 @@ def cmd_scan(query: str, title: str | None, hops: int, db: str | None) -> None:
     for persona in case.personas:
         if persona.hierarchy_tree is not None:
             click.echo(render_hierarchy_ascii(persona.hierarchy_tree))
+
+
+@app.command("scrape")
+@click.argument("target")
+@click.option(
+    "--dynamic/--no-dynamic",
+    default=False,
+    show_default=True,
+    help="Use Scrapling DynamicFetcher (Playwright Chromium) for public JS-rendered pages.",
+)
+@click.option("--db", default=None, help="SQLite database path.")
+@click.option("--title", default=None, help="Investigation title.")
+def cmd_scrape(target: str, dynamic: bool, db: str | None, title: str | None) -> None:
+    """Scrape a public URL or username profile via Scrapling and persist SHA-256 evidence."""
+    db_path = _resolve_db_path(db)
+
+    async def _scrape() -> tuple[Case, list[str]]:
+        async with CaseStorage(db_path) as store:
+            case = await store.create_case(
+                title=title or f"Scrapling Scrape: {target}",
+                target_query=target,
+            )
+            collector = ScraplingCollector(use_dynamic_browser=dynamic)
+            local_ledger = CustodyLedger(case_id=case.case_id)
+            result = await collector.collect(
+                query=target,
+                case_id=case.case_id,
+                ledger=local_ledger,
+                storage=store,
+            )
+            await store.merge_collector_result(case.case_id, result)
+            updated = await store.get_case(case.case_id)
+            assert updated is not None
+            if updated.nodes:
+                KnowledgeGraphEngine().apply_to_case(updated)
+                await AIAnalyst(provider="deterministic").analyze_case(
+                    updated,
+                    run_graph_disambiguation=False,
+                )
+            updated.status = CaseStatus.COMPLETED
+            saved = await store.save_case(updated)
+            return saved, result.errors
+
+    case, errs = asyncio.run(_scrape())
+    click.echo(
+        f"Case ID: {case.case_id} | Nodes: {len(case.nodes)} | Evidence: {len(case.evidence_ledger)}"
+    )
+    for node in case.nodes:
+        if node.entity_type in (EntityType.SOCIAL_PROFILE, EntityType.URL):
+            attrs = node.attributes or {}
+            disp = attrs.get("display_name") or node.label or node.value
+            plat = node.platform or "Web"
+            click.echo(f" - [{plat}] {disp} ({attrs.get('url', node.value)})")
+            if attrs.get("bio"):
+                click.echo(f"   Bio: {str(attrs['bio'])[:160]}")
+            counts = [
+                f"{k}={attrs[v]}"
+                for k, v in (
+                    ("followers", "follower_count"),
+                    ("following", "following_count"),
+                    ("posts", "post_count"),
+                )
+                if attrs.get(v) is not None
+            ]
+            if counts:
+                click.echo(f"   Counts: {', '.join(counts)}")
+            if attrs.get("mentions"):
+                click.echo(f"   Mentions: {', '.join(attrs['mentions'][:8])}")
+            if attrs.get("hashtags"):
+                click.echo(f"   Hashtags: {', '.join(attrs['hashtags'][:8])}")
+    for err in errs:
+        click.echo(f"Notice: {err}")
 
 
 @app.group("case")

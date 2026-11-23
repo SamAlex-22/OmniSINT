@@ -31,6 +31,12 @@ tui = [
 graph = [
     "networkx>=3.2.1",
 ]
+scraper = [
+    "scrapling>=0.3.0",
+]
+browser = [
+    "scrapling[fetchers]>=0.3.0",
+]
 full = [
     "fastapi>=0.109.0",
     "uvicorn[standard]>=0.27.0",

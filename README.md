@@ -303,6 +303,10 @@ source .venv/bin/activate
 
 # Install OmniSINT in editable mode with development/test extras
 pip install -e ".[dev]"
+
+# Optional extras: Scrapling static scraper / Playwright DynamicFetcher browser
+pip install -e ".[scraper]"
+pip install -e ".[browser]"
 ```
 
 ### Step 2: Configure Environment Variables (Optional)
@@ -333,7 +337,23 @@ python3 -m unittest discover -s tests -v
 python3 -m omnisint demo --db demo.db --output-md dossier.md --output-stix bundle.stix.json
 python3 -m omnisint case verify demo-collision-case --db demo.db
 python3 -m omnisint tui demo-collision-case --db demo.db --snapshot
+
+# Run a username scan using Sherlock (data.json) or WhatsMyName (wmn-data.json) registries
+python3 -m omnisint scan alex_sec --sherlock-file data.json --max-sites 50 --scrapling --dynamic
+
+# Scrape public OpenGraph/JSON-LD profile metadata cleanly via Scrapling
+python3 -m omnisint scrape https://www.instagram.com/alex_sec/ --dynamic --db demo.db
 ```
+
+---
+
+### Step 4: Collectors — Sherlock, WhatsMyName & Compliant Scrapling Integration
+- **Sherlock `data.json` & WhatsMyName Loaders ([`username_collector.py`](file:///Users/alex/OmniSINT/omnisint/collectors/username_collector.py)):**
+  - `load_sherlock_specs()` parses Sherlock `data.json` registries (`urlProbe`/`url`, `errorType`: `status_code`, `message`, `response_url`, `errorMsg`, `errorUrl`, `regexCheck`) alongside `load_whatsmyname_specs()`.
+- **Public Profile & JS-Rendered Scraper ([`scrapling_collector.py`](file:///Users/alex/OmniSINT/omnisint/collectors/scrapling_collector.py)):**
+  - Uses [`D4Vinci/Scrapling`](https://github.com/D4Vinci/Scrapling) **`Fetcher`** (fast HTTP) and **`DynamicFetcher`** (Playwright headless Chromium) with **`Selector`** (and an automatic stdlib `HTMLParser` fallback when `scrapling` is not installed).
+  - Extracts OpenGraph (`og:title`, `og:description`, `og:image`), JSON-LD (`ProfilePage`, `Person`), external bio links, `@mentions`, `#hashtags`, public emails, locations, follower/following/post counts, and perceptual avatar `dHash` values while hashing every response into `CustodyLedger`.
+  - **Strict Compliance Guardrail:** OmniSINT deliberately excludes stealth/anti-bot bypasses (`StealthyFetcher` / `solve_cloudflare`). When a target returns HTTP `401`/`403`/`429`, redirects to `/accounts/login`, or presents a Cloudflare/CAPTCHA gate, `detect_access_gate()` records an explicit notice and aborts cleanly without attempting evasion.
 
 ---
 
@@ -443,7 +463,9 @@ OmniSINT/
 │   │   ├── temporal.py              # 24h circadian activity histogram & UTC timezone inference
 │   │   ├── graph_engine.py          # NetworkX graph, conflict-aware Louvain & Hierarchy Tree
 │   │   └── ai_analyst.py            # Citation-locked AI analyst & Identity Confidence Matrix
-│   ├── collectors/                  # Pluggable passive OSINT collectors (Tasks 6 & 7)
+│   ├── collectors/                  # Pluggable passive OSINT collectors + Scrapling/Sherlock loaders
+│   │   ├── scrapling_collector.py   # Compliant Fetcher/DynamicFetcher + Selector metadata extractor
+│   │   └── username_collector.py    # Async username discovery + Sherlock/WhatsMyName registry loaders
 │   ├── reporting/                   # Markdown dossier & STIX 2.1 bundle exporters (Task 8)
 │   ├── api/                         # FastAPI REST + WebSocket backend (Task 9)
 │   └── cli/                         # Typer CLI & Textual interactive terminal dashboard (Task 10)
@@ -486,5 +508,5 @@ We welcome contributions from cybersecurity specialists, OSINT researchers, data
 
 OmniSINT is designed strictly for **passive, authorized open-source intelligence, defensive threat hunting, digital forensics, and academic research**:
 - **Passive-First:** Collectors query only publicly accessible records and documented APIs, respecting rate limits, exponential backoff, and local TTL caching.
-- **No Active Exploitation or Access Bypass:** OmniSINT never performs credential stuffing, authentication bypass, active vulnerability scanning, or CAPTCHA circumvention.
+- **No Active Exploitation or Access Bypass:** OmniSINT never performs credential stuffing, authentication bypass, active vulnerability scanning, Cloudflare/anti-bot evasion (`StealthyFetcher` is strictly excluded), or CAPTCHA circumvention. If a page presents a login wall or CAPTCHA gate, `ScraplingCollector` halts cleanly and logs the gate status.
 - **Zero Unverified Speculation:** All entity links and AI-generated narratives are mathematically scored and cryptographically bound to `[node:<id>]` and `[evidence:<id>]` citations.

@@ -108,10 +108,12 @@ async def _default_urllib_get(
                     parsed_body = json.loads(raw_text)
                 except ValueError:
                     parsed_body = raw_text
+            resp_headers = {k.lower(): v for k, v in resp.headers.items()}
+            resp_headers.setdefault("x-final-url", str(resp.url))
             return HttpResponseData(
                 status_code=resp.status_code,
                 body=parsed_body,
-                headers={k.lower(): v for k, v in resp.headers.items()},
+                headers=resp_headers,
             )
 
     def _sync_get() -> HttpResponseData:
@@ -134,10 +136,12 @@ async def _default_urllib_get(
                         parsed_body = json.loads(raw_text)
                     except ValueError:
                         parsed_body = raw_text
+                resp_headers = {k.lower(): v for k, v in resp.headers.items()}
+                resp_headers.setdefault("x-final-url", str(resp.geturl()))
                 return HttpResponseData(
                     status_code=int(getattr(resp, "status", 200)),
                     body=parsed_body,
-                    headers={k.lower(): v for k, v in resp.headers.items()},
+                    headers=resp_headers,
                 )
         except urllib.error.HTTPError as err:
             raw_err = err.read().decode("utf-8", errors="replace")
@@ -226,6 +230,30 @@ class BaseCollector(ABC):
         record_on_non_200: bool = False,
     ) -> tuple[int, str | dict[str, Any] | list[Any], EvidenceItem | None, bool]:
         """Fetch an external OSINT resource with TTL caching, rate-limiting, secret redaction, and custody hashing."""
+        status_code, payload, ev_item, from_cache, _ = await self._fetch_with_custody_full(
+            url=url,
+            case_id=case_id,
+            ledger=ledger,
+            storage=storage,
+            params=params,
+            headers=headers,
+            notes=notes,
+            record_on_non_200=record_on_non_200,
+        )
+        return status_code, payload, ev_item, from_cache
+
+    async def _fetch_with_custody_full(
+        self,
+        url: str,
+        case_id: str,
+        ledger: CustodyLedger | None = None,
+        storage: CaseStorage | None = None,
+        params: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
+        notes: str = "",
+        record_on_non_200: bool = False,
+    ) -> tuple[int, str | dict[str, Any] | list[Any], EvidenceItem | None, bool, dict[str, str]]:
+        """Internal variant of `fetch_with_custody` that also returns normalized HTTP response headers."""
         sanitized_url = redact_sensitive_url(url)
 
         if storage is not None and self.config.use_cache:
@@ -240,7 +268,7 @@ class BaseCollector(ABC):
                         payload=cached.payload,
                         notes=f"{notes} [cache-hit]".strip(),
                     )
-                return cached.status_code, cached.payload, ev_item, True
+                return cached.status_code, cached.payload, ev_item, True, {}
 
         req_headers = {"User-Agent": self.config.user_agent, "Accept": "application/json"}
         if headers:
@@ -305,7 +333,7 @@ class BaseCollector(ABC):
                 notes=notes,
             )
 
-        return response.status_code, response.body, evidence_item, False
+        return response.status_code, response.body, evidence_item, False, dict(response.headers)
 
     async def fetch_bytes(self, url: str, max_bytes: int = 2_000_000) -> bytes | None:
         """Download raw bytes (e.g. avatar images) safely up to `max_bytes`."""

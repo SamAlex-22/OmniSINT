@@ -621,6 +621,42 @@ Security operators working over SSH or inside automated CI/SOAR pipelines need f
 5. **Packaging & CLI Entrypoint (`pyproject.toml`, `omnisint/__main__.py`):**
    - Split optional extras (`[web]`, `[tui]`, `[graph]`, `[full]`, `[dev]`), removed unused `aiosqlite`, added `cryptography` and `click`, and added `python3 -m omnisint` entrypoint without `runpy` warnings.
 
+---
+
+## Milestone 12: Compliant Scrapling Web Scraper, JS Profile Metadata & Sherlock `data.json` Compatibility
+
+**Status:** Completed  
+**Modules Created / Updated:**
+- [omnisint/collectors/scrapling_collector.py](file:///Users/alex/OmniSINT/omnisint/collectors/scrapling_collector.py)
+- [omnisint/collectors/username_collector.py](file:///Users/alex/OmniSINT/omnisint/collectors/username_collector.py)
+- [omnisint/collectors/base.py](file:///Users/alex/OmniSINT/omnisint/collectors/base.py)
+- [omnisint/collectors/\_\_init\_\_.py](file:///Users/alex/OmniSINT/omnisint/collectors/__init__.py)
+- [omnisint/cli/main.py](file:///Users/alex/OmniSINT/omnisint/cli/main.py)
+- [pyproject.toml](file:///Users/alex/OmniSINT/pyproject.toml)
+- [tests/test_scrapling_and_sherlock.py](file:///Users/alex/OmniSINT/tests/test_scrapling_and_sherlock.py)
+
+### What Was Built
+1. **Native Sherlock `data.json` Registry Compatibility ([`username_collector.py`](file:///Users/alex/OmniSINT/omnisint/collectors/username_collector.py)):**
+   - Extended `PlatformSpec` with `missing_strings`, `error_type` (`status_code`, `message`, `response_url`), `error_url`, and `regex_check`.
+   - Added `load_sherlock_specs()` (handling `$schema` skipping, `urlProbe` fallback, `errorMsg` string/list, `errorUrl` redirect/canonical detection, and `regexCheck` pre-filtering) alongside `load_whatsmyname_specs()`.
+   - Added light HTML OpenGraph/`<title>` extraction for text-mode platform responses and response header (`location` / `x-final-url`) visibility via `_fetch_with_custody_full()`.
+2. **Compliant Scrapling Public Scraper ([`scrapling_collector.py`](file:///Users/alex/OmniSINT/omnisint/collectors/scrapling_collector.py)):**
+   - Integrates `D4Vinci/Scrapling` **`Fetcher`** (static HTTP) and **`DynamicFetcher`** (Playwright headless browser for public JS-rendered pages) with **`Selector`** CSS/XPath parsing—and includes a complete stdlib `HTMLParser` + HTTP fallback so zero external dependencies are required offline.
+   - Extracts `og:title`, `og:description`, `og:image`, Twitter Card tags, JSON-LD `ProfilePage` / `Person` schemas, public follower/following/post counts, external bio links, `@mentions`, `#hashtags`, public emails, locations, and avatar perceptual `dHash` hashes, recording every captured snapshot in the SHA-256 `CustodyLedger`.
+   - **Strict Ethical & Security Guardrails:** `StealthyFetcher` and `solve_cloudflare` are explicitly excluded (and verified absent by AST unit test). `detect_access_gate()` detects HTTP `401`/`403`/`429`, login redirects (`/accounts/login`, `/signin`, `/authwall`), and CAPTCHA/anti-bot pages (`cf-turnstile`, `g-recaptcha`, `h-captcha`) and halts cleanly without attempting evasion.
+3. **CLI & Packaging Integration ([`omnisint/cli/main.py`](file:///Users/alex/OmniSINT/omnisint/cli/main.py), [`pyproject.toml`](file:///Users/alex/OmniSINT/pyproject.toml)):**
+   - Extended `omnisint scan` with `--sherlock-file`, `--wmn-file`, `--max-sites`, `--scrapling/--no-scrapling`, and `--dynamic/--no-dynamic`.
+   - Added `omnisint scrape TARGET` (`--dynamic`, `--db`, `--title`) to capture public profile/page metadata directly into SQLite cases with custody verification.
+   - Added `[scraper]` (`scrapling>=0.3.0`) and `[browser]` (`scrapling[fetchers]>=0.3.0`) optional extras in `pyproject.toml`.
+
+### What the Unit Tests Prove ([`tests/test_scrapling_and_sherlock.py`](file:///Users/alex/OmniSINT/tests/test_scrapling_and_sherlock.py))
+- `test_load_sherlock_specs_handles_schema_and_all_error_types`: Proves Sherlock `data.json` loading (`$schema`, `urlProbe`, `status_code`, `message` lists, `response_url`, `regexCheck`, `max_sites`).
+- `test_username_collector_executes_sherlock_specs_accurately`: Proves pre-request `regexCheck` skipping, `message` soft-404 rejection, `response_url` redirect/canonical filtering, and HTML metadata extraction with valid SHA-256 custody.
+- `test_parse_public_profile_html_extracts_rich_social_metadata`: Proves Instagram-style OpenGraph follower/following/post count parsing (`1,234 Followers` and `12.5K Followers`), JSON-LD `ProfilePage` $\rightarrow$ `Person`, `@mentions`, `#hashtags`, emails, locations, and external link filtering.
+- `test_detect_access_gate_and_verify_no_stealth_bypass_code`: Proves clean gate detection for 401/403/429, login redirects, and CAPTCHA markers, plus AST verification that stealth/Cloudflare-solving APIs do not exist in `scrapling_collector.py`.
+- `test_scrapling_collector_url_and_gated_handling` & `test_scrapling_collector_username_mode_partial_success`: Proves full end-to-end URL scraping, username template fan-out, avatar `dHash` correlation, partial success when one platform hits a login wall, and valid `CustodyLedger` chaining.
+
+
 
 
 

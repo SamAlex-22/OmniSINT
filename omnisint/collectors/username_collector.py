@@ -4,12 +4,18 @@ from __future__ import annotations
 
 import asyncio
 import json
+import re
+import urllib.parse
 from pathlib import Path
 from typing import Any, Sequence
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from omnisint.collectors.base import BaseCollector, CollectorConfig, HttpGetTransportCallable
+from omnisint.collectors.scrapling_collector import (
+    extract_html_canonical_and_og_url,
+    parse_public_profile_html,
+)
 from omnisint.config import OmniSINTSettings
 from omnisint.core.custody import CustodyLedger
 from omnisint.core.models import (
@@ -26,7 +32,7 @@ from omnisint.intelligence.similarity import compute_dhash_from_bytes
 
 
 class PlatformSpec(BaseModel):
-    """Definition of a passive platform check for UsernameCollector (WhatsMyName compatible)."""
+    """Definition of a passive platform check for UsernameCollector (WhatsMyName & Sherlock compatible)."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -37,7 +43,44 @@ class PlatformSpec(BaseModel):
     expected_status: int = 200
     existence_string: str | None = None
     missing_string: str | None = None
+    missing_strings: list[str] = Field(default_factory=list)
+    error_type: str = "status_code"
+    error_url: str | None = None
+    regex_check: str | None = None
     category: str = "social"
+
+
+def _load_json_mapping(source: str | Path | dict[str, Any]) -> dict[str, Any]:
+    """Load a JSON dictionary from an in-memory dict, JSON string, or file path."""
+    if isinstance(source, dict):
+        return source
+    if isinstance(source, Path):
+        return dict(json.loads(source.read_text(encoding="utf-8")))
+    raw_str = str(source).strip()
+    if raw_str.startswith("{"):
+        return dict(json.loads(raw_str))
+    return dict(json.loads(Path(raw_str).read_text(encoding="utf-8")))
+
+
+def _format_handle_url(template: str, handle: str) -> str:
+    """Substitute `{handle}` or `{}` placeholders safely without failing on unrelated braces."""
+    return template.replace("{}", "{handle}").replace("{handle}", handle)
+
+
+def _url_matches_error_url(candidate_url: str, error_url: str) -> bool:
+    """Return True when a redirect/canonical URL matches a Sherlock `errorUrl` indicator."""
+    cand = candidate_url.strip()
+    err = error_url.strip()
+    if not cand or not err:
+        return False
+    cand_norm = cand.rstrip("/").lower()
+    err_norm = err.rstrip("/").lower()
+    if cand_norm == err_norm:
+        return True
+    parsed_err = urllib.parse.urlsplit(err_norm)
+    if (parsed_err.path and parsed_err.path != "/") or parsed_err.query:
+        return err_norm in cand_norm
+    return False
 
 
 def load_whatsmyname_specs(
@@ -45,17 +88,9 @@ def load_whatsmyname_specs(
     max_sites: int | None = None,
 ) -> list[PlatformSpec]:
     """Load PlatformSpec entries from a WhatsMyName JSON file path, JSON string, or parsed dictionary."""
-    if isinstance(source, dict):
-        data = source
-    elif isinstance(source, Path):
-        data = json.loads(source.read_text(encoding="utf-8"))
-    else:
-        raw_str = str(source).strip()
-        if raw_str.startswith("{"):
-            data = json.loads(raw_str)
-        else:
-            data = json.loads(Path(raw_str).read_text(encoding="utf-8"))
-
+    if max_sites is not None and max_sites <= 0:
+        return []
+    data = _load_json_mapping(source)
     sites = data.get("sites") or []
     specs: list[PlatformSpec] = []
     for entry in sites:
@@ -66,6 +101,7 @@ def load_whatsmyname_specs(
         uri_pretty = str(entry.get("uri_pretty") or uri_check).strip()
         if not name or not uri_check or "{account}" not in uri_check:
             continue
+        m_str = entry.get("m_string")
         specs.append(
             PlatformSpec(
                 platform=name,
@@ -74,8 +110,74 @@ def load_whatsmyname_specs(
                 response_kind="text",
                 expected_status=int(entry.get("e_code", 200)),
                 existence_string=entry.get("e_string"),
-                missing_string=entry.get("m_string"),
+                missing_string=m_str,
+                missing_strings=[m_str] if isinstance(m_str, str) and m_str else [],
                 category=str(entry.get("cat") or "social"),
+            )
+        )
+        if max_sites is not None and len(specs) >= max_sites:
+            break
+    return specs
+
+
+def load_sherlock_specs(
+    source: str | Path | dict[str, Any],
+    max_sites: int | None = None,
+) -> list[PlatformSpec]:
+    """Load PlatformSpec entries from a Sherlock `data.json` path, JSON string, or parsed dictionary."""
+    if max_sites is not None and max_sites <= 0:
+        return []
+    data = _load_json_mapping(source)
+    specs: list[PlatformSpec] = []
+    for name, entry in data.items():
+        site_name = str(name).strip()
+        if not site_name or site_name.startswith("$") or not isinstance(entry, dict):
+            continue
+
+        raw_profile_url = str(entry.get("url") or "").strip()
+        raw_probe_url = str(entry.get("urlProbe") or raw_profile_url).strip()
+        api_tmpl = raw_probe_url.replace("{}", "{handle}")
+        profile_tmpl = (raw_profile_url or raw_probe_url).replace("{}", "{handle}")
+        if "{handle}" not in api_tmpl:
+            continue
+
+        raw_err_type = entry.get("errorType")
+        if isinstance(raw_err_type, list):
+            err_type = str(raw_err_type[0] if raw_err_type else "status_code").strip().lower()
+        else:
+            err_type = str(raw_err_type or "status_code").strip().lower()
+        if err_type not in {"status_code", "message", "response_url"}:
+            err_type = "status_code"
+
+        raw_msg = entry.get("errorMsg")
+        missing_list: list[str] = []
+        if isinstance(raw_msg, str) and raw_msg:
+            missing_list = [raw_msg]
+        elif isinstance(raw_msg, list):
+            missing_list = [str(m) for m in raw_msg if isinstance(m, str) and m]
+
+        raw_err_url = entry.get("errorUrl")
+        err_url = (
+            str(raw_err_url).strip().replace("{}", "{handle}")
+            if isinstance(raw_err_url, str) and raw_err_url.strip()
+            else None
+        )
+        raw_regex = entry.get("regexCheck")
+        regex_check = str(raw_regex).strip() if isinstance(raw_regex, str) and raw_regex.strip() else None
+
+        specs.append(
+            PlatformSpec(
+                platform=site_name,
+                api_url_template=api_tmpl,
+                profile_url_template=profile_tmpl,
+                response_kind="text",
+                expected_status=200,
+                missing_string=missing_list[0] if missing_list else None,
+                missing_strings=missing_list,
+                error_type=err_type,
+                error_url=err_url,
+                regex_check=regex_check,
+                category=str(entry.get("cat") or entry.get("category") or "social"),
             )
         )
         if max_sites is not None and len(specs) >= max_sites:
@@ -143,6 +245,7 @@ class UsernameCollector(BaseCollector):
         spec: PlatformSpec,
         handle: str,
         payload: str | dict[str, Any] | list[Any],
+        headers: dict[str, str] | None = None,
     ) -> dict[str, Any] | None:
         """Extract normalized profile metadata if the platform payload confirms an active account."""
         plat = spec.platform
@@ -158,7 +261,7 @@ class UsernameCollector(BaseCollector):
                 "avatar_bytes_seed": payload.get("avatar_bytes_hex"),
                 "timestamps": payload.get("timestamps")
                 or ([payload["created_at"]] if payload.get("created_at") else []),
-                "url": payload.get("html_url") or spec.profile_url_template.format(handle=handle),
+                "url": payload.get("html_url") or _format_handle_url(spec.profile_url_template, handle),
             }
 
         if plat == "GitLab" and isinstance(payload, list) and len(payload) > 0 and isinstance(payload[0], dict):
@@ -173,7 +276,7 @@ class UsernameCollector(BaseCollector):
                     "avatar_hash": user.get("avatar_hash"),
                     "timestamps": user.get("timestamps")
                     or ([user["created_at"]] if user.get("created_at") else []),
-                    "url": user.get("web_url") or spec.profile_url_template.format(handle=handle),
+                    "url": user.get("web_url") or _format_handle_url(spec.profile_url_template, handle),
                 }
 
         if plat == "Reddit" and isinstance(payload, dict):
@@ -188,7 +291,7 @@ class UsernameCollector(BaseCollector):
                     "avatar_url": data.get("icon_img") or "",
                     "avatar_hash": data.get("avatar_hash"),
                     "timestamps": data.get("timestamps") or [],
-                    "url": spec.profile_url_template.format(handle=handle),
+                    "url": _format_handle_url(spec.profile_url_template, handle),
                 }
 
         if plat == "Keybase" and isinstance(payload, dict):
@@ -208,7 +311,7 @@ class UsernameCollector(BaseCollector):
                         "avatar_url": primary_pic.get("url") or "",
                         "avatar_hash": user.get("avatar_hash"),
                         "timestamps": user.get("timestamps") or [],
-                        "url": spec.profile_url_template.format(handle=handle),
+                        "url": _format_handle_url(spec.profile_url_template, handle),
                     }
 
         if plat == "HackerNews" and isinstance(payload, dict) and payload.get("id"):
@@ -220,7 +323,7 @@ class UsernameCollector(BaseCollector):
                 "avatar_url": "",
                 "avatar_hash": payload.get("avatar_hash"),
                 "timestamps": payload.get("timestamps") or [],
-                "url": spec.profile_url_template.format(handle=handle),
+                "url": _format_handle_url(spec.profile_url_template, handle),
             }
 
         if plat == "DevTo" and isinstance(payload, dict) and payload.get("username"):
@@ -232,24 +335,80 @@ class UsernameCollector(BaseCollector):
                 "avatar_url": payload.get("profile_image") or "",
                 "avatar_hash": payload.get("avatar_hash"),
                 "timestamps": payload.get("timestamps") or [],
-                "url": spec.profile_url_template.format(handle=handle),
+                "url": _format_handle_url(spec.profile_url_template, handle),
             }
 
-        # WhatsMyName text/HTML existence & missing-string matching
-        if isinstance(payload, str) and (spec.existence_string or spec.missing_string):
-            if spec.missing_string and spec.missing_string in payload:
+        # Sherlock & WhatsMyName text/HTML/response_url evaluation
+        if isinstance(payload, str) or spec.response_kind == "text":
+            text_payload = payload if isinstance(payload, str) else json.dumps(payload, ensure_ascii=False)
+            missing_tokens = [
+                tok
+                for tok in (([spec.missing_string] if spec.missing_string else []) + list(spec.missing_strings))
+                if tok
+            ]
+            if any(tok in text_payload for tok in missing_tokens):
                 return None
-            if spec.existence_string and spec.existence_string not in payload:
+            if spec.existence_string and spec.existence_string not in text_payload:
                 return None
+
+            if spec.error_type == "response_url" and spec.error_url:
+                formatted_err = _format_handle_url(spec.error_url, handle)
+                err_candidates = (
+                    [formatted_err] if formatted_err == spec.error_url else [formatted_err, spec.error_url]
+                )
+                if headers:
+                    lower_headers = {k.lower(): str(v) for k, v in headers.items()}
+                    for hkey in ("location", "x-final-url", "content-location"):
+                        hval = lower_headers.get(hkey, "").strip()
+                        if hval and any(_url_matches_error_url(hval, ec) for ec in err_candidates):
+                            return None
+                if isinstance(payload, str):
+                    if "<" in payload and ">" in payload:
+                        canon_url, og_url = extract_html_canonical_and_og_url(payload)
+                        for found_url in (canon_url, og_url):
+                            if found_url and any(_url_matches_error_url(found_url, ec) for ec in err_candidates):
+                                return None
+                    lower_payload = payload.lower()
+                    for ec in err_candidates:
+                        parsed_ec = urllib.parse.urlsplit(ec.strip().lower())
+                        if ((parsed_ec.path and parsed_ec.path != "/") or parsed_ec.query) and ec.lower() in lower_payload:
+                            return None
+
+            if isinstance(payload, dict) and (
+                payload.get("username") or payload.get("handle") or payload.get("login")
+            ):
+                uname = str(payload.get("username") or payload.get("handle") or payload.get("login"))
+                return {
+                    "username": uname,
+                    "display_name": payload.get("name") or uname,
+                    "bio": payload.get("bio") or "",
+                    "location": payload.get("location") or "",
+                    "avatar_url": payload.get("avatar_url") or "",
+                    "avatar_hash": payload.get("avatar_hash"),
+                    "timestamps": payload.get("timestamps") or [],
+                    "url": payload.get("url") or _format_handle_url(spec.profile_url_template, handle),
+                }
+
+            profile_url = _format_handle_url(spec.profile_url_template, handle)
+            display_name = handle
+            bio = ""
+            avatar_url = ""
+            location = ""
+            if isinstance(payload, str) and "<" in payload and ">" in payload:
+                meta = parse_public_profile_html(payload, profile_url)
+                display_name = meta.display_name or handle
+                bio = meta.bio
+                avatar_url = meta.avatar_url
+                location = meta.locations[0] if meta.locations else ""
             return {
                 "username": handle,
-                "display_name": handle,
-                "bio": "",
-                "location": "",
-                "avatar_url": "",
+                "display_name": display_name,
+                "bio": bio,
+                "location": location,
+                "avatar_url": avatar_url,
                 "avatar_hash": None,
                 "timestamps": [],
-                "url": spec.profile_url_template.format(handle=handle),
+                "url": profile_url,
             }
 
         # Generic fallback for custom PlatformSpec entries
@@ -263,7 +422,7 @@ class UsernameCollector(BaseCollector):
                 "avatar_url": payload.get("avatar_url") or "",
                 "avatar_hash": payload.get("avatar_hash"),
                 "timestamps": payload.get("timestamps") or [],
-                "url": payload.get("url") or spec.profile_url_template.format(handle=handle),
+                "url": payload.get("url") or _format_handle_url(spec.profile_url_template, handle),
             }
 
         return None
@@ -302,10 +461,16 @@ class UsernameCollector(BaseCollector):
         semaphore = asyncio.Semaphore(self.config.max_concurrency)
 
         async def _probe_platform(spec: PlatformSpec) -> None:
-            url = spec.api_url_template.format(handle=cleaned)
+            if spec.regex_check:
+                try:
+                    if not re.search(spec.regex_check, cleaned):
+                        return
+                except re.error:
+                    return
+            url = _format_handle_url(spec.api_url_template, cleaned)
             async with semaphore:
                 try:
-                    status, payload, ev_item, _ = await self.fetch_with_custody(
+                    status, payload, ev_item, _, resp_headers = await self._fetch_with_custody_full(
                         url=url,
                         case_id=case_id,
                         ledger=active_ledger,
@@ -319,7 +484,12 @@ class UsernameCollector(BaseCollector):
                 if status != spec.expected_status or ev_item is None:
                     return
 
-                parsed = self._parse_platform_payload(spec, cleaned, payload)
+                parsed = self._parse_platform_payload(
+                    spec,
+                    cleaned,
+                    payload,
+                    headers=resp_headers,
+                )
                 if parsed is None:
                     return
 

@@ -1,29 +1,37 @@
 {
-  "generated_at_utc": "2026-11-23T08:19:42.036130+00:00",
+  "generated_at_utc": "2026-11-23T10:24:51.103764+00:00",
   "stats": {
-    "total_nodes": 203,
-    "total_edges": 827,
+    "total_nodes": 232,
+    "total_edges": 938,
     "communities_count": 11
   },
   "god_nodes": [
     {
       "id": "omnisint.core.models",
-      "degree": 47
+      "degree": 49
     },
     {
       "id": "omnisint.core.custody",
-      "degree": 37
+      "degree": 39
+    },
+    {
+      "id": "omnisint.collectors.scrapling_collector",
+      "degree": 38
     },
     {
       "id": "omnisint.cli.main",
-      "degree": 32
+      "degree": 36
     },
     {
       "id": "omnisint.core.storage.CaseStorage",
-      "degree": 32
+      "degree": 33
     },
     {
       "id": "omnisint.core.storage",
+      "degree": 31
+    },
+    {
+      "id": "omnisint.core.custody.CustodyLedger",
       "degree": 30
     },
     {
@@ -31,7 +39,11 @@
       "degree": 29
     },
     {
-      "id": "omnisint.core.custody.CustodyLedger",
+      "id": "omnisint.intelligence.similarity",
+      "degree": 27
+    },
+    {
+      "id": "omnisint.collectors.base",
       "degree": 27
     },
     {
@@ -39,20 +51,8 @@
       "degree": 26
     },
     {
-      "id": "omnisint.intelligence.similarity",
-      "degree": 26
-    },
-    {
-      "id": "omnisint.collectors.base",
-      "degree": 26
-    },
-    {
       "id": "omnisint.intelligence.ai_analyst",
       "degree": 25
-    },
-    {
-      "id": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
-      "degree": 24
     }
   ],
   "communities": {
@@ -90,7 +90,9 @@
       "omnisint.cli.main._resolve_db_path",
       "omnisint.cli.main.app",
       "omnisint.cli.main.cmd_demo",
+      "omnisint.cli.main._build_platform_specs",
       "omnisint.cli.main.cmd_scan",
+      "omnisint.cli.main.cmd_scrape",
       "omnisint.cli.main.case_group",
       "omnisint.cli.main.cmd_case_list",
       "omnisint.cli.main.cmd_case_show",
@@ -118,6 +120,27 @@
       "omnisint.collectors.domain_ct_collector.DomainCTCollector",
       "omnisint.collectors.github_collector",
       "omnisint.collectors.github_collector.GitHubCollector",
+      "omnisint.collectors.scrapling_collector",
+      "omnisint.collectors.scrapling_collector.ScrapedPageData",
+      "omnisint.collectors.scrapling_collector.ExtractedProfileMetadata",
+      "omnisint.collectors.scrapling_collector.detect_access_gate",
+      "omnisint.collectors.scrapling_collector._StdlibMetaParser",
+      "omnisint.collectors.scrapling_collector._extract_raw_html_fields",
+      "omnisint.collectors.scrapling_collector.extract_html_canonical_and_og_url",
+      "omnisint.collectors.scrapling_collector._infer_platform_from_url",
+      "omnisint.collectors.scrapling_collector._parse_human_count",
+      "omnisint.collectors.scrapling_collector._extract_metric_count",
+      "omnisint.collectors.scrapling_collector._clean_display_title",
+      "omnisint.collectors.scrapling_collector._dedupe_preserve_order",
+      "omnisint.collectors.scrapling_collector._flatten_json_ld_objects",
+      "omnisint.collectors.scrapling_collector._extract_location_string",
+      "omnisint.collectors.scrapling_collector._is_valid_external_url",
+      "omnisint.collectors.scrapling_collector.parse_public_profile_html",
+      "omnisint.collectors.scrapling_collector._extract_scrapling_response",
+      "omnisint.collectors.scrapling_collector._run_scrapling_static",
+      "omnisint.collectors.scrapling_collector._run_scrapling_dynamic",
+      "omnisint.collectors.scrapling_collector._extract_handle_from_url",
+      "omnisint.collectors.scrapling_collector.ScraplingCollector",
       "omnisint.collectors.search_dork_collector",
       "omnisint.collectors.search_dork_collector.generate_dork_queries",
       "omnisint.collectors.search_dork_collector.SearchDorkCollector",
@@ -125,7 +148,11 @@
       "omnisint.collectors.threat_intel.ThreatIntelCollector",
       "omnisint.collectors.username_collector",
       "omnisint.collectors.username_collector.PlatformSpec",
+      "omnisint.collectors.username_collector._load_json_mapping",
+      "omnisint.collectors.username_collector._format_handle_url",
+      "omnisint.collectors.username_collector._url_matches_error_url",
       "omnisint.collectors.username_collector.load_whatsmyname_specs",
+      "omnisint.collectors.username_collector.load_sherlock_specs",
       "omnisint.collectors.username_collector.UsernameCollector"
     ],
     "config": [
@@ -278,6 +305,8 @@
       "tests.test_models_and_custody.TestModelsAndCustody",
       "tests.test_orchestrator_and_reporting",
       "tests.test_orchestrator_and_reporting.TestOrchestratorAndReporting",
+      "tests.test_scrapling_and_sherlock",
+      "tests.test_scrapling_and_sherlock.TestScraplingAndSherlock",
       "tests.test_storage",
       "tests.test_storage.TestCaseStorage"
     ]
@@ -495,7 +524,7 @@
       "id": "omnisint.cli.main.build_demo_collision_case",
       "type": "function",
       "file": "omnisint/cli/main.py",
-      "line": 31,
+      "line": 39,
       "community": "cli",
       "docstring": "Construct and analyze a realistic offline OSINT collision scenario separating distinct personas."
     },
@@ -503,7 +532,7 @@
       "id": "omnisint.cli.main._resolve_db_path",
       "type": "function",
       "file": "omnisint/cli/main.py",
-      "line": 174,
+      "line": 182,
       "community": "cli",
       "docstring": ""
     },
@@ -511,7 +540,7 @@
       "id": "omnisint.cli.main.app",
       "type": "function",
       "file": "omnisint/cli/main.py",
-      "line": 179,
+      "line": 187,
       "community": "cli",
       "docstring": "OmniSINT top-level CLI group."
     },
@@ -519,23 +548,39 @@
       "id": "omnisint.cli.main.cmd_demo",
       "type": "function",
       "file": "omnisint/cli/main.py",
-      "line": 187,
+      "line": 195,
       "community": "cli",
       "docstring": "Run an offline colliding-namesake disambiguation demonstration."
+    },
+    {
+      "id": "omnisint.cli.main._build_platform_specs",
+      "type": "function",
+      "file": "omnisint/cli/main.py",
+      "line": 221,
+      "community": "cli",
+      "docstring": "Combine built-in JSON platform specs with optional Sherlock/WhatsMyName registries."
     },
     {
       "id": "omnisint.cli.main.cmd_scan",
       "type": "function",
       "file": "omnisint/cli/main.py",
-      "line": 218,
+      "line": 282,
       "community": "cli",
       "docstring": "Execute a multi-collector OSINT scan and resolve persona hierarchy trees."
+    },
+    {
+      "id": "omnisint.cli.main.cmd_scrape",
+      "type": "function",
+      "file": "omnisint/cli/main.py",
+      "line": 329,
+      "community": "cli",
+      "docstring": "Scrape a public URL or username profile via Scrapling and persist SHA-256 evidence."
     },
     {
       "id": "omnisint.cli.main.case_group",
       "type": "function",
       "file": "omnisint/cli/main.py",
-      "line": 240,
+      "line": 392,
       "community": "cli",
       "docstring": "Inspect and verify persisted investigation Cases."
     },
@@ -543,7 +588,7 @@
       "id": "omnisint.cli.main.cmd_case_list",
       "type": "function",
       "file": "omnisint/cli/main.py",
-      "line": 246,
+      "line": 398,
       "community": "cli",
       "docstring": "List all Cases stored in SQLite."
     },
@@ -551,7 +596,7 @@
       "id": "omnisint.cli.main.cmd_case_show",
       "type": "function",
       "file": "omnisint/cli/main.py",
-      "line": 268,
+      "line": 420,
       "community": "cli",
       "docstring": "Show details, hierarchy trees, and brief for CASE_ID."
     },
@@ -559,7 +604,7 @@
       "id": "omnisint.cli.main.cmd_case_verify",
       "type": "function",
       "file": "omnisint/cli/main.py",
-      "line": 292,
+      "line": 444,
       "community": "cli",
       "docstring": "Cryptographically verify the SHA-256 Chain of Custody for CASE_ID."
     },
@@ -567,7 +612,7 @@
       "id": "omnisint.cli.main.cmd_pivot",
       "type": "function",
       "file": "omnisint/cli/main.py",
-      "line": 323,
+      "line": 475,
       "community": "cli",
       "docstring": "Pivot on NODE_ID inside CASE_ID and re-resolve persona clusters."
     },
@@ -575,7 +620,7 @@
       "id": "omnisint.cli.main.cmd_report",
       "type": "function",
       "file": "omnisint/cli/main.py",
-      "line": 354,
+      "line": 506,
       "community": "cli",
       "docstring": "Export CASE_ID as a Markdown investigative dossier or STIX 2.1 JSON bundle."
     },
@@ -583,7 +628,7 @@
       "id": "omnisint.cli.main.cmd_tui",
       "type": "function",
       "file": "omnisint/cli/main.py",
-      "line": 383,
+      "line": 535,
       "community": "cli",
       "docstring": "Launch the interactive OmniSINT terminal dashboard."
     },
@@ -591,7 +636,7 @@
       "id": "omnisint.cli.main.cmd_serve",
       "type": "function",
       "file": "omnisint/cli/main.py",
-      "line": 407,
+      "line": 559,
       "community": "cli",
       "docstring": "Start the OmniSINT Web GUI & REST API server."
     },
@@ -599,7 +644,7 @@
       "id": "omnisint.cli.main.run_cli",
       "type": "function",
       "file": "omnisint/cli/main.py",
-      "line": 420,
+      "line": 572,
       "community": "cli",
       "docstring": "Invoke the OmniSINT CLI programmatically and return `(exit_code, output)`."
     },
@@ -648,7 +693,7 @@
       "id": "omnisint.collectors.create_default_registry",
       "type": "function",
       "file": "omnisint/collectors/__init__.py",
-      "line": 27,
+      "line": 37,
       "community": "collectors",
       "docstring": "Create a CollectorRegistry pre-populated with all OmniSINT passive collectors."
     },
@@ -697,7 +742,7 @@
       "id": "omnisint.collectors.base.BaseCollector",
       "type": "class",
       "file": "omnisint/collectors/base.py",
-      "line": 153,
+      "line": 157,
       "community": "collectors",
       "methods": [
         "__init__",
@@ -705,6 +750,7 @@
         "_respect_rate_limit",
         "_normalize_transport_output",
         "fetch_with_custody",
+        "_fetch_with_custody_full",
         "fetch_bytes",
         "_record_custody_item",
         "collect"
@@ -715,7 +761,7 @@
       "id": "omnisint.collectors.base.CollectorRegistry",
       "type": "class",
       "file": "omnisint/collectors/base.py",
-      "line": 400,
+      "line": 428,
       "community": "collectors",
       "methods": [
         "__init__",
@@ -768,6 +814,186 @@
         "collect"
       ],
       "docstring": "Collects GitHub profile metadata, repositories, commit emails/timestamps, and SSH/PGP keys."
+    },
+    {
+      "id": "omnisint.collectors.scrapling_collector",
+      "type": "module",
+      "file": "omnisint/collectors/scrapling_collector.py",
+      "community": "collectors",
+      "docstring": "Compliant Scrapling-powered public page & JS-rendered profile collector."
+    },
+    {
+      "id": "omnisint.collectors.scrapling_collector.ScrapedPageData",
+      "type": "class",
+      "file": "omnisint/collectors/scrapling_collector.py",
+      "line": 126,
+      "community": "collectors",
+      "methods": [],
+      "docstring": "Normalized HTTP or headless browser response captured by ScraplingCollector."
+    },
+    {
+      "id": "omnisint.collectors.scrapling_collector.ExtractedProfileMetadata",
+      "type": "class",
+      "file": "omnisint/collectors/scrapling_collector.py",
+      "line": 139,
+      "community": "collectors",
+      "methods": [],
+      "docstring": "Structured OSINT profile metadata parsed from public HTML."
+    },
+    {
+      "id": "omnisint.collectors.scrapling_collector.detect_access_gate",
+      "type": "function",
+      "file": "omnisint/collectors/scrapling_collector.py",
+      "line": 164,
+      "community": "collectors",
+      "docstring": "Detect HTTP rate limits, auth walls, login redirects, and CAPTCHA gates without bypassing them."
+    },
+    {
+      "id": "omnisint.collectors.scrapling_collector._StdlibMetaParser",
+      "type": "class",
+      "file": "omnisint/collectors/scrapling_collector.py",
+      "line": 186,
+      "community": "collectors",
+      "methods": [
+        "__init__",
+        "handle_starttag",
+        "handle_endtag",
+        "handle_data"
+      ],
+      "docstring": "Stdlib HTMLParser extracting title, meta tags, canonical link, JSON-LD blocks, and anchors."
+    },
+    {
+      "id": "omnisint.collectors.scrapling_collector._extract_raw_html_fields",
+      "type": "function",
+      "file": "omnisint/collectors/scrapling_collector.py",
+      "line": 243,
+      "community": "collectors",
+      "docstring": "Parse raw HTML into `(title, meta_map, canonical_url, json_ld_raw, links)`."
+    },
+    {
+      "id": "omnisint.collectors.scrapling_collector.extract_html_canonical_and_og_url",
+      "type": "function",
+      "file": "omnisint/collectors/scrapling_collector.py",
+      "line": 274,
+      "community": "collectors",
+      "docstring": "Return `(canonical_url, og_url)` from raw HTML for soft redirect detection."
+    },
+    {
+      "id": "omnisint.collectors.scrapling_collector._infer_platform_from_url",
+      "type": "function",
+      "file": "omnisint/collectors/scrapling_collector.py",
+      "line": 286,
+      "community": "collectors",
+      "docstring": "Determine a normalized platform name from URL host or OpenGraph site_name."
+    },
+    {
+      "id": "omnisint.collectors.scrapling_collector._parse_human_count",
+      "type": "function",
+      "file": "omnisint/collectors/scrapling_collector.py",
+      "line": 299,
+      "community": "collectors",
+      "docstring": "Convert numeric tokens like '1,234', '12.5K', or '1.2M' into integer counts."
+    },
+    {
+      "id": "omnisint.collectors.scrapling_collector._extract_metric_count",
+      "type": "function",
+      "file": "omnisint/collectors/scrapling_collector.py",
+      "line": 310,
+      "community": "collectors",
+      "docstring": "Search candidate descriptions for social counts like Followers / Following / Posts."
+    },
+    {
+      "id": "omnisint.collectors.scrapling_collector._clean_display_title",
+      "type": "function",
+      "file": "omnisint/collectors/scrapling_collector.py",
+      "line": 322,
+      "community": "collectors",
+      "docstring": "Strip common platform branding suffixes from `<title>` / `og:title` values."
+    },
+    {
+      "id": "omnisint.collectors.scrapling_collector._dedupe_preserve_order",
+      "type": "function",
+      "file": "omnisint/collectors/scrapling_collector.py",
+      "line": 331,
+      "community": "collectors",
+      "docstring": "Deduplicate strings case-insensitively while preserving first-seen order."
+    },
+    {
+      "id": "omnisint.collectors.scrapling_collector._flatten_json_ld_objects",
+      "type": "function",
+      "file": "omnisint/collectors/scrapling_collector.py",
+      "line": 347,
+      "community": "collectors",
+      "docstring": "Parse JSON-LD script blocks into a flat list of dictionary nodes."
+    },
+    {
+      "id": "omnisint.collectors.scrapling_collector._extract_location_string",
+      "type": "function",
+      "file": "omnisint/collectors/scrapling_collector.py",
+      "line": 371,
+      "community": "collectors",
+      "docstring": "Convert schema.org `address` or `location` objects into a readable location string."
+    },
+    {
+      "id": "omnisint.collectors.scrapling_collector._is_valid_external_url",
+      "type": "function",
+      "file": "omnisint/collectors/scrapling_collector.py",
+      "line": 389,
+      "community": "collectors",
+      "docstring": "Keep public http(s) URLs that are distinct from `page_url` and not auth/share noise."
+    },
+    {
+      "id": "omnisint.collectors.scrapling_collector.parse_public_profile_html",
+      "type": "function",
+      "file": "omnisint/collectors/scrapling_collector.py",
+      "line": 400,
+      "community": "collectors",
+      "docstring": "Extract OpenGraph, Twitter Card, JSON-LD, links, @mentions, #hashtags, emails & counts from public HTML."
+    },
+    {
+      "id": "omnisint.collectors.scrapling_collector._extract_scrapling_response",
+      "type": "function",
+      "file": "omnisint/collectors/scrapling_collector.py",
+      "line": 524,
+      "community": "collectors",
+      "docstring": "Normalize a Scrapling Response object into ScrapedPageData."
+    },
+    {
+      "id": "omnisint.collectors.scrapling_collector._run_scrapling_static",
+      "type": "function",
+      "file": "omnisint/collectors/scrapling_collector.py",
+      "line": 552,
+      "community": "collectors",
+      "docstring": ""
+    },
+    {
+      "id": "omnisint.collectors.scrapling_collector._run_scrapling_dynamic",
+      "type": "function",
+      "file": "omnisint/collectors/scrapling_collector.py",
+      "line": 558,
+      "community": "collectors",
+      "docstring": ""
+    },
+    {
+      "id": "omnisint.collectors.scrapling_collector._extract_handle_from_url",
+      "type": "function",
+      "file": "omnisint/collectors/scrapling_collector.py",
+      "line": 568,
+      "community": "collectors",
+      "docstring": "Best-effort handle/slug extraction from the terminal path segment of a profile URL."
+    },
+    {
+      "id": "omnisint.collectors.scrapling_collector.ScraplingCollector",
+      "type": "class",
+      "file": "omnisint/collectors/scrapling_collector.py",
+      "line": 577,
+      "community": "collectors",
+      "methods": [
+        "__init__",
+        "_fetch_page",
+        "collect"
+      ],
+      "docstring": "Collects public profile & OpenGraph/JSON-LD metadata using Scrapling (or stdlib HTTP fallback)."
     },
     {
       "id": "omnisint.collectors.search_dork_collector",
@@ -827,24 +1053,56 @@
       "id": "omnisint.collectors.username_collector.PlatformSpec",
       "type": "class",
       "file": "omnisint/collectors/username_collector.py",
-      "line": 28,
+      "line": 34,
       "community": "collectors",
       "methods": [],
-      "docstring": "Definition of a passive platform check for UsernameCollector (WhatsMyName compatible)."
+      "docstring": "Definition of a passive platform check for UsernameCollector (WhatsMyName & Sherlock compatible)."
+    },
+    {
+      "id": "omnisint.collectors.username_collector._load_json_mapping",
+      "type": "function",
+      "file": "omnisint/collectors/username_collector.py",
+      "line": 53,
+      "community": "collectors",
+      "docstring": "Load a JSON dictionary from an in-memory dict, JSON string, or file path."
+    },
+    {
+      "id": "omnisint.collectors.username_collector._format_handle_url",
+      "type": "function",
+      "file": "omnisint/collectors/username_collector.py",
+      "line": 65,
+      "community": "collectors",
+      "docstring": "Substitute `{handle}` or `{}` placeholders safely without failing on unrelated braces."
+    },
+    {
+      "id": "omnisint.collectors.username_collector._url_matches_error_url",
+      "type": "function",
+      "file": "omnisint/collectors/username_collector.py",
+      "line": 70,
+      "community": "collectors",
+      "docstring": "Return True when a redirect/canonical URL matches a Sherlock `errorUrl` indicator."
     },
     {
       "id": "omnisint.collectors.username_collector.load_whatsmyname_specs",
       "type": "function",
       "file": "omnisint/collectors/username_collector.py",
-      "line": 43,
+      "line": 86,
       "community": "collectors",
       "docstring": "Load PlatformSpec entries from a WhatsMyName JSON file path, JSON string, or parsed dictionary."
+    },
+    {
+      "id": "omnisint.collectors.username_collector.load_sherlock_specs",
+      "type": "function",
+      "file": "omnisint/collectors/username_collector.py",
+      "line": 123,
+      "community": "collectors",
+      "docstring": "Load PlatformSpec entries from a Sherlock `data.json` path, JSON string, or parsed dictionary."
     },
     {
       "id": "omnisint.collectors.username_collector.UsernameCollector",
       "type": "class",
       "file": "omnisint/collectors/username_collector.py",
-      "line": 120,
+      "line": 222,
       "community": "collectors",
       "methods": [
         "__init__",
@@ -2178,6 +2436,30 @@
       "docstring": "End-to-end offline tests for ScanOrchestrator multi-hop pivoting and Markdown/STIX 2.1 export."
     },
     {
+      "id": "tests.test_scrapling_and_sherlock",
+      "type": "module",
+      "file": "tests/test_scrapling_and_sherlock.py",
+      "community": "tests",
+      "docstring": "Offline deterministic tests for Sherlock data.json support and ScraplingCollector."
+    },
+    {
+      "id": "tests.test_scrapling_and_sherlock.TestScraplingAndSherlock",
+      "type": "class",
+      "file": "tests/test_scrapling_and_sherlock.py",
+      "line": 71,
+      "community": "tests",
+      "methods": [
+        "test_load_sherlock_specs_handles_schema_and_all_error_types",
+        "test_username_collector_executes_sherlock_specs_accurately",
+        "test_parse_public_profile_html_extracts_rich_social_metadata",
+        "test_detect_access_gate_and_verify_no_stealth_bypass_code",
+        "test_scrapling_collector_url_and_gated_handling",
+        "test_scrapling_collector_username_mode_partial_success",
+        "test_registry_default_backward_compatibility_and_cli_help"
+      ],
+      "docstring": "Deterministic offline tests covering Sherlock data.json parsing and Scrapling integration."
+    },
+    {
       "id": "tests.test_storage",
       "type": "module",
       "file": "tests/test_storage.py",
@@ -2578,6 +2860,11 @@
     },
     {
       "source": "omnisint.cli.main",
+      "target": "omnisint.collectors",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.cli.main",
       "target": "omnisint.config",
       "relation": "imports"
     },
@@ -2698,6 +2985,11 @@
     },
     {
       "source": "omnisint.cli.main",
+      "target": "omnisint.cli.main._build_platform_specs",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.cli.main",
       "target": "omnisint.cli.main.cmd_scan",
       "relation": "defines"
     },
@@ -2708,7 +3000,17 @@
     },
     {
       "source": "omnisint.cli.main.cmd_scan",
+      "target": "omnisint.cli.main._build_platform_specs",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_scan",
       "target": "omnisint.core.storage.CaseStorage",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_scan",
+      "target": "omnisint.collectors.create_default_registry",
       "relation": "calls"
     },
     {
@@ -2719,6 +3021,36 @@
     {
       "source": "omnisint.cli.main.cmd_scan",
       "target": "omnisint.intelligence.graph_engine.render_hierarchy_ascii",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main",
+      "target": "omnisint.cli.main.cmd_scrape",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_scrape",
+      "target": "omnisint.cli.main._resolve_db_path",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_scrape",
+      "target": "omnisint.core.storage.CaseStorage",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_scrape",
+      "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_scrape",
+      "target": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.cli.main.cmd_scrape",
+      "target": "omnisint.intelligence.ai_analyst.AIAnalyst",
       "relation": "calls"
     },
     {
@@ -2918,6 +3250,11 @@
     },
     {
       "source": "omnisint.collectors",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors",
       "target": "omnisint.collectors.base",
       "relation": "imports"
     },
@@ -2929,6 +3266,11 @@
     {
       "source": "omnisint.collectors",
       "target": "omnisint.collectors.github_collector",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors",
+      "target": "omnisint.collectors.scrapling_collector",
       "relation": "imports"
     },
     {
@@ -2984,6 +3326,11 @@
     {
       "source": "omnisint.collectors.create_default_registry",
       "target": "omnisint.collectors.search_dork_collector.SearchDorkCollector",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.create_default_registry",
+      "target": "omnisint.collectors.scrapling_collector.ScraplingCollector",
       "relation": "calls"
     },
     {
@@ -3302,6 +3649,346 @@
       "relation": "calls"
     },
     {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "asyncio",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "json",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "re",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "urllib.parse",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "collections.abc",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "html.parser",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "pydantic",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.collectors.base",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.config",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.core.custody",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.core.storage",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.intelligence.entropy",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.intelligence.similarity",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.collectors.scrapling_collector.ScrapedPageData",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.ScrapedPageData",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.collectors.scrapling_collector.ExtractedProfileMetadata",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.ExtractedProfileMetadata",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.collectors.scrapling_collector.detect_access_gate",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.collectors.scrapling_collector._StdlibMetaParser",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector._StdlibMetaParser",
+      "target": "HTMLParser",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.collectors.scrapling_collector._extract_raw_html_fields",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector._extract_raw_html_fields",
+      "target": "omnisint.collectors.scrapling_collector._StdlibMetaParser",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.collectors.scrapling_collector.extract_html_canonical_and_og_url",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.extract_html_canonical_and_og_url",
+      "target": "omnisint.collectors.scrapling_collector._extract_raw_html_fields",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.collectors.scrapling_collector._infer_platform_from_url",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.collectors.scrapling_collector._parse_human_count",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.collectors.scrapling_collector._extract_metric_count",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector._extract_metric_count",
+      "target": "omnisint.collectors.scrapling_collector._parse_human_count",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.collectors.scrapling_collector._clean_display_title",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.collectors.scrapling_collector._dedupe_preserve_order",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.collectors.scrapling_collector._flatten_json_ld_objects",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.collectors.scrapling_collector._extract_location_string",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.collectors.scrapling_collector._is_valid_external_url",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.collectors.scrapling_collector.parse_public_profile_html",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.parse_public_profile_html",
+      "target": "omnisint.collectors.scrapling_collector._extract_raw_html_fields",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.parse_public_profile_html",
+      "target": "omnisint.collectors.scrapling_collector._infer_platform_from_url",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.parse_public_profile_html",
+      "target": "omnisint.collectors.scrapling_collector._flatten_json_ld_objects",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.parse_public_profile_html",
+      "target": "omnisint.collectors.scrapling_collector._dedupe_preserve_order",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.parse_public_profile_html",
+      "target": "omnisint.collectors.scrapling_collector.ExtractedProfileMetadata",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.parse_public_profile_html",
+      "target": "omnisint.collectors.scrapling_collector._clean_display_title",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.parse_public_profile_html",
+      "target": "omnisint.collectors.scrapling_collector._is_valid_external_url",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.parse_public_profile_html",
+      "target": "omnisint.collectors.scrapling_collector._extract_metric_count",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.parse_public_profile_html",
+      "target": "omnisint.collectors.scrapling_collector._extract_location_string",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.collectors.scrapling_collector._extract_scrapling_response",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector._extract_scrapling_response",
+      "target": "omnisint.collectors.scrapling_collector.ScrapedPageData",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector._extract_scrapling_response",
+      "target": "omnisint.collectors.scrapling_collector.detect_access_gate",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.collectors.scrapling_collector._run_scrapling_static",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector._run_scrapling_static",
+      "target": "omnisint.collectors.scrapling_collector._extract_scrapling_response",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.collectors.scrapling_collector._run_scrapling_dynamic",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector._run_scrapling_dynamic",
+      "target": "omnisint.collectors.scrapling_collector._extract_scrapling_response",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.collectors.scrapling_collector._extract_handle_from_url",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector",
+      "target": "omnisint.collectors.scrapling_collector.ScraplingCollector",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.ScraplingCollector",
+      "target": "BaseCollector",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.ScraplingCollector",
+      "target": "omnisint.collectors.scrapling_collector.ScrapedPageData",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.ScraplingCollector",
+      "target": "omnisint.core.models.CollectorResult",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.ScraplingCollector",
+      "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.ScraplingCollector",
+      "target": "omnisint.intelligence.entropy.analyze_handle_entropy",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.ScraplingCollector",
+      "target": "omnisint.core.models.EntityNode",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.ScraplingCollector",
+      "target": "omnisint.collectors.base.redact_sensitive_url",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.ScraplingCollector",
+      "target": "omnisint.collectors.scrapling_collector.detect_access_gate",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.ScraplingCollector",
+      "target": "omnisint.collectors.scrapling_collector.parse_public_profile_html",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.ScraplingCollector",
+      "target": "omnisint.collectors.scrapling_collector._infer_platform_from_url",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.ScraplingCollector",
+      "target": "omnisint.intelligence.similarity.compute_dhash_from_bytes",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.ScraplingCollector",
+      "target": "omnisint.core.models.RelationshipEdge",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.scrapling_collector.ScraplingCollector",
+      "target": "omnisint.collectors.scrapling_collector._extract_handle_from_url",
+      "relation": "calls"
+    },
+    {
       "source": "omnisint.collectors.search_dork_collector",
       "target": "__future__",
       "relation": "imports"
@@ -3478,6 +4165,16 @@
     },
     {
       "source": "omnisint.collectors.username_collector",
+      "target": "re",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "urllib.parse",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
       "target": "pathlib",
       "relation": "imports"
     },
@@ -3494,6 +4191,11 @@
     {
       "source": "omnisint.collectors.username_collector",
       "target": "omnisint.collectors.base",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "omnisint.collectors.scrapling_collector",
       "relation": "imports"
     },
     {
@@ -3538,11 +4240,46 @@
     },
     {
       "source": "omnisint.collectors.username_collector",
+      "target": "omnisint.collectors.username_collector._load_json_mapping",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "omnisint.collectors.username_collector._format_handle_url",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "omnisint.collectors.username_collector._url_matches_error_url",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
       "target": "omnisint.collectors.username_collector.load_whatsmyname_specs",
       "relation": "defines"
     },
     {
       "source": "omnisint.collectors.username_collector.load_whatsmyname_specs",
+      "target": "omnisint.collectors.username_collector._load_json_mapping",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.username_collector.load_whatsmyname_specs",
+      "target": "omnisint.collectors.username_collector.PlatformSpec",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "omnisint.collectors.username_collector.load_sherlock_specs",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.username_collector.load_sherlock_specs",
+      "target": "omnisint.collectors.username_collector._load_json_mapping",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.username_collector.load_sherlock_specs",
       "target": "omnisint.collectors.username_collector.PlatformSpec",
       "relation": "calls"
     },
@@ -3573,7 +4310,17 @@
     },
     {
       "source": "omnisint.collectors.username_collector.UsernameCollector",
+      "target": "omnisint.collectors.username_collector._format_handle_url",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.username_collector.UsernameCollector",
       "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.username_collector.UsernameCollector",
+      "target": "omnisint.collectors.scrapling_collector.parse_public_profile_html",
       "relation": "calls"
     },
     {
@@ -3583,7 +4330,17 @@
     },
     {
       "source": "omnisint.collectors.username_collector.UsernameCollector",
+      "target": "omnisint.collectors.scrapling_collector.extract_html_canonical_and_og_url",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.username_collector.UsernameCollector",
       "target": "omnisint.intelligence.similarity.compute_dhash_from_bytes",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.username_collector.UsernameCollector",
+      "target": "omnisint.collectors.username_collector._url_matches_error_url",
       "relation": "calls"
     },
     {
@@ -6244,6 +7001,86 @@
     {
       "source": "tests.test_orchestrator_and_reporting.TestOrchestratorAndReporting",
       "target": "omnisint.core.custody.CustodySigner",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_scrapling_and_sherlock",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_scrapling_and_sherlock",
+      "target": "ast",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_scrapling_and_sherlock",
+      "target": "json",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_scrapling_and_sherlock",
+      "target": "tempfile",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_scrapling_and_sherlock",
+      "target": "unittest",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_scrapling_and_sherlock",
+      "target": "pathlib",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_scrapling_and_sherlock",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_scrapling_and_sherlock",
+      "target": "omnisint.cli.main",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_scrapling_and_sherlock",
+      "target": "omnisint.collectors",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_scrapling_and_sherlock",
+      "target": "omnisint.core.custody",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_scrapling_and_sherlock",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_scrapling_and_sherlock",
+      "target": "tests.test_scrapling_and_sherlock.TestScraplingAndSherlock",
+      "relation": "defines"
+    },
+    {
+      "source": "tests.test_scrapling_and_sherlock.TestScraplingAndSherlock",
+      "target": "unittest.IsolatedAsyncioTestCase",
+      "relation": "inherits"
+    },
+    {
+      "source": "tests.test_scrapling_and_sherlock.TestScraplingAndSherlock",
+      "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_scrapling_and_sherlock.TestScraplingAndSherlock",
+      "target": "omnisint.cli.main.run_cli",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_scrapling_and_sherlock.TestScraplingAndSherlock",
+      "target": "omnisint.collectors.create_default_registry",
       "relation": "calls"
     },
     {
