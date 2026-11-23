@@ -4,11 +4,10 @@ from __future__ import annotations
 
 import asyncio
 import ipaddress
-from typing import Any, Awaitable, Callable, Sequence
+from typing import TYPE_CHECKING, Any, Awaitable, Callable, Sequence
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from omnisint.collectors import CollectorRegistry, create_default_registry
 from omnisint.core.custody import CustodyLedger
 from omnisint.core.models import (
     AuditLogEntry,
@@ -22,6 +21,9 @@ from omnisint.core.models import (
 from omnisint.core.storage import CaseStorage
 from omnisint.intelligence.ai_analyst import AIAnalysisReport, AIAnalyst
 from omnisint.intelligence.graph_engine import KnowledgeGraphEngine
+
+if TYPE_CHECKING:  # pragma: no cover
+    from omnisint.collectors.base import CollectorRegistry
 
 
 class ScanProgressEvent(BaseModel):
@@ -72,6 +74,8 @@ def infer_entity_type(query: str) -> EntityType:
         return EntityType.EMAIL
     if "." in cleaned and " " not in cleaned and not cleaned.startswith("@"):
         return EntityType.DOMAIN
+    if " " in cleaned and not cleaned.startswith("@"):
+        return EntityType.PERSON
     return EntityType.USERNAME
 
 
@@ -87,7 +91,12 @@ class ScanOrchestrator:
         progress_callback: ProgressCallback | None = None,
     ) -> None:
         self.storage = storage
-        self.registry = registry or create_default_registry()
+        if registry is not None:
+            self.registry = registry
+        else:
+            from omnisint.collectors import create_default_registry
+
+            self.registry = create_default_registry()
         self.graph_engine = graph_engine or KnowledgeGraphEngine()
         self.ai_analyst = ai_analyst or AIAnalyst()
         self.progress_callback = progress_callback
@@ -114,11 +123,13 @@ class ScanOrchestrator:
                     selected.append(c)
             return selected
 
-        if entity_type == EntityType.SOCIAL_PROFILE:
-            by_profile = {c.name: c for c in self.registry.get_for_entity_type(EntityType.SOCIAL_PROFILE)}
+        if entity_type in (EntityType.SOCIAL_PROFILE, EntityType.PERSON):
+            by_type = {c.name: c for c in self.registry.get_for_entity_type(entity_type)}
             for c in self.registry.get_for_entity_type(EntityType.USERNAME):
-                by_profile.setdefault(c.name, c)
-            return [by_profile[k] for k in sorted(by_profile.keys())]
+                if entity_type == EntityType.PERSON and c.name == "scrapling_collector":
+                    continue
+                by_type.setdefault(c.name, c)
+            return [by_type[k] for k in sorted(by_type.keys())]
 
         return self.registry.get_for_entity_type(entity_type)
 
@@ -246,7 +257,10 @@ class ScanOrchestrator:
 
         await self.storage.update_case_status(case.case_id, CaseStatus.ANALYZING)
 
-        pivoted_keys: set[tuple[EntityType, str]] = {(seed_type, cleaned.lower())}
+        pivoted_keys: set[tuple[EntityType, str]] = {
+            (seed_type, cleaned.lower()),
+            (EntityType.USERNAME, cleaned.lstrip("@").lower()),
+        }
         frontier: list[tuple[str, EntityType]] = [(cleaned, seed_type)]
 
         for hop in range(1, max(1, max_hops) + 1):
@@ -271,7 +285,7 @@ class ScanOrchestrator:
             if hop >= max_hops:
                 break
 
-            # Build next-hop pivot frontier from newly discovered domains & IPs
+            # Build next-hop pivot frontier from newly discovered domains, IPs, emails & usernames
             refreshed = await self.storage.get_case(case.case_id)
             if refreshed is None:
                 break
@@ -290,6 +304,23 @@ class ScanOrchestrator:
                         if key not in pivoted_keys:
                             pivoted_keys.add(key)
                             next_frontier.append((dom_part, EntityType.DOMAIN))
+                elif node.entity_type == EntityType.USERNAME:
+                    uname = node.value.strip().lstrip("@")
+                    if uname and " " not in uname:
+                        key = (EntityType.USERNAME, uname.lower())
+                        if key not in pivoted_keys:
+                            pivoted_keys.add(key)
+                            next_frontier.append((uname, EntityType.USERNAME))
+                elif (
+                    node.entity_type == EntityType.SOCIAL_PROFILE
+                    and (node.platform or "").strip().lower() == "github"
+                ):
+                    uname = node.value.strip().lstrip("@")
+                    if uname and " " not in uname:
+                        key = (EntityType.USERNAME, uname.lower())
+                        if key not in pivoted_keys:
+                            pivoted_keys.add(key)
+                            next_frontier.append((uname, EntityType.USERNAME))
             frontier = next_frontier[:10]
 
         return await self._finalize_intelligence(

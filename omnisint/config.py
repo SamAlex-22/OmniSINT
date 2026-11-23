@@ -27,7 +27,7 @@ class OmniSINTSettings(BaseModel):
         gt=0.0,
     )
     max_concurrent_requests: int = Field(
-        default_factory=lambda: int(os.getenv("OMNISINT_MAX_CONCURRENT_REQUESTS", "10")),
+        default_factory=lambda: int(os.getenv("OMNISINT_MAX_CONCURRENT_REQUESTS", "12")),
         ge=1,
         le=100,
     )

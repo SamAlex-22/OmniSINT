@@ -43,13 +43,25 @@ from omnisint.intelligence.entropy import analyze_handle_entropy
 from omnisint.intelligence.similarity import compute_dhash_from_bytes
 
 try:
-    from scrapling.fetchers import DynamicFetcher, Fetcher  # type: ignore[import-untyped]
+    from scrapling.fetchers import Fetcher  # type: ignore[import-untyped]
 
     HAS_SCRAPLING_FETCHERS = True
 except ImportError:  # pragma: no cover
-    DynamicFetcher = None
     Fetcher = None
     HAS_SCRAPLING_FETCHERS = False
+
+try:
+    from scrapling.fetchers import DynamicFetcher  # type: ignore[import-untyped]
+except ImportError:  # pragma: no cover
+    DynamicFetcher = None
+
+try:
+    from playwright.async_api import async_playwright  # type: ignore[import-untyped]
+
+    HAS_PLAYWRIGHT = True
+except ImportError:  # pragma: no cover
+    async_playwright = None
+    HAS_PLAYWRIGHT = False
 
 try:
     from scrapling.parser import Selector  # type: ignore[import-untyped]
@@ -565,6 +577,33 @@ def _run_scrapling_dynamic(url: str, timeout_seconds: float) -> ScrapedPageData:
     return _extract_scrapling_response(page, url, "scrapling_dynamic")
 
 
+async def _run_playwright_dynamic(
+    url: str,
+    timeout_seconds: float,
+    user_agent: str,
+) -> ScrapedPageData:  # pragma: no cover
+    assert async_playwright is not None
+    timeout_ms = int(max(1000.0, timeout_seconds * 1000.0))
+    async with async_playwright() as pw:
+        browser = await pw.chromium.launch(headless=True)
+        try:
+            page = await browser.new_page(user_agent=user_agent)
+            resp = await page.goto(url, wait_until="domcontentloaded", timeout=timeout_ms)
+            status_code = int(resp.status) if resp is not None else 200
+            final_url = str(page.url or url)
+            html_str = await page.content()
+        finally:
+            await browser.close()
+    return ScrapedPageData(
+        url=url,
+        final_url=final_url,
+        status_code=status_code,
+        html=html_str,
+        fetcher_used="scrapling_dynamic",
+        blocked_reason=detect_access_gate(status_code, html_str, final_url),
+    )
+
+
 def _extract_handle_from_url(url: str) -> str:
     """Best-effort handle/slug extraction from the terminal path segment of a profile URL."""
     path = urllib.parse.urlsplit(url).path.strip("/")
@@ -615,9 +654,25 @@ class ScraplingCollector(BaseCollector):
                 return page.model_copy(update={"blocked_reason": detected})
             return page
 
-        if self.use_dynamic_browser and HAS_SCRAPLING_FETCHERS and DynamicFetcher is not None:  # pragma: no cover
-            await self._respect_rate_limit()
-            return await asyncio.to_thread(_run_scrapling_dynamic, url, self.config.timeout_seconds)
+        if self.use_dynamic_browser and not self._has_custom_transport:  # pragma: no cover
+            if DynamicFetcher is not None:
+                await self._respect_rate_limit()
+                return await asyncio.to_thread(_run_scrapling_dynamic, url, self.config.timeout_seconds)
+            if HAS_PLAYWRIGHT and async_playwright is not None:
+                await self._respect_rate_limit()
+                try:
+                    return await _run_playwright_dynamic(
+                        url,
+                        self.config.timeout_seconds,
+                        self.config.user_agent,
+                    )
+                except Exception:
+                    if HAS_SCRAPLING_FETCHERS and Fetcher is not None:
+                        return await asyncio.to_thread(
+                            _run_scrapling_static,
+                            url,
+                            self.config.timeout_seconds,
+                        )
 
         if HAS_SCRAPLING_FETCHERS and Fetcher is not None and not self._has_custom_transport:  # pragma: no cover
             await self._respect_rate_limit()

@@ -1,8 +1,8 @@
 # OmniSINT — Graphify Codebase Knowledge Report
 
-- **Generated (UTC):** `2026-11-23T11:39:54.885312+00:00`
-- **Total AST Nodes:** `234`
-- **Total Structural Edges:** `948`
+- **Generated (UTC):** `2026-11-23T12:11:42.874695+00:00`
+- **Total AST Nodes:** `240`
+- **Total Structural Edges:** `973`
 - **Architectural Communities:** `11`
 
 ## 1. High-Centrality 'God Nodes' (Core Abstractions)
@@ -10,12 +10,12 @@
 | :--- | :--- |
 | `omnisint.core.models` | 49 |
 | `omnisint.core.custody` | 39 |
-| `omnisint.collectors.scrapling_collector` | 38 |
+| `omnisint.collectors.scrapling_collector` | 39 |
 | `omnisint.cli.main` | 37 |
-| `omnisint.core.storage.CaseStorage` | 34 |
-| `omnisint.core.storage` | 33 |
+| `omnisint.core.storage` | 35 |
+| `omnisint.core.storage.CaseStorage` | 35 |
+| `omnisint.api.routes.cases` | 31 |
 | `omnisint.core.custody.CustodyLedger` | 30 |
-| `omnisint.api.routes.cases` | 29 |
 | `omnisint.collectors.base` | 28 |
 | `omnisint.intelligence.similarity` | 27 |
 | `omnisint.intelligence.graph_engine` | 26 |
@@ -70,7 +70,7 @@
 - **`omnisint.cli.tui.OmniSINTTUIDashboard`** (`class` in `omnisint/cli/tui.py`) — Stateful interactive terminal dashboard controller for OmniSINT Cases.
 - **`omnisint.cli.tui.launch_tui`** (`function` in `omnisint/cli/tui.py`) — Launch the Textual TUI when available & interactive, or return rendered dashboard text.
 
-### Community: `collectors` (47 nodes)
+### Community: `collectors` (53 nodes)
 - **`omnisint.collectors`** (`module` in `omnisint/collectors/__init__.py`) — Pluggable passive OSINT collectors and registry.
 - **`omnisint.collectors.create_default_registry`** (`function` in `omnisint/collectors/__init__.py`) — Create a CollectorRegistry pre-populated with all OmniSINT passive collectors.
 - **`omnisint.collectors.base`** (`module` in `omnisint/collectors/base.py`) — Abstract BaseCollector, rate-limiting, caching, proxy routing, secret redaction, custody integration, and CollectorRegistry.
@@ -103,11 +103,16 @@
 - **`omnisint.collectors.scrapling_collector._extract_scrapling_response`** (`function` in `omnisint/collectors/scrapling_collector.py`) — Normalize a Scrapling Response object into ScrapedPageData.
 - **`omnisint.collectors.scrapling_collector._run_scrapling_static`** (`function` in `omnisint/collectors/scrapling_collector.py`)
 - **`omnisint.collectors.scrapling_collector._run_scrapling_dynamic`** (`function` in `omnisint/collectors/scrapling_collector.py`)
+- **`omnisint.collectors.scrapling_collector._run_playwright_dynamic`** (`async_function` in `omnisint/collectors/scrapling_collector.py`)
 - **`omnisint.collectors.scrapling_collector._extract_handle_from_url`** (`function` in `omnisint/collectors/scrapling_collector.py`) — Best-effort handle/slug extraction from the terminal path segment of a profile URL.
 - **`omnisint.collectors.scrapling_collector.ScraplingCollector`** (`class` in `omnisint/collectors/scrapling_collector.py`) — Collects public profile & OpenGraph/JSON-LD metadata using Scrapling (or stdlib HTTP fallback).
-- **`omnisint.collectors.search_dork_collector`** (`module` in `omnisint/collectors/search_dork_collector.py`) — Pluggable search dork generator, Wayback Machine CDX archive & Google CSE collector.
-- **`omnisint.collectors.search_dork_collector.generate_dork_queries`** (`function` in `omnisint/collectors/search_dork_collector.py`) — Generate targeted passive OSINT search dork strings for a handle, email, or domain.
-- **`omnisint.collectors.search_dork_collector.SearchDorkCollector`** (`class` in `omnisint/collectors/search_dork_collector.py`) — Queries Wayback Machine CDX archives and optional Google CSE for historical & dorked mentions.
+- **`omnisint.collectors.search_dork_collector`** (`module` in `omnisint/collectors/search_dork_collector.py`) — Pluggable search dork generator, no-key web search, Wayback CDX archive & Google CSE collector.
+- **`omnisint.collectors.search_dork_collector.generate_dork_queries`** (`function` in `omnisint/collectors/search_dork_collector.py`) — Generate targeted passive OSINT search dork strings for a person name, handle, email, or domain.
+- **`omnisint.collectors.search_dork_collector.classify_social_profile_url`** (`function` in `omnisint/collectors/search_dork_collector.py`) — Classify a discovered URL into `(platform, handle)` for recognized social/code profiles.
+- **`omnisint.collectors.search_dork_collector._SearchEngineHtmlParser`** (`class` in `omnisint/collectors/search_dork_collector.py`) — Lightweight HTML parser extracting `<a href>` links and inner text for search results.
+- **`omnisint.collectors.search_dork_collector._unwrap_search_redirect`** (`function` in `omnisint/collectors/search_dork_collector.py`) — Decode DuckDuckGo `uddg=` and Yahoo `/RU=` redirect wrappers into clean target URLs.
+- **`omnisint.collectors.search_dork_collector.parse_search_engine_html`** (`function` in `omnisint/collectors/search_dork_collector.py`) — Extract deduplicated organic search hits from DuckDuckGo or Yahoo Search HTML.
+- **`omnisint.collectors.search_dork_collector.SearchDorkCollector`** (`class` in `omnisint/collectors/search_dork_collector.py`) — Queries GitHub User Search, no-key web search dorks, Wayback CDX & Google CSE.
 - **`omnisint.collectors.threat_intel`** (`module` in `omnisint/collectors/threat_intel.py`) — Passive Threat Intelligence collector (VirusTotal v3 & passive DNS/reputation indicators).
 - **`omnisint.collectors.threat_intel.ThreatIntelCollector`** (`class` in `omnisint/collectors/threat_intel.py`) — Collects VirusTotal reputation, threat indicators, and passive DNS infrastructure links.
 - **`omnisint.collectors.username_collector`** (`module` in `omnisint/collectors/username_collector.py`) — Passive multi-platform username discovery & profile/avatar collector (Sherlock-compatible).
@@ -117,6 +122,7 @@
 - **`omnisint.collectors.username_collector._url_matches_error_url`** (`function` in `omnisint/collectors/username_collector.py`) — Return True when a redirect/canonical URL matches a Sherlock `errorUrl` indicator.
 - **`omnisint.collectors.username_collector.load_whatsmyname_specs`** (`function` in `omnisint/collectors/username_collector.py`) — Load PlatformSpec entries from a WhatsMyName JSON file path, JSON string, or parsed dictionary.
 - **`omnisint.collectors.username_collector.load_sherlock_specs`** (`function` in `omnisint/collectors/username_collector.py`) — Load PlatformSpec entries from a Sherlock `data.json` path, JSON string, or parsed dictionary.
+- **`omnisint.collectors.username_collector.derive_handle_candidates`** (`function` in `omnisint/collectors/username_collector.py`) — Generate clean handle probe candidates from a username or multi-word person name.
 - **`omnisint.collectors.username_collector.UsernameCollector`** (`class` in `omnisint/collectors/username_collector.py`) — Sherlock-style async multi-platform username discovery, metadata, and avatar dHash collector.
 
 ### Community: `config` (3 nodes)
@@ -158,7 +164,7 @@
 - **`omnisint.core.storage`** (`module` in `omnisint/core/storage.py`) — Async SQLite Case Store & TTL Response Cache for OmniSINT.
 - **`omnisint.core.storage.make_cache_key`** (`function` in `omnisint/core/storage.py`) — Generate a deterministic SHA-256 cache key for a collector request.
 - **`omnisint.core.storage.CacheEntry`** (`class` in `omnisint/core/storage.py`) — Cached collector response record with TTL metadata and SHA-256 integrity hash.
-- **`omnisint.core.storage._CrossLoopAsyncLock`** (`class` in `omnisint/core/storage.py`) — Thread-backed async mutex safe across multiple asyncio event loops.
+- **`omnisint.core.storage._CrossLoopAsyncLock`** (`class` in `omnisint/core/storage.py`) — Thread-backed async mutex safe across multiple asyncio event loops without starving default threads.
 - **`omnisint.core.storage.CaseStorage`** (`class` in `omnisint/core/storage.py`) — Async SQLite persistence engine for Cases, Graph Entities/Edges, Custody Ledger, and HTTP Cache.
 
 ### Community: `intelligence` (66 nodes)

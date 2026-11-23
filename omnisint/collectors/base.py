@@ -76,10 +76,10 @@ class CollectorConfig(BaseModel):
     timeout_seconds: float = Field(default=15.0, gt=0.0)
     max_retries: int = Field(default=2, ge=0, le=5)
     backoff_base_seconds: float = Field(default=0.25, ge=0.0)
-    rate_limit_per_second: float = Field(default=5.0, gt=0.0)
+    rate_limit_per_second: float = Field(default=25.0, gt=0.0)
     use_cache: bool = True
     cache_ttl_seconds: int = Field(default=86400, ge=0)
-    max_concurrency: int = Field(default=5, ge=1, le=50)
+    max_concurrency: int = Field(default=12, ge=1, le=50)
     user_agent: str = "OmniSINT/0.1.0 (+https://github.com/SamAlex-22/OmniSINT; Passive-OSINT)"
     http_proxy: str | None = None
 

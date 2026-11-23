@@ -269,7 +269,7 @@ def _build_platform_specs(
 )
 @click.option(
     "--scrapling/--no-scrapling",
-    default=False,
+    default=True,
     show_default=True,
     help="Enable Scrapling public page & profile scraper.",
 )

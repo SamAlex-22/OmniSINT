@@ -185,36 +185,235 @@ def load_sherlock_specs(
     return specs
 
 
+def derive_handle_candidates(query: str) -> list[str]:
+    """Generate clean handle probe candidates from a username or multi-word person name."""
+    cleaned = query.strip().lstrip("@")
+    if not cleaned:
+        return []
+    if " " not in cleaned and "\t" not in cleaned:
+        return [cleaned]
+    tokens = [re.sub(r"[^a-z0-9]", "", tok.lower()) for tok in cleaned.split()]
+    tokens = [tok for tok in tokens if tok]
+    if not tokens:
+        return []
+    if len(tokens) == 1:
+        return [tokens[0]]
+    return list(
+        dict.fromkeys(
+            [
+                "".join(tokens),
+                "_".join(tokens),
+                "-".join(tokens),
+            ]
+        )
+    )
+
+
 DEFAULT_PLATFORM_SPECS: tuple[PlatformSpec, ...] = (
+    # JSON API platforms (richest metadata: bio, location, timestamps, avatar URL)
     PlatformSpec(
         platform="GitHub",
         api_url_template="https://api.github.com/users/{handle}",
         profile_url_template="https://github.com/{handle}",
+        category="coding",
     ),
     PlatformSpec(
         platform="GitLab",
         api_url_template="https://gitlab.com/api/v4/users?username={handle}",
         profile_url_template="https://gitlab.com/{handle}",
+        category="coding",
     ),
     PlatformSpec(
         platform="Reddit",
         api_url_template="https://www.reddit.com/user/{handle}/about.json",
         profile_url_template="https://www.reddit.com/user/{handle}",
+        category="social",
     ),
     PlatformSpec(
         platform="Keybase",
         api_url_template="https://keybase.io/_/api/1.0/user/lookup.json?usernames={handle}",
         profile_url_template="https://keybase.io/{handle}",
+        category="identity",
     ),
     PlatformSpec(
         platform="HackerNews",
         api_url_template="https://hacker-news.firebaseio.com/v0/user/{handle}.json",
         profile_url_template="https://news.ycombinator.com/user?id={handle}",
+        category="coding",
     ),
     PlatformSpec(
         platform="DevTo",
         api_url_template="https://dev.to/api/users/by_username?url={handle}",
         profile_url_template="https://dev.to/{handle}",
+        category="coding",
+    ),
+    PlatformSpec(
+        platform="DockerHub",
+        api_url_template="https://hub.docker.com/v2/users/{handle}/",
+        profile_url_template="https://hub.docker.com/u/{handle}",
+        category="coding",
+    ),
+    PlatformSpec(
+        platform="ChessCom",
+        api_url_template="https://api.chess.com/pub/player/{handle}",
+        profile_url_template="https://www.chess.com/member/{handle}",
+        category="gaming",
+    ),
+    PlatformSpec(
+        platform="Gravatar",
+        api_url_template="https://en.gravatar.com/{handle}.json",
+        profile_url_template="https://en.gravatar.com/{handle}",
+        category="identity",
+    ),
+    # High-signal text/JSON/HTML WhatsMyName & Sherlock presets (guarded by existence_string + missing_string)
+    PlatformSpec(
+        platform="Codeforces",
+        api_url_template="https://codeforces.com/api/user.info?handles={handle}",
+        profile_url_template="https://codeforces.com/profile/{handle}",
+        response_kind="text",
+        existence_string='"status":"OK"',
+        missing_string='"status":"FAILED"',
+        category="coding",
+    ),
+    PlatformSpec(
+        platform="TryHackMe",
+        api_url_template="https://tryhackme.com/api/v2/public-profile?username={handle}",
+        profile_url_template="https://tryhackme.com/p/{handle}",
+        response_kind="text",
+        existence_string='"status":"success"',
+        missing_string='"status":"error"',
+        category="security",
+    ),
+    PlatformSpec(
+        platform="HuggingFace",
+        api_url_template="https://huggingface.co/api/users/{handle}/overview",
+        profile_url_template="https://huggingface.co/{handle}",
+        response_kind="text",
+        existence_string='"user"',
+        missing_string="User not found",
+        category="coding",
+    ),
+    PlatformSpec(
+        platform="Bitbucket",
+        api_url_template="https://api.bitbucket.org/2.0/workspaces/{handle}",
+        profile_url_template="https://bitbucket.org/{handle}/",
+        response_kind="text",
+        existence_string='"uuid"',
+        missing_string='"type": "error"',
+        category="coding",
+    ),
+    PlatformSpec(
+        platform="Medium",
+        api_url_template="https://medium.com/@{handle}",
+        profile_url_template="https://medium.com/@{handle}",
+        response_kind="text",
+        existence_string="og:type",
+        missing_string="PAGE NOT FOUND",
+        missing_strings=["PAGE NOT FOUND", "404"],
+        category="writing",
+    ),
+    PlatformSpec(
+        platform="Linktree",
+        api_url_template="https://linktr.ee/{handle}",
+        profile_url_template="https://linktr.ee/{handle}",
+        response_kind="text",
+        existence_string='"username"',
+        missing_string="The page you're looking for doesn't exist",
+        missing_strings=[
+            "The page you're looking for doesn't exist",
+            "The page you’re looking for doesn’t exist",
+        ],
+        category="social",
+    ),
+    PlatformSpec(
+        platform="Kaggle",
+        api_url_template="https://www.kaggle.com/{handle}",
+        profile_url_template="https://www.kaggle.com/{handle}",
+        response_kind="text",
+        existence_string="og:title",
+        missing_string="We couldn't find that page",
+        category="coding",
+    ),
+    PlatformSpec(
+        platform="LeetCode",
+        api_url_template="https://leetcode.com/u/{handle}/",
+        profile_url_template="https://leetcode.com/u/{handle}/",
+        response_kind="text",
+        existence_string="og:title",
+        missing_string="Page Not Found",
+        category="coding",
+    ),
+    PlatformSpec(
+        platform="AboutMe",
+        api_url_template="https://about.me/{handle}",
+        profile_url_template="https://about.me/{handle}",
+        response_kind="text",
+        existence_string="og:title",
+        missing_string="Whoops!",
+        category="identity",
+    ),
+    PlatformSpec(
+        platform="Vimeo",
+        api_url_template="https://vimeo.com/{handle}",
+        profile_url_template="https://vimeo.com/{handle}",
+        response_kind="text",
+        existence_string="og:title",
+        missing_string="Sorry, we couldn’t find that page",
+        category="video",
+    ),
+    PlatformSpec(
+        platform="SoundCloud",
+        api_url_template="https://soundcloud.com/{handle}",
+        profile_url_template="https://soundcloud.com/{handle}",
+        response_kind="text",
+        existence_string="og:title",
+        missing_string="We can't find that user",
+        category="audio",
+    ),
+    PlatformSpec(
+        platform="Pinterest",
+        api_url_template="https://www.pinterest.com/{handle}/",
+        profile_url_template="https://www.pinterest.com/{handle}/",
+        response_kind="text",
+        existence_string="og:title",
+        missing_string="User not found",
+        category="social",
+    ),
+    PlatformSpec(
+        platform="Steam",
+        api_url_template="https://steamcommunity.com/id/{handle}",
+        profile_url_template="https://steamcommunity.com/id/{handle}",
+        response_kind="text",
+        existence_string="actual_persona_name",
+        missing_string="The specified profile could not be found",
+        category="gaming",
+    ),
+    PlatformSpec(
+        platform="Telegram",
+        api_url_template="https://t.me/{handle}",
+        profile_url_template="https://t.me/{handle}",
+        response_kind="text",
+        existence_string="tgme_page_title",
+        missing_string="If you have <strong>Telegram</strong>, you can contact",
+        category="messaging",
+    ),
+    PlatformSpec(
+        platform="YouTube",
+        api_url_template="https://www.youtube.com/@{handle}",
+        profile_url_template="https://www.youtube.com/@{handle}",
+        response_kind="text",
+        existence_string="og:title",
+        missing_string="404 Not Found",
+        category="video",
+    ),
+    PlatformSpec(
+        platform="NPM",
+        api_url_template="https://www.npmjs.com/~{handle}",
+        profile_url_template="https://www.npmjs.com/~{handle}",
+        response_kind="text",
+        existence_string="og:title",
+        missing_string="Cannot find user",
+        category="coding",
     ),
 )
 
@@ -338,6 +537,47 @@ class UsernameCollector(BaseCollector):
                 "url": _format_handle_url(spec.profile_url_template, handle),
             }
 
+        if plat == "DockerHub" and isinstance(payload, dict) and payload.get("username"):
+            uname = str(payload["username"])
+            return {
+                "username": uname,
+                "display_name": payload.get("full_name") or uname,
+                "bio": payload.get("company") or "",
+                "location": payload.get("location") or "",
+                "avatar_url": payload.get("gravatar_url") or "",
+                "avatar_hash": payload.get("avatar_hash"),
+                "timestamps": [payload["date_joined"]] if payload.get("date_joined") else [],
+                "url": _format_handle_url(spec.profile_url_template, uname),
+            }
+
+        if plat == "ChessCom" and isinstance(payload, dict) and payload.get("username"):
+            uname = str(payload["username"])
+            return {
+                "username": uname,
+                "display_name": payload.get("name") or uname,
+                "bio": payload.get("title") or "",
+                "location": payload.get("location") or "",
+                "avatar_url": payload.get("avatar") or "",
+                "avatar_hash": payload.get("avatar_hash"),
+                "timestamps": [],
+                "url": payload.get("url") or _format_handle_url(spec.profile_url_template, uname),
+            }
+
+        if plat == "Gravatar" and isinstance(payload, dict) and isinstance(payload.get("entry"), list) and payload["entry"]:
+            entry = payload["entry"][0]
+            if isinstance(entry, dict) and (entry.get("preferredUsername") or entry.get("displayName") or entry.get("id")):
+                uname = str(entry.get("preferredUsername") or handle)
+                return {
+                    "username": uname,
+                    "display_name": entry.get("displayName") or uname,
+                    "bio": entry.get("aboutMe") or "",
+                    "location": entry.get("currentLocation") or "",
+                    "avatar_url": entry.get("thumbnailUrl") or "",
+                    "avatar_hash": None,
+                    "timestamps": [],
+                    "url": entry.get("profileUrl") or _format_handle_url(spec.profile_url_template, handle),
+                }
+
         # Sherlock & WhatsMyName text/HTML/response_url evaluation
         if isinstance(payload, str) or spec.response_kind == "text":
             text_payload = payload if isinstance(payload, str) else json.dumps(payload, ensure_ascii=False)
@@ -444,9 +684,10 @@ class UsernameCollector(BaseCollector):
                 errors=["Username query cannot be empty"],
             )
 
+        is_person = " " in cleaned or "\t" in cleaned
         metrics = analyze_handle_entropy(cleaned)
         root_node = EntityNode(
-            entity_type=EntityType.USERNAME,
+            entity_type=EntityType.PERSON if is_person else EntityType.USERNAME,
             value=cleaned,
             entropy_score=metrics.shannon_entropy,
             rarity_score=metrics.rarity_score,
@@ -458,16 +699,33 @@ class UsernameCollector(BaseCollector):
         evidence_items: list[EvidenceItem] = []
         errors: list[str] = []
 
-        semaphore = asyncio.Semaphore(self.config.max_concurrency)
+        candidates = derive_handle_candidates(cleaned)
+        if not candidates:
+            return CollectorResult(
+                collector_name=self.name,
+                query=cleaned,
+                nodes=nodes,
+                edges=edges,
+                evidence_items=evidence_items,
+                errors=["No valid username candidates could be derived from query"],
+            )
 
-        async def _probe_platform(spec: PlatformSpec) -> None:
+        semaphore = asyncio.Semaphore(self.config.max_concurrency)
+        seen_profiles: set[tuple[str, str]] = set()
+
+        async def _probe_platform(spec: PlatformSpec, candidate: str) -> None:
             if spec.regex_check:
                 try:
-                    if not re.search(spec.regex_check, cleaned):
+                    if not re.search(spec.regex_check, candidate):
                         return
                 except re.error:
                     return
-            url = _format_handle_url(spec.api_url_template, cleaned)
+            url = _format_handle_url(spec.api_url_template, candidate)
+            req_headers = (
+                {"Accept": "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8"}
+                if spec.response_kind == "text"
+                else None
+            )
             async with semaphore:
                 try:
                     status, payload, ev_item, _, resp_headers = await self._fetch_with_custody_full(
@@ -475,7 +733,8 @@ class UsernameCollector(BaseCollector):
                         case_id=case_id,
                         ledger=active_ledger,
                         storage=storage,
-                        notes=f"Username probe on {spec.platform} for '{cleaned}'",
+                        headers=req_headers,
+                        notes=f"Username probe on {spec.platform} for '{candidate}'",
                     )
                 except Exception as exc:
                     errors.append(f"{spec.platform}: {type(exc).__name__}: {exc}")
@@ -486,12 +745,17 @@ class UsernameCollector(BaseCollector):
 
                 parsed = self._parse_platform_payload(
                     spec,
-                    cleaned,
+                    candidate,
                     payload,
                     headers=resp_headers,
                 )
                 if parsed is None:
                     return
+
+                dedupe_key = (spec.platform.strip().lower(), str(parsed["username"]).strip().lower())
+                if dedupe_key in seen_profiles:
+                    return
+                seen_profiles.add(dedupe_key)
 
                 evidence_items.append(ev_item)
                 if ev_item.evidence_id not in root_node.evidence_ids:
@@ -532,7 +796,7 @@ class UsernameCollector(BaseCollector):
                     platform=spec.platform,
                     entropy_score=prof_metrics.shannon_entropy,
                     rarity_score=prof_metrics.rarity_score,
-                    confidence=0.88,
+                    confidence=0.88 if not is_person else 0.78,
                     attributes=profile_attrs,
                     evidence_ids=[ev_item.evidence_id],
                 )
@@ -542,9 +806,9 @@ class UsernameCollector(BaseCollector):
                         source_node_id=root_node.node_id,
                         target_node_id=profile_node.node_id,
                         relation_type=RelationType.HAS_PROFILE,
-                        weight=0.90,
-                        confidence=0.88,
-                        rationale=f"Active {spec.platform} profile discovered for '{cleaned}'",
+                        weight=0.90 if not is_person else 0.80,
+                        confidence=0.88 if not is_person else 0.78,
+                        rationale=f"Active {spec.platform} profile discovered for '{candidate}'",
                         evidence_ids=[ev_item.evidence_id],
                     )
                 )
@@ -570,7 +834,13 @@ class UsernameCollector(BaseCollector):
                         )
                     )
 
-        await asyncio.gather(*(_probe_platform(spec) for spec in self.platforms))
+        await asyncio.gather(
+            *(
+                _probe_platform(spec, candidate)
+                for candidate in candidates
+                for spec in self.platforms
+            )
+        )
 
         return CollectorResult(
             collector_name=self.name,

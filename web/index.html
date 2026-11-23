@@ -373,7 +373,8 @@
       { key: 'infra', label: 'Infrastructure & Threats', color: '#f59e0b', types: ['domain', 'subdomain', 'ip_address', 'certificate', 'threat_indicator'], defaultOn: true },
       { key: 'orgs', label: 'Orgs & Locations', color: '#14b8a6', types: ['organization', 'location'], defaultOn: true },
       { key: 'repos', label: 'Repositories (Top 8)', color: '#a855f7', types: ['repository'], defaultOn: true },
-      { key: 'noise', label: 'URLs & Avatar Hashes', color: '#64748b', types: ['url', 'avatar_hash'], defaultOn: false }
+      { key: 'urls', label: 'Web URLs & Mentions', color: '#64748b', types: ['url'], defaultOn: true },
+      { key: 'hashes', label: 'Avatar Hashes', color: '#475569', types: ['avatar_hash'], defaultOn: false }
     ];
 
     const filterState = {};

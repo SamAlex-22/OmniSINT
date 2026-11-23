@@ -11,6 +11,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from omnisint.collectors import create_default_registry
 from omnisint.config import get_settings
 from omnisint.core.custody import CustodyLedger
 from omnisint.core.models import Case, EntityType, new_uuid, utc_now
@@ -215,6 +216,7 @@ class OmniSINTAPIService:
         else:
             self.orchestrator = ScanOrchestrator(
                 storage=self.storage,
+                registry=create_default_registry(include_scrapling=True),
                 progress_callback=self.broadcaster.publish,
             )
 

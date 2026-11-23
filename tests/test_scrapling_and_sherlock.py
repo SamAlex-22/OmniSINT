@@ -9,20 +9,28 @@ import unittest
 from pathlib import Path
 from typing import Any
 
+from omnisint.api.routes.cases import OmniSINTAPIService
 from omnisint.cli.main import run_cli
 from omnisint.collectors import (
+    DEFAULT_PLATFORM_SPECS,
     CollectorConfig,
     HttpResponseData,
     ScrapedPageData,
     ScraplingCollector,
+    SearchDorkCollector,
     UsernameCollector,
+    classify_social_profile_url,
     create_default_registry,
+    derive_handle_candidates,
     detect_access_gate,
     load_sherlock_specs,
     parse_public_profile_html,
+    parse_search_engine_html,
 )
 from omnisint.core.custody import CustodyLedger
 from omnisint.core.models import EntityType, RelationType
+from omnisint.core.orchestrator import infer_entity_type
+from omnisint.core.storage import CaseStorage
 
 
 SAMPLE_INSTAGRAM_PUBLIC_HTML = """<!DOCTYPE html>
@@ -394,6 +402,122 @@ class TestScraplingAndSherlock(unittest.IsolatedAsyncioTestCase):
         self.assertIn("--dynamic", out_scrape)
         self.assertIn("--db", out_scrape)
         self.assertIn("--title", out_scrape)
+
+    def test_classify_social_profile_url_and_search_engine_html_parser(self) -> None:
+        self.assertEqual(
+            classify_social_profile_url("https://www.linkedin.com/in/sam-alex-22/"),
+            ("LinkedIn", "sam-alex-22"),
+        )
+        self.assertEqual(
+            classify_social_profile_url("https://www.instagram.com/samalex/"),
+            ("Instagram", "samalex"),
+        )
+        self.assertEqual(
+            classify_social_profile_url("https://x.com/samalex_sec"),
+            ("Twitter", "samalex_sec"),
+        )
+        self.assertEqual(
+            classify_social_profile_url("https://github.com/SamAlex-22"),
+            ("GitHub", "SamAlex-22"),
+        )
+        self.assertEqual(
+            classify_social_profile_url("https://medium.com/@samalex"),
+            ("Medium", "samalex"),
+        )
+        self.assertEqual(
+            classify_social_profile_url("https://www.youtube.com/@samalex"),
+            ("YouTube", "samalex"),
+        )
+        # Non-profile & gist URLs must not be misclassified
+        self.assertIsNone(classify_social_profile_url("https://www.linkedin.com/company/acme/"))
+        self.assertIsNone(classify_social_profile_url("https://www.instagram.com/accounts/login/"))
+        self.assertIsNone(classify_social_profile_url("https://www.youtube.com/watch?v=12345"))
+        self.assertIsNone(classify_social_profile_url("https://gist.github.com/krypton_sec/12345"))
+
+        ddg_and_yahoo_html = """
+        <html><body>
+          <a class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Fwww.linkedin.com%2Fin%2Fsam-alex%2F&amp;rut=1">Sam Alex | LinkedIn</a>
+          <a href="https://r.search.yahoo.com/_ylt=A0/RV=2/RU=https%3a%2f%2finstagram.com%2fsamalex%2f/RK=2/RS=1">Sam Alex (@samalex)</a>
+          <a href="https://html.duckduckgo.com/html/?q=internal">Internal DDG Nav</a>
+          <a href="https://medium.com/@samalex">Sam Alex - Medium</a>
+        </body></html>
+        """
+        hits = parse_search_engine_html(ddg_and_yahoo_html)
+        urls = [h["url"] for h in hits]
+        self.assertEqual(
+            urls,
+            [
+                "https://www.linkedin.com/in/sam-alex/",
+                "https://instagram.com/samalex/",
+                "https://medium.com/@samalex",
+            ],
+        )
+
+    async def test_search_dork_collector_real_name_github_and_ddg_without_api_keys(self) -> None:
+        async def _mock_web(
+            url: str,
+            headers: dict[str, str] | None,
+            params: dict[str, Any] | None,
+            timeout: float,
+        ) -> HttpResponseData:
+            if "api.github.com/search/users" in url:
+                return HttpResponseData(
+                    status_code=200,
+                    body={
+                        "total_count": 1,
+                        "items": [
+                            {
+                                "login": "SamAlex-22",
+                                "html_url": "https://github.com/SamAlex-22",
+                                "avatar_url": "https://avatars.githubusercontent.com/u/1?v=4",
+                                "score": 1.0,
+                            }
+                        ],
+                    },
+                )
+            if "html.duckduckgo.com/html/" in url:
+                return HttpResponseData(
+                    status_code=200,
+                    body=(
+                        '<a class="result__a" href="//duckduckgo.com/l/?uddg='
+                        'https%3A%2F%2Fwww.linkedin.com%2Fin%2Fsam-alex-sec%2F&amp;rut=a">'
+                        "Sam Alex - Cybersecurity | LinkedIn</a>"
+                    ),
+                )
+            return HttpResponseData(status_code=404, body="")
+
+        ledger = CustodyLedger(case_id="case-name-01")
+        collector = SearchDorkCollector(
+            config=CollectorConfig(rate_limit_per_second=100.0),
+            http_transport=_mock_web,
+        )
+        res = await collector.collect("Sam Alex", case_id="case-name-01", ledger=ledger)
+
+        self.assertEqual(res.errors, [])
+        self.assertTrue(ledger.verify_chain()[0])
+
+        profiles = {(n.platform, n.value) for n in res.nodes if n.entity_type == EntityType.SOCIAL_PROFILE}
+        self.assertIn(("GitHub", "SamAlex-22"), profiles)
+        self.assertIn(("LinkedIn", "sam-alex-sec"), profiles)
+        usernames = {n.value for n in res.nodes if n.entity_type == EntityType.USERNAME}
+        self.assertIn("SamAlex-22", usernames)
+        self.assertTrue(any(e.relation_type == RelationType.HAS_PROFILE for e in res.edges))
+        self.assertTrue(any(e.relation_type == RelationType.HAS_HANDLE for e in res.edges))
+
+    def test_handle_candidates_person_type_and_api_default_scrapling(self) -> None:
+        self.assertEqual(
+            derive_handle_candidates("Sam Alex"),
+            ["samalex", "sam_alex", "sam-alex"],
+        )
+        self.assertEqual(derive_handle_candidates("@SamAlex-22"), ["SamAlex-22"])
+        self.assertEqual(infer_entity_type("Sam Alex"), EntityType.PERSON)
+        self.assertGreaterEqual(len(DEFAULT_PLATFORM_SPECS), 20)
+        for spec in DEFAULT_PLATFORM_SPECS:
+            if spec.response_kind == "text":
+                self.assertTrue(spec.existence_string, f"{spec.platform} text spec must guard existence_string")
+
+        service = OmniSINTAPIService(storage=CaseStorage(":memory:"))
+        self.assertIsNotNone(service.orchestrator.registry.get("scrapling_collector"))
 
 
 if __name__ == "__main__":

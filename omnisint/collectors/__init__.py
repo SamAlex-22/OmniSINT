@@ -21,13 +21,16 @@ from omnisint.collectors.scrapling_collector import (
 )
 from omnisint.collectors.search_dork_collector import (
     SearchDorkCollector,
+    classify_social_profile_url,
     generate_dork_queries,
+    parse_search_engine_html,
 )
 from omnisint.collectors.threat_intel import ThreatIntelCollector
 from omnisint.collectors.username_collector import (
     DEFAULT_PLATFORM_SPECS,
     PlatformSpec,
     UsernameCollector,
+    derive_handle_candidates,
     load_sherlock_specs,
     load_whatsmyname_specs,
 )
@@ -84,11 +87,14 @@ __all__ = [
     "SearchDorkCollector",
     "ThreatIntelCollector",
     "UsernameCollector",
+    "classify_social_profile_url",
     "create_default_registry",
+    "derive_handle_candidates",
     "detect_access_gate",
     "generate_dork_queries",
     "load_sherlock_specs",
     "load_whatsmyname_specs",
     "parse_public_profile_html",
+    "parse_search_engine_html",
     "redact_sensitive_url",
 ]

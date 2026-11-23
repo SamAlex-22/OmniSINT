@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import concurrent.futures
 import json
 import sqlite3
 import threading
@@ -74,13 +75,18 @@ class CacheEntry(BaseModel):
 
 
 class _CrossLoopAsyncLock:
-    """Thread-backed async mutex safe across multiple asyncio event loops."""
+    """Thread-backed async mutex safe across multiple asyncio event loops without starving default threads."""
 
     def __init__(self) -> None:
         self._lock = threading.Lock()
+        self._waiter_pool = concurrent.futures.ThreadPoolExecutor(
+            max_workers=1,
+            thread_name_prefix="omnisint-db-lock",
+        )
 
     async def __aenter__(self) -> _CrossLoopAsyncLock:
-        await asyncio.to_thread(self._lock.acquire)
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(self._waiter_pool, self._lock.acquire)
         return self
 
     async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
