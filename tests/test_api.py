@@ -89,6 +89,11 @@ class TestOmniSINTAPI(unittest.TestCase):
             graph_data = graph_res.get_json()
             self.assertGreaterEqual(len(graph_data["elements"]["nodes"]), 2)
             self.assertGreaterEqual(len(graph_data["personas"]), 1)
+            entity_nodes = [
+                n for n in graph_data["elements"]["nodes"] if n["data"].get("type") != "persona_cluster"
+            ]
+            self.assertTrue(entity_nodes)
+            self.assertIsInstance(entity_nodes[0]["data"].get("attributes"), dict)
 
             # 5. Custody endpoint verifies intact SHA-256 chain
             custody_res = client.get(f"/api/cases/{case_id}/custody")
@@ -219,9 +224,15 @@ class TestOmniSINTAPI(unittest.TestCase):
         try:
             with app.test_client() as client:
                 html = client.get("/").get_data(as_text=True)
+                self.assertIn("function escapeHtml", html)
+                self.assertIn("titleEl.textContent", html)
                 self.assertIn('id="scan-form"', html)
                 self.assertIn('type="submit"', html)
                 self.assertIn("status-banner", html)
+                self.assertIn("switchView", html)
+                self.assertIn("view-nav", html)
+                self.assertIn("formatShortNodeLabel", html)
+                self.assertIn("nodeDimensionsIncludeLabels", html)
 
             paths = [
                 "/api/cases",

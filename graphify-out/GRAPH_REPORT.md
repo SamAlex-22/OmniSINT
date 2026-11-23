@@ -1,6 +1,6 @@
 # OmniSINT — Graphify Codebase Knowledge Report
 
-- **Generated (UTC):** `2026-11-23T11:26:42.746724+00:00`
+- **Generated (UTC):** `2026-11-23T11:39:54.885312+00:00`
 - **Total AST Nodes:** `234`
 - **Total Structural Edges:** `948`
 - **Architectural Communities:** `11`

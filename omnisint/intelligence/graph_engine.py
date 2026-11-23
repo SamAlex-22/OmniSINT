@@ -1651,6 +1651,7 @@ class KnowledgeGraphEngine:
                         "rarity_score": node.rarity_score,
                         "confidence": node.confidence,
                         "parent": node.cluster_id,
+                        "attributes": dict(node.attributes),
                         "evidence_ids": node.evidence_ids,
                     }
                 }

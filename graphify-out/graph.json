@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-11-23T11:26:42.746724+00:00",
+  "generated_at_utc": "2026-11-23T11:39:54.885312+00:00",
   "stats": {
     "total_nodes": 234,
     "total_edges": 948,
@@ -1911,7 +1911,7 @@
       "id": "omnisint.intelligence.graph_engine.render_hierarchy_ascii",
       "type": "function",
       "file": "omnisint/intelligence/graph_engine.py",
-      "line": 1678,
+      "line": 1679,
       "community": "intelligence",
       "docstring": "Render a HierarchyTreeNode into an investigative Unicode box-drawing hierarchy tree."
     },
