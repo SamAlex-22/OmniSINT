@@ -1,25 +1,25 @@
 # OmniSINT — Graphify Codebase Knowledge Report
 
-- **Generated (UTC):** `2026-11-23T12:11:42.874695+00:00`
-- **Total AST Nodes:** `240`
-- **Total Structural Edges:** `973`
+- **Generated (UTC):** `2026-11-23T12:41:22.077729+00:00`
+- **Total AST Nodes:** `244`
+- **Total Structural Edges:** `990`
 - **Architectural Communities:** `11`
 
 ## 1. High-Centrality 'God Nodes' (Core Abstractions)
 | Node ID | Degree (Connections) |
 | :--- | :--- |
 | `omnisint.core.models` | 49 |
+| `omnisint.collectors.scrapling_collector` | 40 |
 | `omnisint.core.custody` | 39 |
-| `omnisint.collectors.scrapling_collector` | 39 |
 | `omnisint.cli.main` | 37 |
 | `omnisint.core.storage` | 35 |
 | `omnisint.core.storage.CaseStorage` | 35 |
 | `omnisint.api.routes.cases` | 31 |
 | `omnisint.core.custody.CustodyLedger` | 30 |
+| `omnisint.collectors.username_collector` | 30 |
 | `omnisint.collectors.base` | 28 |
 | `omnisint.intelligence.similarity` | 27 |
 | `omnisint.intelligence.graph_engine` | 26 |
-| `omnisint.intelligence.ai_analyst` | 25 |
 
 ## 2. Architectural Communities & Symbols
 ### Community: `__main__` (1 nodes)
@@ -70,7 +70,7 @@
 - **`omnisint.cli.tui.OmniSINTTUIDashboard`** (`class` in `omnisint/cli/tui.py`) — Stateful interactive terminal dashboard controller for OmniSINT Cases.
 - **`omnisint.cli.tui.launch_tui`** (`function` in `omnisint/cli/tui.py`) — Launch the Textual TUI when available & interactive, or return rendered dashboard text.
 
-### Community: `collectors` (53 nodes)
+### Community: `collectors` (57 nodes)
 - **`omnisint.collectors`** (`module` in `omnisint/collectors/__init__.py`) — Pluggable passive OSINT collectors and registry.
 - **`omnisint.collectors.create_default_registry`** (`function` in `omnisint/collectors/__init__.py`) — Create a CollectorRegistry pre-populated with all OmniSINT passive collectors.
 - **`omnisint.collectors.base`** (`module` in `omnisint/collectors/base.py`) — Abstract BaseCollector, rate-limiting, caching, proxy routing, secret redaction, custody integration, and CollectorRegistry.
@@ -122,7 +122,11 @@
 - **`omnisint.collectors.username_collector._url_matches_error_url`** (`function` in `omnisint/collectors/username_collector.py`) — Return True when a redirect/canonical URL matches a Sherlock `errorUrl` indicator.
 - **`omnisint.collectors.username_collector.load_whatsmyname_specs`** (`function` in `omnisint/collectors/username_collector.py`) — Load PlatformSpec entries from a WhatsMyName JSON file path, JSON string, or parsed dictionary.
 - **`omnisint.collectors.username_collector.load_sherlock_specs`** (`function` in `omnisint/collectors/username_collector.py`) — Load PlatformSpec entries from a Sherlock `data.json` path, JSON string, or parsed dictionary.
-- **`omnisint.collectors.username_collector.derive_handle_candidates`** (`function` in `omnisint/collectors/username_collector.py`) — Generate clean handle probe candidates from a username or multi-word person name.
+- **`omnisint.collectors.username_collector._segment_concatenated_word`** (`function` in `omnisint/collectors/username_collector.py`) — Segment an unbroken lowercase alphabetic name string (e.g. 'samuelalexanderv') via dictionary DFS.
+- **`omnisint.collectors.username_collector.split_concatenated_name_tokens`** (`function` in `omnisint/collectors/username_collector.py`) — Split spaced, delimited, camelCase, or concatenated person names into lowercase tokens.
+- **`omnisint.collectors.username_collector.is_human_name_query`** (`function` in `omnisint/collectors/username_collector.py`) — Return True when `query` represents a multi-word or concatenated human full name.
+- **`omnisint.collectors.username_collector.derive_search_name_variants`** (`function` in `omnisint/collectors/username_collector.py`) — Build natural human-name search variants (spaced, without trailing initial, and short forms).
+- **`omnisint.collectors.username_collector.derive_handle_candidates`** (`function` in `omnisint/collectors/username_collector.py`) — Generate separated, initial-free, and nickname handle candidates for human names.
 - **`omnisint.collectors.username_collector.UsernameCollector`** (`class` in `omnisint/collectors/username_collector.py`) — Sherlock-style async multi-platform username discovery, metadata, and avatar dHash collector.
 
 ### Community: `config` (3 nodes)

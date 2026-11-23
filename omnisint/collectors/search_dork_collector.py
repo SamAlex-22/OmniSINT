@@ -2,13 +2,24 @@
 
 from __future__ import annotations
 
+import asyncio
 import html as html_lib
 import re
 import urllib.parse
 from html.parser import HTMLParser
 from typing import Any
 
-from omnisint.collectors.base import BaseCollector, CollectorConfig, HttpGetTransportCallable
+from omnisint.collectors.base import (
+    BaseCollector,
+    CollectorConfig,
+    HttpGetTransportCallable,
+    redact_sensitive_url,
+)
+from omnisint.collectors.scrapling_collector import HAS_SCRAPLING_FETCHERS, Fetcher
+from omnisint.collectors.username_collector import (
+    derive_search_name_variants,
+    is_human_name_query,
+)
 from omnisint.config import OmniSINTSettings
 from omnisint.core.custody import CustodyLedger
 from omnisint.core.models import (
@@ -67,12 +78,20 @@ _NON_PROFILE_SEGMENTS: frozenset[str] = frozenset(
 
 _SEARCH_INTERNAL_HOSTS: tuple[str, ...] = (
     "duckduckgo.com",
+    "brave.com",
     "yahoo.com",
+    "yahoo.uservoice.com",
+    "yimg.com",
     "bing.com",
     "google.com",
     "gstatic.com",
     "w3.org",
     "schema.org",
+)
+
+_CHROME_SEARCH_UA = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
 )
 
 _YAHOO_RU_RE = re.compile(r"/RU=([^/]+)(?:/|$)")
@@ -96,11 +115,14 @@ def generate_dork_queries(target: str, entity_type: EntityType | None = None) ->
             f'"{cleaned}" site:github.com OR site:gist.github.com',
             f'"{cleaned}" site:pastebin.com OR site:reddit.com',
         ]
+    name_variants = derive_search_name_variants(cleaned)
+    primary = name_variants[0] if name_variants else cleaned
+    core = name_variants[1] if len(name_variants) > 1 else primary
     return [
-        f'"{cleaned}" (site:linkedin.com/in/ OR site:instagram.com OR site:x.com OR site:github.com)',
-        f'"{cleaned}" (site:medium.com OR site:youtube.com OR site:linktr.ee OR site:reddit.com)',
-        f'"{cleaned}" site:github.com OR site:gitlab.com',
-        f'"{cleaned}" site:pastebin.com OR site:gist.github.com',
+        f'"{primary}" site:linkedin.com/in',
+        f"{core} linkedin",
+        f'"{primary}"',
+        f'"{core}" (github OR instagram OR twitter OR medium)',
     ]
 
 
@@ -409,6 +431,92 @@ class SearchDorkCollector(BaseCollector):
         super().__init__(config=config, settings=settings, http_transport=http_transport)
         self._has_custom_transport = http_transport is not None
 
+    @staticmethod
+    def _extract_fetcher_html(resp: Any) -> tuple[int, str]:
+        """Extract HTTP status code and HTML string from a Scrapling Response object."""
+        status_code = int(getattr(resp, "status", None) or getattr(resp, "status_code", 200))
+        raw_html = getattr(resp, "html_content", None)
+        if raw_html is None:
+            raw_body = getattr(resp, "body", None)
+            if isinstance(raw_body, (bytes, bytearray)):
+                raw_html = raw_body.decode("utf-8", errors="replace")
+            elif raw_body is not None:
+                raw_html = str(raw_body)
+            else:
+                raw_html = str(getattr(resp, "text", None) or resp or "")
+        return status_code, str(raw_html)
+
+    async def _fetch_search_page_with_custody(
+        self,
+        url: str,
+        case_id: str,
+        ledger: CustodyLedger,
+        storage: CaseStorage | None,
+        notes: str,
+    ) -> tuple[int, str, EvidenceItem | None]:
+        """Fetch public search HTML via Scrapling Chrome Fetcher (live) or BaseCollector HTTP transport."""
+        sanitized_url = redact_sensitive_url(url)
+        if storage is not None and self.config.use_cache:
+            cached = await storage.get_cached_response(self.name, sanitized_url)
+            if cached is not None:
+                ev_cached: EvidenceItem | None = None
+                if cached.status_code == 200:
+                    ev_cached = self._record_custody_item(
+                        case_id=case_id,
+                        ledger=ledger,
+                        source_uri=sanitized_url,
+                        payload=cached.payload,
+                        mime_type="text/html",
+                        notes=f"{notes} [cache-hit]".strip(),
+                    )
+                return cached.status_code, str(cached.payload), ev_cached
+
+        if not self._has_custom_transport and HAS_SCRAPLING_FETCHERS and Fetcher is not None:  # pragma: no cover
+            await self._respect_rate_limit()
+            resp = await asyncio.to_thread(
+                Fetcher.get,
+                url,
+                impersonate="chrome",
+                timeout=float(self.config.timeout_seconds),
+                retries=1,
+                follow_redirects=True,
+                proxy=self.config.http_proxy,
+            )
+            status_code, html_str = self._extract_fetcher_html(resp)
+            if storage is not None and self.config.use_cache and status_code == 200:
+                await storage.set_cached_response(
+                    collector_name=self.name,
+                    query_or_uri=sanitized_url,
+                    payload=html_str,
+                    status_code=status_code,
+                    ttl_seconds=self.config.cache_ttl_seconds,
+                )
+            ev_item: EvidenceItem | None = None
+            if status_code == 200:
+                ev_item = self._record_custody_item(
+                    case_id=case_id,
+                    ledger=ledger,
+                    source_uri=sanitized_url,
+                    payload=html_str,
+                    mime_type="text/html",
+                    notes=notes,
+                )
+            return status_code, html_str, ev_item
+
+        status, body, ev_http, _ = await self.fetch_with_custody(
+            url=url,
+            case_id=case_id,
+            ledger=ledger,
+            storage=storage,
+            headers={
+                "User-Agent": _CHROME_SEARCH_UA,
+                "Accept": "text/html,application/xhtml+xml,*/*",
+                "Accept-Language": "en-US,en;q=0.9",
+            },
+            notes=notes,
+        )
+        return status, body if isinstance(body, str) else "", ev_http
+
     async def collect(
         self,
         query: str,
@@ -428,7 +536,7 @@ class SearchDorkCollector(BaseCollector):
 
         is_email = "@" in cleaned
         is_domain = "." in cleaned and not is_email and " " not in cleaned
-        is_person = " " in cleaned and not is_email and not is_domain
+        is_person = not is_email and not is_domain and is_human_name_query(cleaned)
         root_type = (
             EntityType.EMAIL
             if is_email
@@ -503,6 +611,35 @@ class SearchDorkCollector(BaseCollector):
                         evidence_ids=[ev_item.evidence_id],
                     )
                 )
+                if (
+                    is_person
+                    and plat in ("GitHub", "Instagram", "Twitter")
+                    and " " not in handle
+                    and handle.lower() not in username_keys_seen
+                ):
+                    username_keys_seen.add(handle.lower())
+                    uname_metrics = analyze_handle_entropy(handle)
+                    uname_node = EntityNode(
+                        entity_type=EntityType.USERNAME,
+                        value=handle,
+                        entropy_score=uname_metrics.shannon_entropy,
+                        rarity_score=uname_metrics.rarity_score,
+                        confidence=0.80,
+                        attributes={"discovered_via": via, "source_url": link},
+                        evidence_ids=[ev_item.evidence_id],
+                    )
+                    nodes.append(uname_node)
+                    edges.append(
+                        RelationshipEdge(
+                            source_node_id=root_node.node_id,
+                            target_node_id=uname_node.node_id,
+                            relation_type=RelationType.HAS_HANDLE,
+                            weight=0.80,
+                            confidence=0.80,
+                            rationale=f"Extracted handle '{handle}' from discovered {plat} profile",
+                            evidence_ids=[ev_item.evidence_id],
+                        )
+                    )
                 return
 
             if link in urls_seen:
@@ -596,142 +733,138 @@ class SearchDorkCollector(BaseCollector):
             except Exception as exc:
                 errors.append(f"Wayback CDX lookup failed: {type(exc).__name__}: {exc}")
 
-        # 2. No-key GitHub User Search API + DuckDuckGo/Yahoo web search dorking for handles & names
+        # 2. No-key GitHub User Search API + DuckDuckGo/Brave/Yahoo web search dorking
         if not is_domain and not is_email:
-            gh_search_url = (
-                f"https://api.github.com/search/users?q={urllib.parse.quote(cleaned)}&per_page=5"
-            )
+            name_variants = derive_search_name_variants(cleaned) or [cleaned]
             gh_headers: dict[str, str] = {"Accept": "application/vnd.github+json"}
             if self.settings.github_token:
                 gh_headers["Authorization"] = f"Bearer {self.settings.github_token}"
-            try:
-                gh_status, gh_payload, ev_gh, _ = await self.fetch_with_custody(
-                    url=gh_search_url,
-                    case_id=case_id,
-                    ledger=active_ledger,
-                    storage=storage,
-                    headers=gh_headers,
-                    notes=f"GitHub public user search for '{cleaned}'",
-                )
-                if (
-                    gh_status == 200
-                    and ev_gh is not None
-                    and isinstance(gh_payload, dict)
-                    and isinstance(gh_payload.get("items"), list)
-                ):
-                    items_list = [it for it in gh_payload["items"][:5] if isinstance(it, dict) and it.get("login")]
-                    if items_list:
-                        evidence_items.append(ev_gh)
-                        if ev_gh.evidence_id not in root_node.evidence_ids:
-                            root_node.evidence_ids.append(ev_gh.evidence_id)
-                    for item in items_list:
-                        login = str(item["login"]).strip()
-                        html_url = str(item.get("html_url") or f"https://github.com/{login}").strip()
-                        pkey = ("github", login.lower())
-                        if pkey not in profile_keys_seen:
-                            profile_keys_seen.add(pkey)
-                            urls_seen.add(html_url)
-                            prof_metrics = analyze_handle_entropy(login)
-                            prof_node = EntityNode(
-                                entity_type=EntityType.SOCIAL_PROFILE,
-                                value=login,
-                                platform="GitHub",
-                                entropy_score=prof_metrics.shannon_entropy,
-                                rarity_score=prof_metrics.rarity_score,
-                                confidence=0.86,
-                                attributes={
-                                    "url": html_url,
-                                    "avatar_url": item.get("avatar_url") or "",
-                                    "score": item.get("score"),
-                                    "discovered_via": "github_user_search",
-                                },
-                                evidence_ids=[ev_gh.evidence_id],
-                            )
-                            nodes.append(prof_node)
-                            edges.append(
-                                RelationshipEdge(
-                                    source_node_id=root_node.node_id,
-                                    target_node_id=prof_node.node_id,
-                                    relation_type=RelationType.HAS_PROFILE,
-                                    weight=0.86,
-                                    confidence=0.86,
-                                    rationale=f"Matched GitHub user '{login}' via public user search",
-                                    evidence_ids=[ev_gh.evidence_id],
-                                )
-                            )
-                        if login.lower() not in username_keys_seen:
-                            username_keys_seen.add(login.lower())
-                            uname_metrics = analyze_handle_entropy(login)
-                            uname_node = EntityNode(
-                                entity_type=EntityType.USERNAME,
-                                value=login,
-                                entropy_score=uname_metrics.shannon_entropy,
-                                rarity_score=uname_metrics.rarity_score,
-                                confidence=0.84,
-                                attributes={
-                                    "discovered_via": "github_user_search",
-                                    "source_url": html_url,
-                                },
-                                evidence_ids=[ev_gh.evidence_id],
-                            )
-                            nodes.append(uname_node)
-                            edges.append(
-                                RelationshipEdge(
-                                    source_node_id=root_node.node_id,
-                                    target_node_id=uname_node.node_id,
-                                    relation_type=RelationType.HAS_HANDLE,
-                                    weight=0.84,
-                                    confidence=0.84,
-                                    rationale=f"Derived GitHub handle '{login}' for '{cleaned}'",
-                                    evidence_ids=[ev_gh.evidence_id],
-                                )
-                            )
-            except Exception as exc:
-                errors.append(f"GitHub user search failed: {type(exc).__name__}: {exc}")
 
-            # Public DuckDuckGo HTML search with Yahoo HTML fallback
-            dorks = generate_dork_queries(cleaned, root_type)
-            html_headers = {
-                "Accept": "text/html,application/xhtml+xml,*/*",
-                "Accept-Language": "en-US,en;q=0.9",
-            }
-            for dork in dorks[:2]:
-                parsed_hits: list[dict[str, str]] = []
-                active_ev: EvidenceItem | None = None
-                ddg_url = f"https://html.duckduckgo.com/html/?q={urllib.parse.quote(dork)}"
+            gh_items_found: list[dict[str, Any]] = []
+            ev_gh_matched: EvidenceItem | None = None
+            for name_q in name_variants:
+                gh_search_url = (
+                    f"https://api.github.com/search/users?q={urllib.parse.quote(name_q)}&per_page=5"
+                )
                 try:
-                    d_status, d_body, ev_ddg, _ = await self.fetch_with_custody(
-                        url=ddg_url,
+                    gh_status, gh_payload, ev_gh, _ = await self.fetch_with_custody(
+                        url=gh_search_url,
                         case_id=case_id,
                         ledger=active_ledger,
                         storage=storage,
-                        headers=html_headers,
-                        notes=f"DuckDuckGo HTML search dork: {dork}",
+                        headers=gh_headers,
+                        notes=f"GitHub public user search for '{name_q}'",
                     )
-                    if d_status == 200 and ev_ddg is not None and isinstance(d_body, str):
-                        parsed_hits = parse_search_engine_html(d_body)
-                        if parsed_hits:
-                            active_ev = ev_ddg
+                    if (
+                        gh_status == 200
+                        and ev_gh is not None
+                        and isinstance(gh_payload, dict)
+                        and isinstance(gh_payload.get("items"), list)
+                    ):
+                        items_list = [
+                            it for it in gh_payload["items"][:5] if isinstance(it, dict) and it.get("login")
+                        ]
+                        if items_list:
+                            gh_items_found = items_list
+                            ev_gh_matched = ev_gh
+                            break
                 except Exception as exc:
-                    errors.append(f"DuckDuckGo search failed: {type(exc).__name__}: {exc}")
+                    errors.append(f"GitHub user search failed: {type(exc).__name__}: {exc}")
 
-                if not parsed_hits:
-                    yahoo_url = f"https://search.yahoo.com/search?p={urllib.parse.quote(dork)}"
+            if gh_items_found and ev_gh_matched is not None:
+                evidence_items.append(ev_gh_matched)
+                if ev_gh_matched.evidence_id not in root_node.evidence_ids:
+                    root_node.evidence_ids.append(ev_gh_matched.evidence_id)
+                for item in gh_items_found:
+                    login = str(item["login"]).strip()
+                    html_url = str(item.get("html_url") or f"https://github.com/{login}").strip()
+                    pkey = ("github", login.lower())
+                    if pkey not in profile_keys_seen:
+                        profile_keys_seen.add(pkey)
+                        urls_seen.add(html_url)
+                        prof_metrics = analyze_handle_entropy(login)
+                        prof_node = EntityNode(
+                            entity_type=EntityType.SOCIAL_PROFILE,
+                            value=login,
+                            platform="GitHub",
+                            entropy_score=prof_metrics.shannon_entropy,
+                            rarity_score=prof_metrics.rarity_score,
+                            confidence=0.86,
+                            attributes={
+                                "url": html_url,
+                                "avatar_url": item.get("avatar_url") or "",
+                                "score": item.get("score"),
+                                "discovered_via": "github_user_search",
+                            },
+                            evidence_ids=[ev_gh_matched.evidence_id],
+                        )
+                        nodes.append(prof_node)
+                        edges.append(
+                            RelationshipEdge(
+                                source_node_id=root_node.node_id,
+                                target_node_id=prof_node.node_id,
+                                relation_type=RelationType.HAS_PROFILE,
+                                weight=0.86,
+                                confidence=0.86,
+                                rationale=f"Matched GitHub user '{login}' via public user search",
+                                evidence_ids=[ev_gh_matched.evidence_id],
+                            )
+                        )
+                    if login.lower() not in username_keys_seen:
+                        username_keys_seen.add(login.lower())
+                        uname_metrics = analyze_handle_entropy(login)
+                        uname_node = EntityNode(
+                            entity_type=EntityType.USERNAME,
+                            value=login,
+                            entropy_score=uname_metrics.shannon_entropy,
+                            rarity_score=uname_metrics.rarity_score,
+                            confidence=0.84,
+                            attributes={
+                                "discovered_via": "github_user_search",
+                                "source_url": html_url,
+                            },
+                            evidence_ids=[ev_gh_matched.evidence_id],
+                        )
+                        nodes.append(uname_node)
+                        edges.append(
+                            RelationshipEdge(
+                                source_node_id=root_node.node_id,
+                                target_node_id=uname_node.node_id,
+                                relation_type=RelationType.HAS_HANDLE,
+                                weight=0.84,
+                                confidence=0.84,
+                                rationale=f"Derived GitHub handle '{login}' for '{cleaned}'",
+                                evidence_ids=[ev_gh_matched.evidence_id],
+                            )
+                        )
+
+            # Public DuckDuckGo -> Brave -> Yahoo HTML web search dorking via Scrapling Chrome Fetcher
+            dorks = generate_dork_queries(cleaned, root_type)
+            for dork in dorks[:3]:
+                parsed_hits: list[dict[str, str]] = []
+                active_ev: EvidenceItem | None = None
+                encoded_q = urllib.parse.quote(dork)
+                engine_urls = (
+                    ("DuckDuckGo", f"https://html.duckduckgo.com/html/?q={encoded_q}"),
+                    ("Brave", f"https://search.brave.com/search?q={encoded_q}"),
+                    ("Yahoo", f"https://search.yahoo.com/search?p={encoded_q}"),
+                )
+                for engine_name, search_url in engine_urls:
                     try:
-                        y_status, y_body, ev_yahoo, _ = await self.fetch_with_custody(
-                            url=yahoo_url,
+                        s_status, s_body, ev_search = await self._fetch_search_page_with_custody(
+                            url=search_url,
                             case_id=case_id,
                             ledger=active_ledger,
                             storage=storage,
-                            headers=html_headers,
-                            notes=f"Yahoo HTML search fallback dork: {dork}",
+                            notes=f"{engine_name} HTML search dork: {dork}",
                         )
-                        if y_status == 200 and ev_yahoo is not None and isinstance(y_body, str):
-                            parsed_hits = parse_search_engine_html(y_body)
+                        if s_status == 200 and ev_search is not None and s_body:
+                            parsed_hits = parse_search_engine_html(s_body)
                             if parsed_hits:
-                                active_ev = ev_yahoo
+                                active_ev = ev_search
+                                break
                     except Exception as exc:
-                        errors.append(f"Yahoo search fallback failed: {type(exc).__name__}: {exc}")
+                        errors.append(f"{engine_name} search failed: {type(exc).__name__}: {exc}")
 
                 if parsed_hits and active_ev is not None:
                     evidence_items.append(active_ev)

@@ -76,6 +76,10 @@ def infer_entity_type(query: str) -> EntityType:
         return EntityType.DOMAIN
     if " " in cleaned and not cleaned.startswith("@"):
         return EntityType.PERSON
+    from omnisint.collectors.username_collector import is_human_name_query
+
+    if is_human_name_query(cleaned):
+        return EntityType.PERSON
     return EntityType.USERNAME
 
 

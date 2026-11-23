@@ -27,7 +27,7 @@ from omnisint.core.models import (
     RelationType,
 )
 from omnisint.core.storage import CaseStorage
-from omnisint.intelligence.entropy import analyze_handle_entropy
+from omnisint.intelligence.entropy import COMMON_NAME_TOKENS, analyze_handle_entropy
 from omnisint.intelligence.similarity import compute_dhash_from_bytes
 
 
@@ -185,28 +185,230 @@ def load_sherlock_specs(
     return specs
 
 
-def derive_handle_candidates(query: str) -> list[str]:
-    """Generate clean handle probe candidates from a username or multi-word person name."""
+NAME_SHORT_FORMS: dict[str, str] = {
+    "samuel": "sam",
+    "alexander": "alex",
+    "william": "will",
+    "robert": "bob",
+    "michael": "mike",
+    "christopher": "chris",
+    "matthew": "matt",
+    "joseph": "joe",
+    "daniel": "dan",
+    "andrew": "andy",
+    "benjamin": "ben",
+    "nicholas": "nick",
+    "anthony": "tony",
+    "joshua": "josh",
+    "david": "dave",
+    "thomas": "tom",
+    "james": "jim",
+    "richard": "rick",
+    "steven": "steve",
+    "stephen": "steve",
+    "edward": "ed",
+    "patrick": "pat",
+    "timothy": "tim",
+    "jonathan": "jon",
+    "elizabeth": "liz",
+    "jennifer": "jen",
+    "katherine": "kate",
+}
+
+_KNOWN_NAME_TOKENS_SET: frozenset[str] = frozenset(
+    t.lower()
+    for t in (
+        set(COMMON_NAME_TOKENS)
+        | set(NAME_SHORT_FORMS.keys())
+        | set(NAME_SHORT_FORMS.values())
+    )
+    if t.isalpha()
+)
+
+_KNOWN_SEGMENT_NAMES: tuple[str, ...] = tuple(
+    sorted((t for t in _KNOWN_NAME_TOKENS_SET if len(t) >= 3), key=len, reverse=True)
+)
+
+_FAST_EXTENDED_VARIANT_PLATFORMS: frozenset[str] = frozenset(
+    {
+        "GitHub",
+        "GitLab",
+        "Reddit",
+        "Medium",
+        "Linktree",
+        "HuggingFace",
+        "Kaggle",
+        "LeetCode",
+        "TryHackMe",
+        "DockerHub",
+    }
+)
+
+
+def _segment_concatenated_word(word: str) -> list[str] | None:
+    """Segment an unbroken lowercase alphabetic name string (e.g. 'samuelalexanderv') via dictionary DFS."""
+    n = len(word)
+    if n < 6 or not word.isalpha():
+        return None
+    memo: dict[int, list[str] | None] = {}
+
+    def _dfs(pos: int) -> list[str] | None:
+        if pos == n:
+            return []
+        if pos in memo:
+            return memo[pos]
+        # Optional single-character trailing initial (e.g. "v") once >= 1 full token precedes it
+        if n - pos == 1 and pos > 0 and word[pos].isalpha():
+            memo[pos] = [word[pos]]
+            return memo[pos]
+        for token in _KNOWN_SEGMENT_NAMES:
+            if word.startswith(token, pos):
+                rest = _dfs(pos + len(token))
+                if rest is not None:
+                    memo[pos] = [token] + rest
+                    return memo[pos]
+        memo[pos] = None
+        return None
+
+    res = _dfs(0)
+    if res is None:
+        return None
+    long_known = [tok for tok in res if len(tok) >= 3 and tok in _KNOWN_NAME_TOKENS_SET]
+    if len(long_known) >= 2:
+        return res
+    return None
+
+
+def split_concatenated_name_tokens(raw: str) -> list[str]:
+    """Split spaced, delimited, camelCase, or concatenated person names into lowercase tokens."""
+    cleaned = raw.strip().lstrip("@")
+    if not cleaned:
+        return []
+
+    if any(sep in cleaned for sep in (" ", "\t", "_", "-", ".")):
+        parts = [re.sub(r"[^a-z0-9]", "", tok.lower()) for tok in re.split(r"[\s_.-]+", cleaned)]
+        return [tok for tok in parts if tok]
+
+    camel_parts = re.findall(r"[A-Z][a-z]+|[A-Z]+(?=[A-Z][a-z]|\d|$)|[a-z]+|\d+", cleaned)
+    if len(camel_parts) >= 2 and cleaned != cleaned.lower() and cleaned != cleaned.upper():
+        return [p.lower() for p in camel_parts if p]
+
+    if cleaned.isalpha() and len(cleaned) >= 6:
+        segmented = _segment_concatenated_word(cleaned.lower())
+        if segmented:
+            return segmented
+
+    alnum = re.sub(r"[^a-z0-9]", "", cleaned.lower())
+    return [alnum] if alnum else []
+
+
+def is_human_name_query(query: str) -> bool:
+    """Return True when `query` represents a multi-word or concatenated human full name."""
+    cleaned = query.strip()
+    if not cleaned or cleaned.startswith("@") or "@" in cleaned:
+        return False
+    lower = cleaned.lower()
+    if lower.startswith(("http://", "https://")):
+        return False
+    if " " in cleaned or "\t" in cleaned:
+        return True
+    if any(ch in cleaned for ch in ("_", "-", ".")) or any(ch.isdigit() for ch in cleaned):
+        return False
+    return cleaned.isalpha() and len(split_concatenated_name_tokens(cleaned)) >= 2
+
+
+def derive_search_name_variants(query: str) -> list[str]:
+    """Build natural human-name search variants (spaced, without trailing initial, and short forms)."""
     cleaned = query.strip().lstrip("@")
     if not cleaned:
         return []
-    if " " not in cleaned and "\t" not in cleaned:
+    if not is_human_name_query(cleaned) and " " not in cleaned and "\t" not in cleaned:
         return [cleaned]
-    tokens = [re.sub(r"[^a-z0-9]", "", tok.lower()) for tok in cleaned.split()]
-    tokens = [tok for tok in tokens if tok]
-    if not tokens:
+
+    tokens = split_concatenated_name_tokens(cleaned)
+    if len(tokens) <= 1:
+        return [cleaned]
+
+    full_spaced = " ".join(tok.title() for tok in tokens)
+    core_tokens = [tok for tok in tokens if len(tok) > 1][:2]
+    variants = [full_spaced]
+    if core_tokens and core_tokens != tokens:
+        variants.append(" ".join(tok.title() for tok in core_tokens))
+    short_tokens = [NAME_SHORT_FORMS.get(tok, tok) for tok in (core_tokens or tokens)]
+    if short_tokens != (core_tokens or tokens):
+        variants.append(" ".join(tok.title() for tok in short_tokens))
+
+    seen: set[str] = set()
+    unique: list[str] = []
+    for variant in variants:
+        key = variant.strip().lower()
+        if variant.strip() and key not in seen:
+            seen.add(key)
+            unique.append(variant.strip())
+    return unique or [cleaned]
+
+
+def derive_handle_candidates(query: str) -> list[str]:
+    """Generate separated, initial-free, and nickname handle candidates for human names."""
+    cleaned = query.strip().lstrip("@")
+    if not cleaned:
         return []
-    if len(tokens) == 1:
-        return [tokens[0]]
-    return list(
-        dict.fromkeys(
+
+    has_space = " " in cleaned or "\t" in cleaned
+    if not has_space and (
+        any(sep in cleaned for sep in ("_", "-", "."))
+        or any(ch.isdigit() for ch in cleaned)
+    ):
+        return [cleaned]
+
+    tokens = split_concatenated_name_tokens(cleaned)
+    if len(tokens) < 2:
+        return [cleaned]
+
+    candidates: list[str] = []
+    if not has_space:
+        candidates.append(cleaned)
+
+    candidates.extend(
+        [
+            "".join(tokens),
+            "_".join(tokens),
+            "-".join(tokens),
+            ".".join(tokens),
+        ]
+    )
+
+    core_tokens = [tok for tok in tokens if len(tok) > 1][:2]
+    if core_tokens and core_tokens != tokens:
+        candidates.extend(
             [
-                "".join(tokens),
-                "_".join(tokens),
-                "-".join(tokens),
+                "".join(core_tokens),
+                "-".join(core_tokens),
+                "_".join(core_tokens),
+                ".".join(core_tokens),
             ]
         )
-    )
+
+    short_tokens = [NAME_SHORT_FORMS.get(tok, tok) for tok in (core_tokens or tokens)]
+    if short_tokens != (core_tokens or tokens):
+        candidates.extend(
+            [
+                "".join(short_tokens),
+                "-".join(short_tokens),
+                "_".join(short_tokens),
+            ]
+        )
+
+    seen: set[str] = set()
+    unique: list[str] = []
+    for cand in candidates:
+        key = cand.strip().lower()
+        if cand.strip() and key not in seen:
+            seen.add(key)
+            unique.append(cand.strip())
+            if len(unique) >= 11:
+                break
+    return unique or [cleaned]
 
 
 DEFAULT_PLATFORM_SPECS: tuple[PlatformSpec, ...] = (
@@ -684,7 +886,7 @@ class UsernameCollector(BaseCollector):
                 errors=["Username query cannot be empty"],
             )
 
-        is_person = " " in cleaned or "\t" in cleaned
+        is_person = is_human_name_query(cleaned) or " " in cleaned or "\t" in cleaned
         metrics = analyze_handle_entropy(cleaned)
         root_node = EntityNode(
             entity_type=EntityType.PERSON if is_person else EntityType.USERNAME,
@@ -834,13 +1036,15 @@ class UsernameCollector(BaseCollector):
                         )
                     )
 
-        await asyncio.gather(
-            *(
-                _probe_platform(spec, candidate)
-                for candidate in candidates
-                for spec in self.platforms
-            )
-        )
+        use_fast_subset = len(self.platforms) > len(_FAST_EXTENDED_VARIANT_PLATFORMS)
+        tasks = []
+        for idx, candidate in enumerate(candidates):
+            for spec in self.platforms:
+                if idx >= 3 and use_fast_subset and spec.platform not in _FAST_EXTENDED_VARIANT_PLATFORMS:
+                    continue
+                tasks.append(_probe_platform(spec, candidate))
+
+        await asyncio.gather(*tasks)
 
         return CollectorResult(
             collector_name=self.name,

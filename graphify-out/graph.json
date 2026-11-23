@@ -1,8 +1,8 @@
 {
-  "generated_at_utc": "2026-11-23T12:11:42.874695+00:00",
+  "generated_at_utc": "2026-11-23T12:41:22.077729+00:00",
   "stats": {
-    "total_nodes": 240,
-    "total_edges": 973,
+    "total_nodes": 244,
+    "total_edges": 990,
     "communities_count": 11
   },
   "god_nodes": [
@@ -11,11 +11,11 @@
       "degree": 49
     },
     {
-      "id": "omnisint.core.custody",
-      "degree": 39
+      "id": "omnisint.collectors.scrapling_collector",
+      "degree": 40
     },
     {
-      "id": "omnisint.collectors.scrapling_collector",
+      "id": "omnisint.core.custody",
       "degree": 39
     },
     {
@@ -39,6 +39,10 @@
       "degree": 30
     },
     {
+      "id": "omnisint.collectors.username_collector",
+      "degree": 30
+    },
+    {
       "id": "omnisint.collectors.base",
       "degree": 28
     },
@@ -49,10 +53,6 @@
     {
       "id": "omnisint.intelligence.graph_engine",
       "degree": 26
-    },
-    {
-      "id": "omnisint.intelligence.ai_analyst",
-      "degree": 25
     }
   ],
   "communities": {
@@ -159,6 +159,10 @@
       "omnisint.collectors.username_collector._url_matches_error_url",
       "omnisint.collectors.username_collector.load_whatsmyname_specs",
       "omnisint.collectors.username_collector.load_sherlock_specs",
+      "omnisint.collectors.username_collector._segment_concatenated_word",
+      "omnisint.collectors.username_collector.split_concatenated_name_tokens",
+      "omnisint.collectors.username_collector.is_human_name_query",
+      "omnisint.collectors.username_collector.derive_search_name_variants",
       "omnisint.collectors.username_collector.derive_handle_candidates",
       "omnisint.collectors.username_collector.UsernameCollector"
     ],
@@ -709,7 +713,7 @@
       "id": "omnisint.collectors.create_default_registry",
       "type": "function",
       "file": "omnisint/collectors/__init__.py",
-      "line": 40,
+      "line": 44,
       "community": "collectors",
       "docstring": "Create a CollectorRegistry pre-populated with all OmniSINT passive collectors."
     },
@@ -1030,7 +1034,7 @@
       "id": "omnisint.collectors.search_dork_collector.generate_dork_queries",
       "type": "function",
       "file": "omnisint/collectors/search_dork_collector.py",
-      "line": 81,
+      "line": 100,
       "community": "collectors",
       "docstring": "Generate targeted passive OSINT search dork strings for a person name, handle, email, or domain."
     },
@@ -1038,7 +1042,7 @@
       "id": "omnisint.collectors.search_dork_collector.classify_social_profile_url",
       "type": "function",
       "file": "omnisint/collectors/search_dork_collector.py",
-      "line": 107,
+      "line": 129,
       "community": "collectors",
       "docstring": "Classify a discovered URL into `(platform, handle)` for recognized social/code profiles."
     },
@@ -1046,7 +1050,7 @@
       "id": "omnisint.collectors.search_dork_collector._SearchEngineHtmlParser",
       "type": "class",
       "file": "omnisint/collectors/search_dork_collector.py",
-      "line": 295,
+      "line": 317,
       "community": "collectors",
       "methods": [
         "__init__",
@@ -1060,7 +1064,7 @@
       "id": "omnisint.collectors.search_dork_collector._unwrap_search_redirect",
       "type": "function",
       "file": "omnisint/collectors/search_dork_collector.py",
-      "line": 330,
+      "line": 352,
       "community": "collectors",
       "docstring": "Decode DuckDuckGo `uddg=` and Yahoo `/RU=` redirect wrappers into clean target URLs."
     },
@@ -1068,7 +1072,7 @@
       "id": "omnisint.collectors.search_dork_collector.parse_search_engine_html",
       "type": "function",
       "file": "omnisint/collectors/search_dork_collector.py",
-      "line": 349,
+      "line": 371,
       "community": "collectors",
       "docstring": "Extract deduplicated organic search hits from DuckDuckGo or Yahoo Search HTML."
     },
@@ -1076,10 +1080,12 @@
       "id": "omnisint.collectors.search_dork_collector.SearchDorkCollector",
       "type": "class",
       "file": "omnisint/collectors/search_dork_collector.py",
-      "line": 388,
+      "line": 410,
       "community": "collectors",
       "methods": [
         "__init__",
+        "_extract_fetcher_html",
+        "_fetch_search_page_with_custody",
         "collect"
       ],
       "docstring": "Queries GitHub User Search, no-key web search dorks, Wayback CDX & Google CSE."
@@ -1161,18 +1167,50 @@
       "docstring": "Load PlatformSpec entries from a Sherlock `data.json` path, JSON string, or parsed dictionary."
     },
     {
+      "id": "omnisint.collectors.username_collector._segment_concatenated_word",
+      "type": "function",
+      "file": "omnisint/collectors/username_collector.py",
+      "line": 248,
+      "community": "collectors",
+      "docstring": "Segment an unbroken lowercase alphabetic name string (e.g. 'samuelalexanderv') via dictionary DFS."
+    },
+    {
+      "id": "omnisint.collectors.username_collector.split_concatenated_name_tokens",
+      "type": "function",
+      "file": "omnisint/collectors/username_collector.py",
+      "line": 282,
+      "community": "collectors",
+      "docstring": "Split spaced, delimited, camelCase, or concatenated person names into lowercase tokens."
+    },
+    {
+      "id": "omnisint.collectors.username_collector.is_human_name_query",
+      "type": "function",
+      "file": "omnisint/collectors/username_collector.py",
+      "line": 305,
+      "community": "collectors",
+      "docstring": "Return True when `query` represents a multi-word or concatenated human full name."
+    },
+    {
+      "id": "omnisint.collectors.username_collector.derive_search_name_variants",
+      "type": "function",
+      "file": "omnisint/collectors/username_collector.py",
+      "line": 320,
+      "community": "collectors",
+      "docstring": "Build natural human-name search variants (spaced, without trailing initial, and short forms)."
+    },
+    {
       "id": "omnisint.collectors.username_collector.derive_handle_candidates",
       "type": "function",
       "file": "omnisint/collectors/username_collector.py",
-      "line": 188,
+      "line": 351,
       "community": "collectors",
-      "docstring": "Generate clean handle probe candidates from a username or multi-word person name."
+      "docstring": "Generate separated, initial-free, and nickname handle candidates for human names."
     },
     {
       "id": "omnisint.collectors.username_collector.UsernameCollector",
       "type": "class",
       "file": "omnisint/collectors/username_collector.py",
-      "line": 421,
+      "line": 623,
       "community": "collectors",
       "methods": [
         "__init__",
@@ -1475,7 +1513,7 @@
       "id": "omnisint.core.orchestrator.ScanOrchestrator",
       "type": "class",
       "file": "omnisint/core/orchestrator.py",
-      "line": 82,
+      "line": 86,
       "community": "core",
       "methods": [
         "__init__",
@@ -2530,7 +2568,7 @@
       "id": "tests.test_scrapling_and_sherlock.TestScraplingAndSherlock",
       "type": "class",
       "file": "tests/test_scrapling_and_sherlock.py",
-      "line": 79,
+      "line": 81,
       "community": "tests",
       "methods": [
         "test_load_sherlock_specs_handles_schema_and_all_error_types",
@@ -2542,7 +2580,8 @@
         "test_registry_default_backward_compatibility_and_cli_help",
         "test_classify_social_profile_url_and_search_engine_html_parser",
         "test_search_dork_collector_real_name_github_and_ddg_without_api_keys",
-        "test_handle_candidates_person_type_and_api_default_scrapling"
+        "test_handle_candidates_person_type_and_api_default_scrapling",
+        "test_concatenated_and_full_name_samuel_alexander_variants"
       ],
       "docstring": "Deterministic offline tests covering Sherlock data.json parsing and Scrapling integration."
     },
@@ -4132,6 +4171,11 @@
     },
     {
       "source": "omnisint.collectors.search_dork_collector",
+      "target": "asyncio",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector",
       "target": "html",
       "relation": "imports"
     },
@@ -4158,6 +4202,16 @@
     {
       "source": "omnisint.collectors.search_dork_collector",
       "target": "omnisint.collectors.base",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector",
+      "target": "omnisint.collectors.scrapling_collector",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector",
+      "target": "omnisint.collectors.username_collector",
       "relation": "imports"
     },
     {
@@ -4189,6 +4243,11 @@
       "source": "omnisint.collectors.search_dork_collector",
       "target": "omnisint.collectors.search_dork_collector.generate_dork_queries",
       "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector.generate_dork_queries",
+      "target": "omnisint.collectors.username_collector.derive_search_name_variants",
+      "relation": "calls"
     },
     {
       "source": "omnisint.collectors.search_dork_collector",
@@ -4237,6 +4296,11 @@
     },
     {
       "source": "omnisint.collectors.search_dork_collector.SearchDorkCollector",
+      "target": "omnisint.collectors.base.redact_sensitive_url",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector.SearchDorkCollector",
       "target": "omnisint.intelligence.entropy.analyze_handle_entropy",
       "relation": "calls"
     },
@@ -4257,6 +4321,11 @@
     },
     {
       "source": "omnisint.collectors.search_dork_collector.SearchDorkCollector",
+      "target": "omnisint.collectors.username_collector.is_human_name_query",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector.SearchDorkCollector",
       "target": "omnisint.collectors.search_dork_collector.classify_social_profile_url",
       "relation": "calls"
     },
@@ -4268,6 +4337,11 @@
     {
       "source": "omnisint.collectors.search_dork_collector.SearchDorkCollector",
       "target": "omnisint.core.models.RelationshipEdge",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.search_dork_collector.SearchDorkCollector",
+      "target": "omnisint.collectors.username_collector.derive_search_name_variants",
       "relation": "calls"
     },
     {
@@ -4482,8 +4556,53 @@
     },
     {
       "source": "omnisint.collectors.username_collector",
+      "target": "omnisint.collectors.username_collector._segment_concatenated_word",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "omnisint.collectors.username_collector.split_concatenated_name_tokens",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.username_collector.split_concatenated_name_tokens",
+      "target": "omnisint.collectors.username_collector._segment_concatenated_word",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "omnisint.collectors.username_collector.is_human_name_query",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.username_collector.is_human_name_query",
+      "target": "omnisint.collectors.username_collector.split_concatenated_name_tokens",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "omnisint.collectors.username_collector.derive_search_name_variants",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.username_collector.derive_search_name_variants",
+      "target": "omnisint.collectors.username_collector.split_concatenated_name_tokens",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.username_collector.derive_search_name_variants",
+      "target": "omnisint.collectors.username_collector.is_human_name_query",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
       "target": "omnisint.collectors.username_collector.derive_handle_candidates",
       "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.username_collector.derive_handle_candidates",
+      "target": "omnisint.collectors.username_collector.split_concatenated_name_tokens",
+      "relation": "calls"
     },
     {
       "source": "omnisint.collectors.username_collector",
@@ -4523,6 +4642,11 @@
     {
       "source": "omnisint.collectors.username_collector.UsernameCollector",
       "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.username_collector.UsernameCollector",
+      "target": "omnisint.collectors.username_collector.is_human_name_query",
       "relation": "calls"
     },
     {

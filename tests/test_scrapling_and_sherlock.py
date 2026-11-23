@@ -22,10 +22,12 @@ from omnisint.collectors import (
     classify_social_profile_url,
     create_default_registry,
     derive_handle_candidates,
+    derive_search_name_variants,
     detect_access_gate,
     load_sherlock_specs,
     parse_public_profile_html,
     parse_search_engine_html,
+    split_concatenated_name_tokens,
 )
 from omnisint.core.custody import CustodyLedger
 from omnisint.core.models import EntityType, RelationType
@@ -507,7 +509,7 @@ class TestScraplingAndSherlock(unittest.IsolatedAsyncioTestCase):
     def test_handle_candidates_person_type_and_api_default_scrapling(self) -> None:
         self.assertEqual(
             derive_handle_candidates("Sam Alex"),
-            ["samalex", "sam_alex", "sam-alex"],
+            ["samalex", "sam_alex", "sam-alex", "sam.alex"],
         )
         self.assertEqual(derive_handle_candidates("@SamAlex-22"), ["SamAlex-22"])
         self.assertEqual(infer_entity_type("Sam Alex"), EntityType.PERSON)
@@ -518,6 +520,69 @@ class TestScraplingAndSherlock(unittest.IsolatedAsyncioTestCase):
 
         service = OmniSINTAPIService(storage=CaseStorage(":memory:"))
         self.assertIsNotNone(service.orchestrator.registry.get("scrapling_collector"))
+
+    async def test_concatenated_and_full_name_samuel_alexander_variants(self) -> None:
+        self.assertEqual(
+            split_concatenated_name_tokens("samuelalexanderv"),
+            ["samuel", "alexander", "v"],
+        )
+        self.assertEqual(
+            split_concatenated_name_tokens("SAMUEL ALEXANDER V"),
+            ["samuel", "alexander", "v"],
+        )
+        self.assertEqual(
+            derive_search_name_variants("samuelalexanderv"),
+            ["Samuel Alexander V", "Samuel Alexander", "Sam Alex"],
+        )
+        self.assertEqual(infer_entity_type("samuelalexanderv"), EntityType.PERSON)
+        self.assertEqual(infer_entity_type("krypton_sec_x7"), EntityType.USERNAME)
+
+        for variant_query in ("SAMUEL ALEXANDER V", "samuelalexanderv"):
+            cands = derive_handle_candidates(variant_query)
+            for expected in (
+                "samuelalexanderv",
+                "samuel_alexander_v",
+                "samuel-alexander-v",
+                "samuelalexander",
+                "samuel-alexander",
+                "samuel_alexander",
+                "samalex",
+                "sam-alex",
+                "sam_alex",
+            ):
+                self.assertIn(expected, cands)
+
+        async def _mock_samuel_web(
+            url: str,
+            headers: dict[str, str] | None,
+            params: dict[str, Any] | None,
+            timeout: float,
+        ) -> HttpResponseData:
+            if "api.github.com/search/users" in url:
+                if "Sam%20Alex" in url:
+                    return HttpResponseData(
+                        status_code=200,
+                        body={"items": [{"login": "SamAlex-22", "html_url": "https://github.com/SamAlex-22"}]},
+                    )
+                return HttpResponseData(status_code=200, body={"items": []})
+            if "search.brave.com/search" in url:
+                return HttpResponseData(
+                    status_code=200,
+                    body='<a href="https://www.linkedin.com/in/samuel-alexander-v">Samuel Alexander V | LinkedIn</a>',
+                )
+            return HttpResponseData(status_code=404, body="")
+
+        collector = SearchDorkCollector(
+            config=CollectorConfig(rate_limit_per_second=100.0),
+            http_transport=_mock_samuel_web,
+        )
+        for seed in ("SAMUEL ALEXANDER V", "samuelalexanderv"):
+            res = await collector.collect(seed, case_id=f"case-{seed}")
+            profiles = {(n.platform, n.value) for n in res.nodes if n.entity_type == EntityType.SOCIAL_PROFILE}
+            self.assertIn(("LinkedIn", "samuel-alexander-v"), profiles)
+            self.assertIn(("GitHub", "SamAlex-22"), profiles)
+            usernames = {n.value for n in res.nodes if n.entity_type == EntityType.USERNAME}
+            self.assertIn("SamAlex-22", usernames)
 
 
 if __name__ == "__main__":

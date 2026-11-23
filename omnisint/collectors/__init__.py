@@ -28,11 +28,15 @@ from omnisint.collectors.search_dork_collector import (
 from omnisint.collectors.threat_intel import ThreatIntelCollector
 from omnisint.collectors.username_collector import (
     DEFAULT_PLATFORM_SPECS,
+    NAME_SHORT_FORMS,
     PlatformSpec,
     UsernameCollector,
     derive_handle_candidates,
+    derive_search_name_variants,
+    is_human_name_query,
     load_sherlock_specs,
     load_whatsmyname_specs,
+    split_concatenated_name_tokens,
 )
 from omnisint.config import OmniSINTSettings
 
@@ -81,6 +85,7 @@ __all__ = [
     "GitHubCollector",
     "HttpGetTransportCallable",
     "HttpResponseData",
+    "NAME_SHORT_FORMS",
     "PlatformSpec",
     "ScrapedPageData",
     "ScraplingCollector",
@@ -90,11 +95,14 @@ __all__ = [
     "classify_social_profile_url",
     "create_default_registry",
     "derive_handle_candidates",
+    "derive_search_name_variants",
     "detect_access_gate",
     "generate_dork_queries",
+    "is_human_name_query",
     "load_sherlock_specs",
     "load_whatsmyname_specs",
     "parse_public_profile_html",
     "parse_search_engine_html",
     "redact_sensitive_url",
+    "split_concatenated_name_tokens",
 ]
