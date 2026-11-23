@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import asyncio
 import json
+import threading
 import time
 import unittest
 from typing import Any
 
 from omnisint.api import create_app
+from omnisint.cli.main import build_demo_collision_case
 from omnisint.collectors import CollectorConfig, HttpResponseData, create_default_registry
 from omnisint.core.orchestrator import ScanOrchestrator
 from omnisint.core.storage import CaseStorage
@@ -205,6 +207,60 @@ class TestOmniSINTAPI(unittest.TestCase):
             ).get_data(as_text=True)
             self.assertNotIn("secret@alexsec.io", redacted_md)
             self.assertIn("s***@alexsec.io", redacted_md)
+        finally:
+            asyncio.run(storage.close())
+
+    def test_concurrent_flask_requests_and_exports_do_not_500(self) -> None:
+        storage = CaseStorage(":memory:")
+        demo_case, _ = build_demo_collision_case()
+        asyncio.run(storage.save_case(demo_case))
+        app = create_app(storage=storage)
+
+        try:
+            with app.test_client() as client:
+                html = client.get("/").get_data(as_text=True)
+                self.assertIn('id="scan-form"', html)
+                self.assertIn('type="submit"', html)
+                self.assertIn("status-banner", html)
+
+            paths = [
+                "/api/cases",
+                f"/api/cases/{demo_case.case_id}/graph",
+                f"/api/cases/{demo_case.case_id}/custody",
+                f"/api/cases/{demo_case.case_id}/export/markdown",
+                f"/api/cases/{demo_case.case_id}/export/stix",
+                f"/api/cases/{demo_case.case_id}/graph",
+            ]
+            results: list[tuple[str, int, str, str]] = []
+            res_lock = threading.Lock()
+            barrier = threading.Barrier(len(paths))
+
+            def _worker(path: str) -> None:
+                barrier.wait(timeout=5.0)
+                with app.test_client() as c:
+                    resp = c.get(path)
+                    cd = resp.headers.get("Content-Disposition", "")
+                    body = resp.get_data(as_text=True)
+                with res_lock:
+                    results.append((path, resp.status_code, cd, body))
+
+            threads = [threading.Thread(target=_worker, args=(p,)) for p in paths]
+            for t in threads:
+                t.start()
+            for t in threads:
+                t.join(timeout=10.0)
+
+            self.assertEqual(len(results), len(paths))
+            for path, status, cd, body in results:
+                self.assertEqual(status, 200, f"{path} failed with status {status}: {body[:200]}")
+                if "/export/markdown" in path:
+                    self.assertIn(f'filename="omnisint-{demo_case.case_id}.md"', cd)
+                    self.assertIn("VERIFIED (INTACT)", body)
+                elif "/export/stix" in path:
+                    self.assertIn(f'filename="omnisint-{demo_case.case_id}.stix.json"', cd)
+                    self.assertEqual(json.loads(body)["type"], "bundle")
+                else:
+                    json.loads(body)
         finally:
             asyncio.run(storage.close())
 

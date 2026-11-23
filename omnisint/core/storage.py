@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import sqlite3
+import threading
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -72,6 +73,20 @@ class CacheEntry(BaseModel):
         return reference >= self.expires_at_utc
 
 
+class _CrossLoopAsyncLock:
+    """Thread-backed async mutex safe across multiple asyncio event loops."""
+
+    def __init__(self) -> None:
+        self._lock = threading.Lock()
+
+    async def __aenter__(self) -> _CrossLoopAsyncLock:
+        await asyncio.to_thread(self._lock.acquire)
+        return self
+
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        self._lock.release()
+
+
 class CaseStorage:
     """Async SQLite persistence engine for Cases, Graph Entities/Edges, Custody Ledger, and HTTP Cache."""
 
@@ -90,7 +105,7 @@ class CaseStorage:
             settings.cache_ttl_seconds if default_ttl_seconds is None else default_ttl_seconds
         )
         self._conn: sqlite3.Connection | None = None
-        self._lock = asyncio.Lock()
+        self._lock = _CrossLoopAsyncLock()
         self._initialized = False
 
     async def __aenter__(self) -> CaseStorage:

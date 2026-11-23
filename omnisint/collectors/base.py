@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -190,7 +191,7 @@ class BaseCollector(ABC):
                 return await _default_urllib_get(url, headers, params, timeout, proxy_url=proxy_url)
 
             self._http_transport = _proxied_default_get
-        self._rate_lock = asyncio.Lock()
+        self._rate_lock = threading.Lock()
         self._last_request_ts: float = 0.0
 
     def supports(self, entity_type: EntityType) -> bool:
@@ -200,12 +201,16 @@ class BaseCollector(ABC):
     async def _respect_rate_limit(self) -> None:
         """Enforce minimum inter-request spacing based on `rate_limit_per_second`."""
         min_interval = 1.0 / self.config.rate_limit_per_second
-        async with self._rate_lock:
+        with self._rate_lock:
             now = time.monotonic()
-            elapsed = now - self._last_request_ts
-            if elapsed < min_interval:
-                await asyncio.sleep(min_interval - elapsed)
-            self._last_request_ts = time.monotonic()
+            next_allowed = max(
+                now,
+                self._last_request_ts + min_interval if self._last_request_ts > 0.0 else now,
+            )
+            wait_seconds = max(0.0, next_allowed - now)
+            self._last_request_ts = next_allowed
+        if wait_seconds > 0.0:
+            await asyncio.sleep(wait_seconds)
 
     @staticmethod
     def _normalize_transport_output(

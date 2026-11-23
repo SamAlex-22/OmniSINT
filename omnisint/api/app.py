@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -40,12 +41,43 @@ except ImportError:  # pragma: no cover
     request = None
 
 
+_BG_LOOP: asyncio.AbstractEventLoop | None = None
+_BG_LOOP_LOCK = threading.Lock()
+
+
+def _get_bg_loop() -> asyncio.AbstractEventLoop:
+    """Return a single persistent background event loop shared by synchronous Flask handlers."""
+    global _BG_LOOP
+    with _BG_LOOP_LOCK:
+        if _BG_LOOP is not None and _BG_LOOP.is_running():
+            return _BG_LOOP
+        loop = asyncio.new_event_loop()
+        ready = threading.Event()
+
+        def _loop_runner() -> None:
+            asyncio.set_event_loop(loop)
+            ready.set()
+            loop.run_forever()
+
+        thread = threading.Thread(
+            target=_loop_runner,
+            name="omnisint-wsgi-loop",
+            daemon=True,
+        )
+        thread.start()
+        ready.wait()
+        _BG_LOOP = loop
+        return loop
+
+
 def _run_coro_sync(coro: Any) -> Any:
     """Run an async coroutine cleanly from synchronous Flask handlers."""
     try:
         asyncio.get_running_loop()
     except RuntimeError:
-        return asyncio.run(coro)
+        loop = _get_bg_loop()
+        return asyncio.run_coroutine_threadsafe(coro, loop).result()
+
     import concurrent.futures
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
@@ -108,6 +140,16 @@ def create_app(
             if not ok:
                 return jsonify({"detail": "Unauthorized"}), 401
         return None
+
+    @flask_app.errorhandler(Exception)
+    def _handle_flask_exception(exc: Exception) -> Any:
+        from werkzeug.exceptions import HTTPException as WerkzeugHTTPException
+
+        if isinstance(exc, WerkzeugHTTPException):
+            if request.path.startswith("/api/"):
+                return jsonify({"detail": exc.description or str(exc)}), exc.code or 500
+            return exc
+        return jsonify({"detail": f"{type(exc).__name__}: {exc}"}), 500
 
     @flask_app.get("/")
     def serve_index() -> FlaskResponse:
@@ -205,7 +247,14 @@ def create_app(
             content, media_type = _run_coro_sync(
                 service.export_report(case_id, fmt, redact_pii=redact_pii)
             )
-            return FlaskResponse(content, status=200, mimetype=media_type)
+            ext = "md" if fmt.strip().lower() in ("md", "markdown") else "stix.json"
+            safe_id = "".join(ch for ch in case_id if ch.isalnum() or ch in ("-", "_")) or "case"
+            return FlaskResponse(
+                content,
+                status=200,
+                content_type=media_type,
+                headers={"Content-Disposition": f'attachment; filename="omnisint-{safe_id}.{ext}"'},
+            )
         except KeyError as exc:
             return jsonify({"detail": str(exc)}), 404
         except ValueError as exc:

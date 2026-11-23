@@ -22,7 +22,7 @@
     body { background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
     header {
       background: var(--panel); border-bottom: 1px solid var(--border);
-      padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
     }
     .brand { font-size: 1.15rem; font-weight: 700; letter-spacing: 0.04em; color: var(--accent); }
     .controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -30,9 +30,13 @@
       background: var(--panel-alt); color: var(--text); border: 1px solid var(--border);
       padding: 7px 11px; border-radius: 6px; font-size: 0.88rem;
     }
+    #case-select { min-width: 240px; max-width: 340px; }
+    #scan-query { min-width: 230px; }
+    select option { background: #1b2440; color: #e6ecff; }
     button { cursor: pointer; font-weight: 600; transition: 0.15s; }
     button.primary { background: var(--accent); color: #051120; border-color: var(--accent); }
-    button:hover { opacity: 0.9; }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+    button:hover:not(:disabled) { opacity: 0.9; }
     main { flex: 1; display: grid; grid-template-columns: 310px 1fr 370px; overflow: hidden; }
     aside { background: var(--panel); border-right: 1px solid var(--border); padding: 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
     aside.right { border-right: none; border-left: 1px solid var(--border); }
@@ -49,9 +53,18 @@
     #canvas-wrap { position: relative; display: flex; flex-direction: column; height: 100%; }
     #toolbar {
       background: var(--panel); border-bottom: 1px solid var(--border); padding: 8px 14px;
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
     }
-    #cy { flex: 1; width: 100%; background: radial-gradient(circle at center, #111936 0%, #090e1c 100%); }
+    #status-banner {
+      font-size: 0.8rem; padding: 3px 10px; border-radius: 999px;
+      background: rgba(56, 189, 248, 0.12); color: var(--accent); border: 1px solid rgba(56, 189, 248, 0.3);
+      max-width: 360px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    #status-banner.ok { background: rgba(34, 197, 94, 0.14); color: var(--success); border-color: rgba(34, 197, 94, 0.35); }
+    #status-banner.warn { background: rgba(245, 158, 11, 0.14); color: var(--warning); border-color: rgba(245, 158, 11, 0.35); }
+    #status-banner.error { background: rgba(239, 68, 68, 0.16); color: var(--danger); border-color: rgba(239, 68, 68, 0.35); }
+    #cy { flex: 1; width: 100%; background: radial-gradient(circle at center, #111936 0%, #090e1c 100%); display: flex; align-items: center; justify-content: center; }
+    .cy-placeholder { color: var(--muted); font-size: 0.86rem; padding: 20px; text-align: center; max-width: 420px; line-height: 1.5; }
     pre { white-space: pre-wrap; word-break: break-word; font-size: 0.78rem; color: #cbd5f5; line-height: 1.4; }
     .ev-row { border-top: 1px solid var(--border); padding: 6px 0; font-size: 0.76rem; }
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
@@ -61,11 +74,15 @@
   <header>
     <div class="brand">OmniSINT // Intelligence Studio</div>
     <div class="controls">
-      <select id="case-select" onchange="loadSelectedCase()"></select>
-      <input id="scan-query" type="text" placeholder="Enter handle, email, domain, or IP..." />
-      <button class="primary" onclick="startNewScan()">New Scan</button>
-      <button onclick="exportReport('markdown')">Export Markdown</button>
-      <button onclick="exportReport('stix')">Export STIX 2.1</button>
+      <select id="case-select" aria-label="Select investigation case" onchange="loadSelectedCase()">
+        <option value="">Loading cases...</option>
+      </select>
+      <form id="scan-form" style="display:flex; gap:8px; align-items:center;">
+        <input id="scan-query" type="text" placeholder="Enter handle, email, domain, or IP..." autocomplete="off" />
+        <button id="scan-btn" type="submit" class="primary">Run Scan</button>
+      </form>
+      <button type="button" onclick="exportReport('markdown')">Export Markdown</button>
+      <button type="button" onclick="exportReport('stix')">Export STIX 2.1</button>
     </div>
   </header>
 
@@ -73,7 +90,7 @@
     <aside>
       <div>
         <div class="section-title">Disambiguated Personas</div>
-        <button class="persona-pill active" id="pill-all" onclick="filterPersona(null)">All Personas (Full Graph)</button>
+        <button type="button" class="persona-pill active" id="pill-all" onclick="filterPersona(null, this)">All Personas (Full Graph)</button>
         <div id="persona-list"></div>
       </div>
 
@@ -86,10 +103,11 @@
     <section id="canvas-wrap">
       <div id="toolbar">
         <div>
-          <button onclick="setLayout('cose')">Knowledge Graph Layout</button>
-          <button onclick="setLayout('breadthfirst')">Hierarchy Tree Layout</button>
-          <button onclick="cy && cy.fit()">Fit View</button>
+          <button type="button" onclick="setLayout('cose')">Knowledge Graph Layout</button>
+          <button type="button" onclick="setLayout('breadthfirst')">Hierarchy Tree Layout</button>
+          <button type="button" onclick="cy && cy.fit()">Fit View</button>
         </div>
+        <div id="status-banner">Ready</div>
         <div id="custody-badge" class="badge ok">Custody: Pending</div>
       </div>
       <div id="cy"></div>
@@ -130,64 +148,192 @@
         .replace(/'/g, '&#39;');
     }
 
-    async function refreshCases(selectId = null) {
-      const resp = await fetch('/api/cases');
-      const cases = await resp.json();
-      const sel = document.getElementById('case-select');
-      sel.innerHTML = '';
-      if (!cases.length) {
-        sel.innerHTML = '<option value="">No Cases Yet</option>';
-        return;
+    function setStatus(message, tone = 'info') {
+      const el = document.getElementById('status-banner');
+      if (!el) return;
+      el.textContent = String(message || '');
+      el.title = String(message || '');
+      el.className = tone === 'info' ? '' : tone;
+    }
+
+    async function extractErrorDetail(resp) {
+      let detail = `HTTP ${resp.status}`;
+      try {
+        const data = await resp.json();
+        if (data && data.detail) {
+          detail = typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail);
+        }
+      } catch (_) {}
+      return detail;
+    }
+
+    function resetWorkspaceView() {
+      currentGraphData = null;
+      selectedNodeId = null;
+      if (cy) {
+        cy.destroy();
+        cy = null;
       }
-      cases.forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c.case_id;
-        opt.textContent = `${c.title} (${c.node_count} nodes, ${c.persona_count} personas)`;
-        sel.appendChild(opt);
-      });
-      if (selectId) sel.value = selectId;
-      activeCaseId = sel.value;
-      await loadSelectedCase();
+      document.getElementById('persona-list').innerHTML = '';
+      document.getElementById('hierarchy-tree').textContent = 'Select or run a scan to view Hierarchy Tree.';
+      document.getElementById('custody-drawer').textContent = 'No case loaded.';
+      document.getElementById('ai-brief').textContent = 'No analysis generated yet.';
+      const badge = document.getElementById('custody-badge');
+      badge.className = 'badge ok';
+      badge.textContent = 'Custody: Pending';
+    }
+
+    async function refreshCases(selectId = null) {
+      const sel = document.getElementById('case-select');
+      const previousId = activeCaseId || sel.value;
+      try {
+        const resp = await fetch('/api/cases');
+        if (!resp.ok) {
+          throw new Error(await extractErrorDetail(resp));
+        }
+        const cases = await resp.json();
+        sel.innerHTML = '';
+        if (!cases.length) {
+          const emptyOpt = document.createElement('option');
+          emptyOpt.value = '';
+          emptyOpt.textContent = 'No Cases Yet — enter a target to scan';
+          sel.appendChild(emptyOpt);
+          activeCaseId = null;
+          resetWorkspaceView();
+          setStatus('No cases yet. Enter a target above and click Run Scan.', 'info');
+          return;
+        }
+        cases.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.case_id;
+          opt.textContent = `${c.title} (${c.node_count} nodes, ${c.persona_count} personas)`;
+          sel.appendChild(opt);
+        });
+        const preferred = selectId || previousId;
+        if (preferred && cases.some(c => c.case_id === preferred)) {
+          sel.value = preferred;
+        } else {
+          sel.value = cases[0].case_id;
+        }
+        activeCaseId = sel.value;
+        await loadSelectedCase();
+      } catch (err) {
+        sel.innerHTML = '';
+        const errOpt = document.createElement('option');
+        errOpt.value = '';
+        errOpt.textContent = 'Failed to load cases';
+        sel.appendChild(errOpt);
+        setStatus(`Failed to load cases: ${err.message || err}`, 'error');
+      }
     }
 
     async function startNewScan() {
-      const query = document.getElementById('scan-query').value.trim();
-      if (!query) return alert('Enter a target handle, email, domain, or IP.');
-      const createResp = await fetch('/api/cases', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ title: `Investigation: ${query}`, target_query: query })
-      });
-      const created = await createResp.json();
-      await fetch(`/api/cases/${created.case_id}/scan`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ query, max_hops: 2, run_ai_analysis: true })
-      });
-      await refreshCases(created.case_id);
+      const inputEl = document.getElementById('scan-query');
+      const btn = document.getElementById('scan-btn');
+      if (btn.disabled) return;
+      const query = inputEl.value.trim();
+      if (!query) {
+        setStatus('Enter a target handle, email, domain, or IP before scanning.', 'warn');
+        inputEl.focus();
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Scanning...';
+      setStatus(`Creating case and running OSINT scan for "${query}"...`, 'info');
+      try {
+        const createResp = await fetch('/api/cases', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: `Investigation: ${query}`, target_query: query })
+        });
+        if (!createResp.ok) {
+          throw new Error(await extractErrorDetail(createResp));
+        }
+        const created = await createResp.json();
+
+        const scanResp = await fetch(`/api/cases/${encodeURIComponent(created.case_id)}/scan?async=true`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query, max_hops: 2, run_ai_analysis: true })
+        });
+        if (!scanResp.ok) {
+          throw new Error(await extractErrorDetail(scanResp));
+        }
+        const job = await scanResp.json();
+        setStatus(`Scan queued for "${query}" (job ${String(job.job_id || '').slice(0, 8)}...)`, 'info');
+
+        let finalState = job;
+        for (let attempt = 0; attempt < 300; attempt += 1) {
+          await new Promise(resolve => setTimeout(resolve, 800));
+          const pollResp = await fetch(`/api/jobs/${encodeURIComponent(job.job_id)}`);
+          if (!pollResp.ok) {
+            throw new Error(await extractErrorDetail(pollResp));
+          }
+          finalState = await pollResp.json();
+          if (finalState.status === 'completed') {
+            break;
+          }
+          if (finalState.status === 'failed') {
+            throw new Error(finalState.error || 'Background scan job failed');
+          }
+        }
+        if (finalState.status !== 'completed') {
+          throw new Error('Scan timed out waiting for job completion');
+        }
+
+        inputEl.value = '';
+        await refreshCases(created.case_id);
+        setStatus(`Scan completed for "${query}".`, 'ok');
+      } catch (err) {
+        setStatus(`Scan failed: ${err.message || err}`, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Run Scan';
+      }
     }
 
     async function loadSelectedCase() {
       const sel = document.getElementById('case-select');
-      activeCaseId = sel.value;
-      if (!activeCaseId) return;
-      const [gResp, cResp] = await Promise.all([
-        fetch(`/api/cases/${activeCaseId}/graph`),
-        fetch(`/api/cases/${activeCaseId}/custody`)
-      ]);
-      currentGraphData = await gResp.json();
-      const custody = await cResp.json();
-      renderPersonas(currentGraphData.personas || []);
-      renderGraph(currentGraphData.elements);
-      renderCustody(custody);
-      document.getElementById('ai-brief').textContent = currentGraphData.ai_executive_brief || 'No brief available.';
+      activeCaseId = sel.value || null;
+      if (!activeCaseId) {
+        resetWorkspaceView();
+        return;
+      }
+      setStatus(`Loading case ${activeCaseId}...`, 'info');
+      try {
+        const [gResp, cResp] = await Promise.all([
+          fetch(`/api/cases/${encodeURIComponent(activeCaseId)}/graph`),
+          fetch(`/api/cases/${encodeURIComponent(activeCaseId)}/custody`)
+        ]);
+        if (!gResp.ok) {
+          throw new Error(await extractErrorDetail(gResp));
+        }
+        if (!cResp.ok) {
+          throw new Error(await extractErrorDetail(cResp));
+        }
+        currentGraphData = await gResp.json();
+        const custody = await cResp.json();
+        renderPersonas(currentGraphData.personas || []);
+        renderGraph(currentGraphData.elements || { nodes: [], edges: [] });
+        renderCustody(custody);
+        document.getElementById('ai-brief').textContent = currentGraphData.ai_executive_brief || 'No brief available.';
+        const nodeCount = ((currentGraphData.elements || {}).nodes || []).length;
+        setStatus(`Loaded case (${nodeCount} graph elements, ${(currentGraphData.personas || []).length} personas)`, 'ok');
+      } catch (err) {
+        setStatus(`Failed to load case: ${err.message || err}`, 'error');
+      }
     }
 
     function renderPersonas(personas) {
       const list = document.getElementById('persona-list');
       list.innerHTML = '';
+      const allPill = document.getElementById('pill-all');
+      if (allPill) allPill.classList.add('active');
+
       personas.forEach(p => {
         const btn = document.createElement('button');
+        btn.type = 'button';
         btn.className = 'persona-pill';
         const titleEl = document.createElement('strong');
         titleEl.textContent = p.persona_label || p.cluster_id;
@@ -198,11 +344,13 @@
         btn.appendChild(titleEl);
         btn.appendChild(document.createElement('br'));
         btn.appendChild(metaEl);
-        btn.onclick = () => filterPersona(p);
+        btn.onclick = () => filterPersona(p, btn);
         list.appendChild(btn);
       });
       if (personas[0] && personas[0].hierarchy_tree) {
         document.getElementById('hierarchy-tree').textContent = formatTree(personas[0].hierarchy_tree);
+      } else {
+        document.getElementById('hierarchy-tree').textContent = 'No hierarchy tree resolved for this case.';
       }
     }
 
@@ -220,10 +368,18 @@
     }
 
     function renderGraph(elements) {
-      if (!window.cytoscape) return;
-      if (cy) cy.destroy();
+      const cyEl = document.getElementById('cy');
+      if (cy) {
+        cy.destroy();
+        cy = null;
+      }
+      if (!window.cytoscape) {
+        cyEl.innerHTML = '<div class="cy-placeholder">Cytoscape.js could not be loaded (offline environment). Persona clusters, Hierarchy Tree, Custody verification, AI Brief, and Export remain fully functional.</div>';
+        return;
+      }
+      cyEl.innerHTML = '';
       cy = cytoscape({
-        container: document.getElementById('cy'),
+        container: cyEl,
         elements: [...(elements.nodes || []), ...(elements.edges || [])],
         style: [
           { selector: 'node[type="persona_cluster"]', style: { 'background-color': '#182246', 'border-color': '#38bdf8', 'border-width': 2, 'label': 'data(label)', 'color': '#38bdf8', 'font-size': 11, 'text-valign': 'top' } },
@@ -235,18 +391,29 @@
       cy.on('tap', 'node[entity_type]', evt => showNodeInspector(evt.target.data()));
     }
 
-    function filterPersona(persona) {
-      if (!cy) return;
+    function filterPersona(persona, clickedBtn = null) {
+      const allPill = document.getElementById('pill-all');
+      if (allPill) allPill.classList.toggle('active', !persona);
+      document.querySelectorAll('#persona-list .persona-pill').forEach(btn => {
+        btn.classList.toggle('active', Boolean(persona) && btn === clickedBtn);
+      });
+
       if (!persona) {
-        cy.elements().style('display', 'element');
+        if (cy) cy.elements().style('display', 'element');
+        const first = currentGraphData && currentGraphData.personas && currentGraphData.personas[0];
+        if (first && first.hierarchy_tree) {
+          document.getElementById('hierarchy-tree').textContent = formatTree(first.hierarchy_tree);
+        }
         return;
       }
-      const allowed = new Set(persona.node_ids || []);
-      cy.nodes().forEach(n => {
-        const d = n.data();
-        const show = d.id === persona.cluster_id || allowed.has(d.id);
-        n.style('display', show ? 'element' : 'none');
-      });
+      if (cy) {
+        const allowed = new Set(persona.node_ids || []);
+        cy.nodes().forEach(n => {
+          const d = n.data();
+          const show = d.id === persona.cluster_id || allowed.has(d.id);
+          n.style('display', show ? 'element' : 'none');
+        });
+      }
       if (persona.hierarchy_tree) {
         document.getElementById('hierarchy-tree').textContent = formatTree(persona.hierarchy_tree);
       }
@@ -279,6 +446,7 @@
       statsDiv.innerHTML = `Type: <b>${escapeHtml(data.entity_type)}</b> | Entropy: <b>${Number(data.entropy_score || 0).toFixed(2)}</b><br/>Rarity: <b>${Number(data.rarity_score || 0).toFixed(2)}</b> | Confidence: <b>${Number(data.confidence || 0).toFixed(2)}</b>`;
 
       const pivotBtn = document.createElement('button');
+      pivotBtn.type = 'button';
       pivotBtn.className = 'primary';
       pivotBtn.style.width = '100%';
       pivotBtn.style.marginTop = '6px';
@@ -293,12 +461,21 @@
 
     async function pivotSelectedNode() {
       if (!activeCaseId || !selectedNodeId) return;
-      await fetch(`/api/cases/${activeCaseId}/pivot`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ node_id: selectedNodeId })
-      });
-      await loadSelectedCase();
+      setStatus(`Pivoting on node ${selectedNodeId}...`, 'info');
+      try {
+        const resp = await fetch(`/api/cases/${encodeURIComponent(activeCaseId)}/pivot`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ node_id: selectedNodeId })
+        });
+        if (!resp.ok) {
+          throw new Error(await extractErrorDetail(resp));
+        }
+        await loadSelectedCase();
+        setStatus(`Pivot complete for node ${selectedNodeId}.`, 'ok');
+      } catch (err) {
+        setStatus(`Pivot failed: ${err.message || err}`, 'error');
+      }
     }
 
     function renderCustody(custody) {
@@ -330,9 +507,38 @@
       });
     }
 
-    function exportReport(fmt) {
-      if (activeCaseId) window.open(`/api/cases/${activeCaseId}/export/${fmt}`, '_blank');
+    async function exportReport(fmt) {
+      if (!activeCaseId) {
+        setStatus('Select or scan a case before exporting.', 'warn');
+        return;
+      }
+      setStatus(`Exporting ${fmt.toUpperCase()} report...`, 'info');
+      try {
+        const resp = await fetch(`/api/cases/${encodeURIComponent(activeCaseId)}/export/${encodeURIComponent(fmt)}`);
+        if (!resp.ok) {
+          throw new Error(await extractErrorDetail(resp));
+        }
+        const blob = await resp.blob();
+        const ext = fmt === 'markdown' ? 'md' : 'stix.json';
+        const safeId = String(activeCaseId).replace(/[^a-zA-Z0-9_-]/g, '_') || 'case';
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = `omnisint-${safeId}.${ext}`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+        setStatus(`Downloaded omnisint-${safeId}.${ext}`, 'ok');
+      } catch (err) {
+        setStatus(`Export failed: ${err.message || err}`, 'error');
+      }
     }
+
+    document.getElementById('scan-form').addEventListener('submit', evt => {
+      evt.preventDefault();
+      startNewScan();
+    });
 
     refreshCases();
   </script>

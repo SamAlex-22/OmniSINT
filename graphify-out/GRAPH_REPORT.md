@@ -1,8 +1,8 @@
 # OmniSINT — Graphify Codebase Knowledge Report
 
-- **Generated (UTC):** `2026-11-23T10:24:51.103764+00:00`
-- **Total AST Nodes:** `232`
-- **Total Structural Edges:** `938`
+- **Generated (UTC):** `2026-11-23T11:26:42.746724+00:00`
+- **Total AST Nodes:** `234`
+- **Total Structural Edges:** `948`
 - **Architectural Communities:** `11`
 
 ## 1. High-Centrality 'God Nodes' (Core Abstractions)
@@ -11,13 +11,13 @@
 | `omnisint.core.models` | 49 |
 | `omnisint.core.custody` | 39 |
 | `omnisint.collectors.scrapling_collector` | 38 |
-| `omnisint.cli.main` | 36 |
-| `omnisint.core.storage.CaseStorage` | 33 |
-| `omnisint.core.storage` | 31 |
+| `omnisint.cli.main` | 37 |
+| `omnisint.core.storage.CaseStorage` | 34 |
+| `omnisint.core.storage` | 33 |
 | `omnisint.core.custody.CustodyLedger` | 30 |
 | `omnisint.api.routes.cases` | 29 |
+| `omnisint.collectors.base` | 28 |
 | `omnisint.intelligence.similarity` | 27 |
-| `omnisint.collectors.base` | 27 |
 | `omnisint.intelligence.graph_engine` | 26 |
 | `omnisint.intelligence.ai_analyst` | 25 |
 
@@ -25,9 +25,10 @@
 ### Community: `__main__` (1 nodes)
 - **`omnisint.__main__`** (`module` in `omnisint/__main__.py`) — Module entrypoint allowing `python3 -m omnisint` execution without runpy warnings.
 
-### Community: `api` (19 nodes)
+### Community: `api` (20 nodes)
 - **`omnisint.api`** (`module` in `omnisint/api/__init__.py`) — FastAPI REST & WebSocket backend for OmniSINT.
 - **`omnisint.api.app`** (`module` in `omnisint/api/app.py`) — FastAPI (or Flask WSGI fallback) web server and WebSocket live stream for OmniSINT.
+- **`omnisint.api.app._get_bg_loop`** (`function` in `omnisint/api/app.py`) — Return a single persistent background event loop shared by synchronous Flask handlers.
 - **`omnisint.api.app._run_coro_sync`** (`function` in `omnisint/api/app.py`) — Run an async coroutine cleanly from synchronous Flask handlers.
 - **`omnisint.api.app.create_app`** (`function` in `omnisint/api/app.py`) — Create the OmniSINT ASGI (FastAPI) or WSGI (Flask fallback) web application.
 - **`omnisint.api.app.get_default_app`** (`function` in `omnisint/api/app.py`) — Factory returning a default configured OmniSINT web application.
@@ -123,7 +124,7 @@
 - **`omnisint.config.OmniSINTSettings`** (`class` in `omnisint/config.py`) — Application-wide settings loaded from environment variables or defaults.
 - **`omnisint.config.get_settings`** (`function` in `omnisint/config.py`) — Return a fresh settings instance.
 
-### Community: `core` (34 nodes)
+### Community: `core` (35 nodes)
 - **`omnisint.core`** (`module` in `omnisint/core/__init__.py`) — Core data models, chain-of-custody ledger, SQLite storage, and async orchestrator.
 - **`omnisint.core.custody`** (`module` in `omnisint/core/custody.py`) — SHA-256 chain-of-custody ledger for OmniSINT evidence.
 - **`omnisint.core.custody.payload_kind`** (`function` in `omnisint/core/custody.py`) — Return the structural kind of a raw payload ("json", "text", or "bytes").
@@ -157,6 +158,7 @@
 - **`omnisint.core.storage`** (`module` in `omnisint/core/storage.py`) — Async SQLite Case Store & TTL Response Cache for OmniSINT.
 - **`omnisint.core.storage.make_cache_key`** (`function` in `omnisint/core/storage.py`) — Generate a deterministic SHA-256 cache key for a collector request.
 - **`omnisint.core.storage.CacheEntry`** (`class` in `omnisint/core/storage.py`) — Cached collector response record with TTL metadata and SHA-256 integrity hash.
+- **`omnisint.core.storage._CrossLoopAsyncLock`** (`class` in `omnisint/core/storage.py`) — Thread-backed async mutex safe across multiple asyncio event loops.
 - **`omnisint.core.storage.CaseStorage`** (`class` in `omnisint/core/storage.py`) — Async SQLite persistence engine for Cases, Graph Entities/Edges, Custody Ledger, and HTTP Cache.
 
 ### Community: `intelligence` (66 nodes)

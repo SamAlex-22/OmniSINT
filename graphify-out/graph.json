@@ -1,8 +1,8 @@
 {
-  "generated_at_utc": "2026-11-23T10:24:51.103764+00:00",
+  "generated_at_utc": "2026-11-23T11:26:42.746724+00:00",
   "stats": {
-    "total_nodes": 232,
-    "total_edges": 938,
+    "total_nodes": 234,
+    "total_edges": 948,
     "communities_count": 11
   },
   "god_nodes": [
@@ -20,15 +20,15 @@
     },
     {
       "id": "omnisint.cli.main",
-      "degree": 36
+      "degree": 37
     },
     {
       "id": "omnisint.core.storage.CaseStorage",
-      "degree": 33
+      "degree": 34
     },
     {
       "id": "omnisint.core.storage",
-      "degree": 31
+      "degree": 33
     },
     {
       "id": "omnisint.core.custody.CustodyLedger",
@@ -39,11 +39,11 @@
       "degree": 29
     },
     {
-      "id": "omnisint.intelligence.similarity",
-      "degree": 27
+      "id": "omnisint.collectors.base",
+      "degree": 28
     },
     {
-      "id": "omnisint.collectors.base",
+      "id": "omnisint.intelligence.similarity",
       "degree": 27
     },
     {
@@ -65,6 +65,7 @@
     "api": [
       "omnisint.api",
       "omnisint.api.app",
+      "omnisint.api.app._get_bg_loop",
       "omnisint.api.app._run_coro_sync",
       "omnisint.api.app.create_app",
       "omnisint.api.app.get_default_app",
@@ -194,6 +195,7 @@
       "omnisint.core.storage",
       "omnisint.core.storage.make_cache_key",
       "omnisint.core.storage.CacheEntry",
+      "omnisint.core.storage._CrossLoopAsyncLock",
       "omnisint.core.storage.CaseStorage"
     ],
     "intelligence": [
@@ -341,10 +343,18 @@
       "docstring": "FastAPI (or Flask WSGI fallback) web server and WebSocket live stream for OmniSINT."
     },
     {
+      "id": "omnisint.api.app._get_bg_loop",
+      "type": "function",
+      "file": "omnisint/api/app.py",
+      "line": 48,
+      "community": "api",
+      "docstring": "Return a single persistent background event loop shared by synchronous Flask handlers."
+    },
+    {
       "id": "omnisint.api.app._run_coro_sync",
       "type": "function",
       "file": "omnisint/api/app.py",
-      "line": 43,
+      "line": 73,
       "community": "api",
       "docstring": "Run an async coroutine cleanly from synchronous Flask handlers."
     },
@@ -352,7 +362,7 @@
       "id": "omnisint.api.app.create_app",
       "type": "function",
       "file": "omnisint/api/app.py",
-      "line": 55,
+      "line": 87,
       "community": "api",
       "docstring": "Create the OmniSINT ASGI (FastAPI) or WSGI (Flask fallback) web application."
     },
@@ -360,7 +370,7 @@
       "id": "omnisint.api.app.get_default_app",
       "type": "function",
       "file": "omnisint/api/app.py",
-      "line": 217,
+      "line": 266,
       "community": "api",
       "docstring": "Factory returning a default configured OmniSINT web application."
     },
@@ -708,7 +718,7 @@
       "id": "omnisint.collectors.base.redact_sensitive_url",
       "type": "function",
       "file": "omnisint/collectors/base.py",
-      "line": 34,
+      "line": 35,
       "community": "collectors",
       "docstring": "Mask sensitive query parameters (e.g. API keys/tokens) before storing URIs in custody or cache."
     },
@@ -716,7 +726,7 @@
       "id": "omnisint.collectors.base.HttpResponseData",
       "type": "class",
       "file": "omnisint/collectors/base.py",
-      "line": 54,
+      "line": 55,
       "community": "collectors",
       "methods": [],
       "docstring": "Normalized HTTP response returned by collector transports."
@@ -725,7 +735,7 @@
       "id": "omnisint.collectors.base.CollectorConfig",
       "type": "class",
       "file": "omnisint/collectors/base.py",
-      "line": 70,
+      "line": 71,
       "community": "collectors",
       "methods": [],
       "docstring": "Runtime configuration for passive OSINT collectors."
@@ -734,7 +744,7 @@
       "id": "omnisint.collectors.base._default_urllib_get",
       "type": "async_function",
       "file": "omnisint/collectors/base.py",
-      "line": 86,
+      "line": 87,
       "community": "collectors",
       "docstring": "Perform an async HTTP GET via httpx (when installed) or stdlib urllib in a worker thread."
     },
@@ -742,7 +752,7 @@
       "id": "omnisint.collectors.base.BaseCollector",
       "type": "class",
       "file": "omnisint/collectors/base.py",
-      "line": 157,
+      "line": 158,
       "community": "collectors",
       "methods": [
         "__init__",
@@ -761,7 +771,7 @@
       "id": "omnisint.collectors.base.CollectorRegistry",
       "type": "class",
       "file": "omnisint/collectors/base.py",
-      "line": 428,
+      "line": 433,
       "community": "collectors",
       "methods": [
         "__init__",
@@ -1429,7 +1439,7 @@
       "id": "omnisint.core.storage.make_cache_key",
       "type": "function",
       "file": "omnisint/core/storage.py",
-      "line": 38,
+      "line": 39,
       "community": "core",
       "docstring": "Generate a deterministic SHA-256 cache key for a collector request."
     },
@@ -1437,7 +1447,7 @@
       "id": "omnisint.core.storage.CacheEntry",
       "type": "class",
       "file": "omnisint/core/storage.py",
-      "line": 55,
+      "line": 56,
       "community": "core",
       "methods": [
         "is_expired"
@@ -1445,10 +1455,23 @@
       "docstring": "Cached collector response record with TTL metadata and SHA-256 integrity hash."
     },
     {
+      "id": "omnisint.core.storage._CrossLoopAsyncLock",
+      "type": "class",
+      "file": "omnisint/core/storage.py",
+      "line": 76,
+      "community": "core",
+      "methods": [
+        "__init__",
+        "__aenter__",
+        "__aexit__"
+      ],
+      "docstring": "Thread-backed async mutex safe across multiple asyncio event loops."
+    },
+    {
       "id": "omnisint.core.storage.CaseStorage",
       "type": "class",
       "file": "omnisint/core/storage.py",
-      "line": 75,
+      "line": 90,
       "community": "core",
       "methods": [
         "__init__",
@@ -2242,11 +2265,12 @@
       "id": "tests.test_api.TestOmniSINTAPI",
       "type": "class",
       "file": "tests/test_api.py",
-      "line": 17,
+      "line": 19,
       "community": "tests",
       "methods": [
         "test_api_case_scan_graph_pivot_custody_and_exports",
-        "test_api_auth_async_jobs_pii_redaction_and_xss_hardening"
+        "test_api_auth_async_jobs_pii_redaction_and_xss_hardening",
+        "test_concurrent_flask_requests_and_exports_do_not_500"
       ],
       "docstring": "Offline integration tests for the OmniSINT Web API and Cytoscape.js UI serving."
     },
@@ -2515,6 +2539,11 @@
     },
     {
       "source": "omnisint.api.app",
+      "target": "threading",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.app",
       "target": "pathlib",
       "relation": "imports"
     },
@@ -2545,8 +2574,18 @@
     },
     {
       "source": "omnisint.api.app",
+      "target": "omnisint.api.app._get_bg_loop",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.api.app",
       "target": "omnisint.api.app._run_coro_sync",
       "relation": "defines"
+    },
+    {
+      "source": "omnisint.api.app._run_coro_sync",
+      "target": "omnisint.api.app._get_bg_loop",
+      "relation": "calls"
     },
     {
       "source": "omnisint.api.app",
@@ -3346,6 +3385,11 @@
     {
       "source": "omnisint.collectors.base",
       "target": "json",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.base",
+      "target": "threading",
       "relation": "imports"
     },
     {
@@ -4860,6 +4904,11 @@
     },
     {
       "source": "omnisint.core.storage",
+      "target": "threading",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.storage",
       "target": "datetime",
       "relation": "imports"
     },
@@ -4920,12 +4969,22 @@
     },
     {
       "source": "omnisint.core.storage",
+      "target": "omnisint.core.storage._CrossLoopAsyncLock",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.storage",
       "target": "omnisint.core.storage.CaseStorage",
       "relation": "defines"
     },
     {
       "source": "omnisint.core.storage.CaseStorage",
       "target": "omnisint.config.get_settings",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.storage.CaseStorage",
+      "target": "omnisint.core.storage._CrossLoopAsyncLock",
       "relation": "calls"
     },
     {
@@ -6340,6 +6399,11 @@
     },
     {
       "source": "tests.test_api",
+      "target": "threading",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_api",
       "target": "time",
       "relation": "imports"
     },
@@ -6356,6 +6420,11 @@
     {
       "source": "tests.test_api",
       "target": "omnisint.api",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_api",
+      "target": "omnisint.cli.main",
       "relation": "imports"
     },
     {
@@ -6396,6 +6465,11 @@
     {
       "source": "tests.test_api.TestOmniSINTAPI",
       "target": "omnisint.core.orchestrator.ScanOrchestrator",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_api.TestOmniSINTAPI",
+      "target": "omnisint.cli.main.build_demo_collision_case",
       "relation": "calls"
     },
     {
