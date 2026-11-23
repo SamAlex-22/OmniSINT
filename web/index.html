@@ -121,6 +121,15 @@
     let currentGraphData = null;
     let selectedNodeId = null;
 
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     async function refreshCases(selectId = null) {
       const resp = await fetch('/api/cases');
       const cases = await resp.json();
@@ -180,7 +189,15 @@
       personas.forEach(p => {
         const btn = document.createElement('button');
         btn.className = 'persona-pill';
-        btn.innerHTML = `<strong>${p.persona_label}</strong><br/><span style="font-size:0.75rem;color:#93a3c8;">conf=${p.confidence_score.toFixed(2)} | H=${p.avg_handle_entropy.toFixed(2)} | nodes=${p.node_ids.length}</span>`;
+        const titleEl = document.createElement('strong');
+        titleEl.textContent = p.persona_label || p.cluster_id;
+        const metaEl = document.createElement('span');
+        metaEl.style.fontSize = '0.75rem';
+        metaEl.style.color = '#93a3c8';
+        metaEl.textContent = `conf=${Number(p.confidence_score || 0).toFixed(2)} | H=${Number(p.avg_handle_entropy || 0).toFixed(2)} | nodes=${(p.node_ids || []).length}`;
+        btn.appendChild(titleEl);
+        btn.appendChild(document.createElement('br'));
+        btn.appendChild(metaEl);
         btn.onclick = () => filterPersona(p);
         list.appendChild(btn);
       });
@@ -241,15 +258,37 @@
 
     function showNodeInspector(data) {
       selectedNodeId = data.id;
-      document.getElementById('node-inspector').innerHTML = `
-        <div><strong>${data.label}</strong></div>
-        <div class="mono" style="font-size:0.74rem;color:#93a3c8;margin:4px 0;">ID: ${data.id}</div>
-        <div style="font-size:0.82rem;margin:6px 0;">
-          Type: <b>${data.entity_type}</b> | Entropy: <b>${Number(data.entropy_score || 0).toFixed(2)}</b><br/>
-          Rarity: <b>${Number(data.rarity_score || 0).toFixed(2)}</b> | Confidence: <b>${Number(data.confidence || 0).toFixed(2)}</b>
-        </div>
-        <button class="primary" style="width:100%;margin-top:6px;" onclick="pivotSelectedNode()">Pivot on Node</button>
-      `;
+      const inspector = document.getElementById('node-inspector');
+      inspector.textContent = '';
+
+      const titleWrap = document.createElement('div');
+      const strong = document.createElement('strong');
+      strong.textContent = data.label || data.id;
+      titleWrap.appendChild(strong);
+
+      const idDiv = document.createElement('div');
+      idDiv.className = 'mono';
+      idDiv.style.fontSize = '0.74rem';
+      idDiv.style.color = '#93a3c8';
+      idDiv.style.margin = '4px 0';
+      idDiv.textContent = `ID: ${data.id}`;
+
+      const statsDiv = document.createElement('div');
+      statsDiv.style.fontSize = '0.82rem';
+      statsDiv.style.margin = '6px 0';
+      statsDiv.innerHTML = `Type: <b>${escapeHtml(data.entity_type)}</b> | Entropy: <b>${Number(data.entropy_score || 0).toFixed(2)}</b><br/>Rarity: <b>${Number(data.rarity_score || 0).toFixed(2)}</b> | Confidence: <b>${Number(data.confidence || 0).toFixed(2)}</b>`;
+
+      const pivotBtn = document.createElement('button');
+      pivotBtn.className = 'primary';
+      pivotBtn.style.width = '100%';
+      pivotBtn.style.marginTop = '6px';
+      pivotBtn.textContent = 'Pivot on Node';
+      pivotBtn.onclick = pivotSelectedNode;
+
+      inspector.appendChild(titleWrap);
+      inspector.appendChild(idDiv);
+      inspector.appendChild(statsDiv);
+      inspector.appendChild(pivotBtn);
     }
 
     async function pivotSelectedNode() {
@@ -267,10 +306,28 @@
       badge.className = `badge ${custody.is_valid ? 'ok' : 'fail'}`;
       badge.textContent = custody.is_valid ? `Custody: VERIFIED (${custody.item_count} items)` : 'Custody: TAMPER DETECTED';
       const drawer = document.getElementById('custody-drawer');
-      drawer.innerHTML = `<div class="mono" style="font-size:0.72rem;margin-bottom:6px;">Head: ${custody.head_chain_hash.slice(0, 24)}...</div>` +
-        (custody.evidence_items || []).slice(0, 8).map(ev =>
-          `<div class="ev-row"><b>${ev.collector_name}</b><br/><span class="mono">${ev.sha256_hash.slice(0, 20)}...</span></div>`
-        ).join('');
+      drawer.textContent = '';
+
+      const headDiv = document.createElement('div');
+      headDiv.className = 'mono';
+      headDiv.style.fontSize = '0.72rem';
+      headDiv.style.marginBottom = '6px';
+      headDiv.textContent = `Head: ${String(custody.head_chain_hash || '').slice(0, 24)}...`;
+      drawer.appendChild(headDiv);
+
+      (custody.evidence_items || []).slice(0, 8).forEach(ev => {
+        const row = document.createElement('div');
+        row.className = 'ev-row';
+        const nameEl = document.createElement('b');
+        nameEl.textContent = ev.collector_name || 'collector';
+        const hashEl = document.createElement('span');
+        hashEl.className = 'mono';
+        hashEl.textContent = `${String(ev.sha256_hash || '').slice(0, 20)}...`;
+        row.appendChild(nameEl);
+        row.appendChild(document.createElement('br'));
+        row.appendChild(hashEl);
+        drawer.appendChild(row);
+      });
     }
 
     function exportReport(fmt) {

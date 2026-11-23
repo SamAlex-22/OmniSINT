@@ -281,6 +281,41 @@ class TestCaseStorage(unittest.IsolatedAsyncioTestCase):
             removed_count = await store.invalidate_cache(collector_name="username_collector")
             self.assertEqual(removed_count, 1)
 
+    async def test_persisted_ed25519_case_signature_and_rfc3161_anchor(self) -> None:
+        from omnisint.core.custody import CustodySigner, build_rfc3161_digest_request
+
+        async with CaseStorage(":memory:") as store:
+            case = await store.create_case(
+                title="Signed Custody Case",
+                target_query="alexsec.io",
+                legal_basis="dfir-engagement-01",
+                retention_days=180,
+            )
+            await store.record_evidence(
+                case_id=case.case_id,
+                collector_name="domain_ct_collector",
+                source_uri="https://crt.sh/?q=alexsec.io&output=json",
+                raw_payload=[{"common_name": "api.alexsec.io"}],
+            )
+            signer = CustodySigner()
+            sig_hex, pub_hex = await store.sign_case_custody(case.case_id, signer)
+            self.assertTrue(sig_hex and pub_hex)
+            self.assertTrue(await store.verify_case_signature(case.case_id))
+
+            ledger = await store.get_custody_ledger(case.case_id)
+            anchor = build_rfc3161_digest_request(ledger)
+            self.assertEqual(anchor.case_id, case.case_id)
+            self.assertEqual(len(anchor.imprint_sha256), 64)
+
+            # Adding new evidence without re-signing invalidates old head signature
+            await store.record_evidence(
+                case_id=case.case_id,
+                collector_name="threat_intel",
+                source_uri="https://www.virustotal.com/api/v3/domains/alexsec.io",
+                raw_payload={"reputation": 0},
+            )
+            self.assertFalse(await store.verify_case_signature(case.case_id))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -5,13 +5,15 @@ from __future__ import annotations
 import unittest
 from typing import Any
 
-from omnisint.collectors.base import (
+from omnisint.collectors import (
     CollectorConfig,
     CollectorRegistry,
+    GitHubCollector,
     HttpResponseData,
+    UsernameCollector,
+    load_whatsmyname_specs,
+    redact_sensitive_url,
 )
-from omnisint.collectors.github_collector import GitHubCollector
-from omnisint.collectors.username_collector import UsernameCollector
 from omnisint.core.custody import CustodyLedger
 from omnisint.core.models import Case, EntityType, RelationType
 from omnisint.core.storage import CaseStorage
@@ -232,6 +234,69 @@ class TestIdentityCollectors(unittest.IsolatedAsyncioTestCase):
         self.assertIn(RelationType.OWNS_DOMAIN, rel_types)
         self.assertEqual(len(result.evidence_items), 5)
         self.assertTrue(ledger.verify_chain()[0])
+
+    async def test_whatsmyname_loader_avatar_url_fetch_and_url_secret_redaction(self) -> None:
+        # 1. Sensitive query parameter redaction
+        raw_url = "https://www.googleapis.com/customsearch/v1?key=SECRET123&cx=mycx&q=test"
+        redacted = redact_sensitive_url(raw_url)
+        self.assertNotIn("SECRET123", redacted)
+        self.assertIn("key=REDACTED", redacted)
+        self.assertIn("cx=mycx", redacted)
+
+        # 2. WhatsMyName JSON site loader + avatar_url download dHash computation
+        wmn_payload = {
+            "sites": [
+                {
+                    "name": "ExampleForum",
+                    "uri_check": "https://exampleforum.test/u/{account}",
+                    "uri_pretty": "https://exampleforum.test/@{account}",
+                    "e_code": 200,
+                    "e_string": "User Profile Found",
+                    "m_string": "No such user",
+                    "cat": "tech",
+                }
+            ]
+        }
+        wmn_specs = load_whatsmyname_specs(wmn_payload)
+        self.assertEqual(len(wmn_specs), 1)
+
+        avatar_raw = b"PNG_AVATAR_BYTES_SAMPLE_" * 12
+
+        async def _mock_wmn_and_avatar(
+            url: str,
+            headers: dict[str, str] | None,
+            params: dict[str, Any] | None,
+            timeout: float,
+        ) -> HttpResponseData:
+            if "exampleforum.test/u/x7_krypton_99" in url:
+                return HttpResponseData(status_code=200, body="<html>User Profile Found</html>")
+            if "api.github.com/users/x7_krypton_99" in url:
+                return HttpResponseData(
+                    status_code=200,
+                    body={
+                        "login": "x7_krypton_99",
+                        "avatar_url": "https://avatars.test/u/12345.png",
+                    },
+                )
+            if url == "https://avatars.test/u/12345.png":
+                return HttpResponseData(status_code=200, body={"bytes_hex": avatar_raw.hex()})
+            return HttpResponseData(status_code=404, body="No such user")
+
+        gh_only_plus_wmn = wmn_specs + [
+            s for s in UsernameCollector().platforms if s.platform == "GitHub"
+        ]
+        collector = UsernameCollector(
+            platforms=gh_only_plus_wmn,
+            config=CollectorConfig(rate_limit_per_second=100.0),
+            http_transport=_mock_wmn_and_avatar,
+            fetch_avatars=True,
+        )
+        res = await collector.collect("x7_krypton_99", case_id="case-wmn-01")
+        platforms = {n.platform for n in res.nodes if n.entity_type == EntityType.SOCIAL_PROFILE}
+        self.assertEqual(platforms, {"ExampleForum", "GitHub"})
+        avatars = [n for n in res.nodes if n.entity_type == EntityType.AVATAR_HASH]
+        self.assertEqual(len(avatars), 1)
+        self.assertEqual(len(avatars[0].value), 16)
 
 
 if __name__ == "__main__":

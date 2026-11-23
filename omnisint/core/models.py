@@ -223,6 +223,10 @@ class Case(BaseModel):
     target_query: str
     investigator: str = "lead-analyst"
     description: str = ""
+    legal_basis: str = "authorized-defensive-research"
+    retention_days: int | None = Field(default=None, ge=1)
+    custody_signature: str | None = None
+    custody_public_key: str | None = None
     status: CaseStatus = CaseStatus.OPEN
     created_at_utc: datetime = Field(default_factory=utc_now)
     updated_at_utc: datetime = Field(default_factory=utc_now)

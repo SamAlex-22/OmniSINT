@@ -332,6 +332,37 @@ class DomainCTCollector(BaseCollector):
             except Exception as exc:
                 errors.append(f"DNS resolve failed for '{host}': {type(exc).__name__}: {exc}")
 
+        # 4. Extended Passive DNS records (MX, TXT, NS) for root domain
+        dns_records: dict[str, list[str]] = {}
+        for rtype in ("MX", "TXT", "NS"):
+            rec_url = f"https://dns.google/resolve?name={urllib.parse.quote(domain)}&type={rtype}"
+            try:
+                r_st, r_pay, ev_rec, _ = await self.fetch_with_custody(
+                    url=rec_url,
+                    case_id=case_id,
+                    ledger=active_ledger,
+                    storage=storage,
+                    notes=f"Passive DNS {rtype}-record lookup for '{domain}'",
+                )
+                if r_st != 200 or ev_rec is None or not isinstance(r_pay, dict):
+                    continue
+                ans_list = r_pay.get("Answer") or []
+                values = [
+                    str(a.get("data") or "").strip().strip('"')
+                    for a in ans_list
+                    if isinstance(a, dict) and a.get("data")
+                ]
+                if values:
+                    dns_records[rtype] = values
+                    evidence_items.append(ev_rec)
+                    if ev_rec.evidence_id not in domain_node.evidence_ids:
+                        domain_node.evidence_ids.append(ev_rec.evidence_id)
+            except Exception as exc:
+                errors.append(f"DNS {rtype} lookup failed for '{domain}': {type(exc).__name__}: {exc}")
+
+        if dns_records:
+            domain_node.attributes["dns_records"] = dns_records
+
         return CollectorResult(
             collector_name=self.name,
             query=domain,

@@ -119,12 +119,24 @@ class STIXExporter:
             }
 
         if etype == EntityType.THREAT_INDICATOR:
+            raw_val = node.value
+            parts = raw_val.split(":")
+            target_observable = parts[1] if len(parts) >= 3 else raw_val
+            try:
+                ip_obj = ipaddress.ip_address(target_observable)
+                stix_obs = "ipv6-addr" if ip_obj.version == 6 else "ipv4-addr"
+                pattern = f"[{stix_obs}:value = '{target_observable}']"
+            except ValueError:
+                if "." in target_observable and " " not in target_observable:
+                    pattern = f"[domain-name:value = '{target_observable}']"
+                else:
+                    pattern = f"[x-omnisint-indicator:value = '{raw_val}']"
             return {
                 "type": "indicator",
                 "spec_version": "2.1",
                 "id": _stix_id("indicator", node.node_id),
                 "name": node.label,
-                "pattern": f"[x-omnisint:indicator = '{node.value}']",
+                "pattern": pattern,
                 "pattern_type": "stix",
                 "valid_from": node.discovered_at_utc.strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "confidence": int(round(node.confidence * 100)),

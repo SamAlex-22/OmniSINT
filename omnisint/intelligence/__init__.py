@@ -11,6 +11,14 @@ from omnisint.intelligence.ai_analyst import (
     sanitize_hallucinated_citations,
     sanitize_untrusted_osint_text,
 )
+from omnisint.intelligence.benchmark import (
+    BenchmarkCase,
+    BenchmarkCaseResult,
+    BenchmarkMetrics,
+    default_benchmark_cases,
+    evaluate_clustering,
+    run_disambiguation_benchmark,
+)
 from omnisint.intelligence.entropy import (
     COMMON_ENGLISH_BIGRAMS,
     COMMON_NAME_TOKENS,
@@ -62,6 +70,9 @@ from omnisint.intelligence.temporal import (
 __all__ = [
     "AIAnalysisReport",
     "AIAnalyst",
+    "BenchmarkCase",
+    "BenchmarkCaseResult",
+    "BenchmarkMetrics",
     "CATEGORY_ORDER",
     "COMMON_ENGLISH_BIGRAMS",
     "COMMON_NAME_TOKENS",
@@ -87,8 +98,10 @@ __all__ = [
     "compute_rarity_score",
     "correlate_temporal_profiles",
     "correlate_timestamps",
+    "default_benchmark_cases",
     "enrich_node_entropy",
     "estimate_collision_probability",
+    "evaluate_clustering",
     "extract_citations",
     "format_utc_offset",
     "hamming_distance_hex",
@@ -102,6 +115,7 @@ __all__ = [
     "normalized_levenshtein",
     "parse_timestamp",
     "render_hierarchy_ascii",
+    "run_disambiguation_benchmark",
     "sanitize_hallucinated_citations",
     "sanitize_untrusted_osint_text",
     "shannon_entropy",

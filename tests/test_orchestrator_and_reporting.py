@@ -170,7 +170,7 @@ class TestOrchestratorAndReporting(unittest.IsolatedAsyncioTestCase):
             )
             self.assertTrue(any(a.action == "PIVOT_EXECUTED" for a in pivoted_case.audit_log))
 
-            # Export Markdown dossier with Ed25519 custody signature
+            # Export Markdown dossier with Ed25519 custody signature + PII redaction mode
             signer = CustodySigner()
             md = MarkdownExporter().export(pivoted_case, verify_custody=True, signer=signer)
             self.assertIn("VERIFIED (INTACT)", md)
@@ -178,7 +178,13 @@ class TestOrchestratorAndReporting(unittest.IsolatedAsyncioTestCase):
             self.assertIn("SHA-256 Chain of Custody Evidence Ledger", md)
             self.assertIn(signer.public_key_hex, md)
 
-            # Export OASIS STIX 2.1 JSON Bundle
+            md_redacted = MarkdownExporter().export(pivoted_case, verify_custody=True, redact_pii=True)
+            self.assertNotIn("krypton@alexsec.io", md_redacted)
+            self.assertIn("k***@alexsec.io", md_redacted)
+            self.assertNotIn("203.0.113.10", md_redacted)
+            self.assertIn("203.0.xxx.xxx", md_redacted)
+
+            # Export OASIS STIX 2.1 JSON Bundle (with valid observable STIX indicator pattern)
             stix_json = STIXExporter().export_json(pivoted_case)
             bundle = json.loads(stix_json)
             self.assertEqual(bundle["type"], "bundle")
@@ -189,6 +195,8 @@ class TestOrchestratorAndReporting(unittest.IsolatedAsyncioTestCase):
             self.assertIn("ipv4-addr", obj_types)
             self.assertIn("relationship", obj_types)
             self.assertIn("note", obj_types)
+            indicators = [obj for obj in bundle["objects"] if obj["type"] == "indicator"]
+            self.assertEqual(indicators[0]["pattern"], "[domain-name:value = 'alexsec.io']")
 
 
 if __name__ == "__main__":

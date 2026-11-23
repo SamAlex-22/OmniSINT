@@ -2,9 +2,23 @@
 
 from __future__ import annotations
 
+import re
+
 from omnisint.core.custody import CustodyLedger, CustodySigner
 from omnisint.core.models import Case, HierarchyTreeNode
 from omnisint.intelligence.graph_engine import render_hierarchy_ascii
+
+_EMAIL_RE = re.compile(r"\b([A-Za-z0-9._%+-])[A-Za-z0-9._%+-]*@([A-Za-z0-9.-]+\.[A-Za-z]{2,})\b")
+_IPV4_RE = re.compile(r"\b(\d{1,3}\.\d{1,3})\.\d{1,3}\.\d{1,3}\b")
+_PHONE_RE = re.compile(r"(?<!\w)(\+?\d[\d\s\-().]{7,}\d)(?!\w)")
+
+
+def redact_pii_text(text: str) -> str:
+    """Mask emails, IPv4 host octets, and phone numbers for PII-safe sharing."""
+    masked = _EMAIL_RE.sub(r"\1***@\2", text)
+    masked = _IPV4_RE.sub(r"\1.xxx.xxx", masked)
+    masked = _PHONE_RE.sub("[REDACTED-PHONE]", masked)
+    return masked
 
 
 def _hierarchy_tree_to_mermaid(tree: HierarchyTreeNode) -> str:
@@ -42,6 +56,7 @@ class MarkdownExporter:
         case: Case,
         verify_custody: bool = True,
         signer: CustodySigner | None = None,
+        redact_pii: bool = False,
     ) -> str:
         """Render a Case into a structured Markdown investigative dossier."""
         ledger = CustodyLedger(
@@ -59,16 +74,23 @@ class MarkdownExporter:
             f"- **Case ID:** `{case.case_id}`",
             f"- **Target Query:** `{case.target_query}`",
             f"- **Investigator:** `{case.investigator}`",
+            f"- **Legal Basis:** `{case.legal_basis}`",
             f"- **Status:** `{case.status.value}`",
             f"- **Created (UTC):** `{case.created_at_utc.isoformat()}`",
             f"- **Updated (UTC):** `{case.updated_at_utc.isoformat()}`",
             f"- **Custody Chain Integrity:** **{custody_badge}** (`head_chain_hash={ledger.head_chain_hash}`)",
         ]
+        if case.retention_days is not None:
+            sections.append(f"- **Retention Policy:** `{case.retention_days} days`")
 
         if signer is not None:
             sig = signer.sign_ledger(ledger)
             sections.append(
                 f"- **Ledger Head Signature ({signer.algorithm}):** `{sig}` (pubkey: `{signer.public_key_hex}`)"
+            )
+        elif case.custody_signature and case.custody_public_key:
+            sections.append(
+                f"- **Persisted Ledger Signature:** `{case.custody_signature}` (pubkey: `{case.custody_public_key}`)"
             )
 
         if violations:
@@ -145,4 +167,5 @@ class MarkdownExporter:
                 f"| `{entry.timestamp_utc.isoformat()}` | `{entry.actor}` | `{entry.action}` | {ev_col} |"
             )
 
-        return "\n".join(sections).strip() + "\n"
+        rendered = "\n".join(sections).strip() + "\n"
+        return redact_pii_text(rendered) if redact_pii else rendered

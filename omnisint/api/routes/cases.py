@@ -1,30 +1,33 @@
-"""REST & WebSocket Case, Scan, Graph, Pivot, Custody & Reporting route handlers for OmniSINT."""
+"""REST & WebSocket Case, Scan, Graph, Pivot, Custody, Async Job & Reporting route handlers for OmniSINT."""
 
 from __future__ import annotations
 
 import asyncio
+import concurrent.futures
+import hmac
 import json
-from typing import Any
+import threading
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from omnisint.config import get_settings
 from omnisint.core.custody import CustodyLedger
-from omnisint.core.models import Case, EntityType
+from omnisint.core.models import Case, EntityType, new_uuid, utc_now
 from omnisint.core.orchestrator import ScanOrchestrator, ScanProgressEvent
 from omnisint.core.storage import CaseStorage
 from omnisint.intelligence.graph_engine import KnowledgeGraphEngine
 from omnisint.reporting import MarkdownExporter, STIXExporter
 
 try:
-    from fastapi import APIRouter, HTTPException, Response, WebSocket, WebSocketDisconnect  # type: ignore[import-untyped]
+    from fastapi import APIRouter, HTTPException, Request, Response  # type: ignore[import-untyped]
 
     HAS_FASTAPI = True
 except ImportError:  # pragma: no cover
     APIRouter = None
     HTTPException = None
+    Request = None
     Response = None
-    WebSocket = None
-    WebSocketDisconnect = None
     HAS_FASTAPI = False
 
 
@@ -37,6 +40,8 @@ class CreateCaseRequest(BaseModel):
     target_query: str = Field(..., min_length=1)
     investigator: str = "lead-analyst"
     description: str = ""
+    legal_basis: str = "authorized-defensive-research"
+    retention_days: int | None = Field(default=None, ge=1)
 
 
 class ScanRequest(BaseModel):
@@ -60,6 +65,21 @@ class PivotNodeRequest(BaseModel):
     collector_names: list[str] | None = None
     run_disambiguation: bool = True
     run_ai_analysis: bool = True
+
+
+class ScanJobStatus(BaseModel):
+    """Status tracker for non-blocking background scan or pivot jobs."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    job_id: str = Field(default_factory=new_uuid)
+    case_id: str
+    job_type: Literal["scan", "pivot"]
+    status: Literal["queued", "running", "completed", "failed"] = "queued"
+    created_at_utc: str = Field(default_factory=lambda: utc_now().isoformat())
+    completed_at_utc: str | None = None
+    result: dict[str, Any] | None = None
+    error: str | None = None
 
 
 class CustodyVerificationResponse(BaseModel):
@@ -114,6 +134,66 @@ class ProgressBroadcaster:
             await queue.put(payload)
 
 
+class JobManager:
+    """Tracks background scan and pivot tasks across both ASGI and WSGI runtimes."""
+
+    def __init__(self) -> None:
+        self._jobs: dict[str, ScanJobStatus] = {}
+        self._lock = threading.Lock()
+        self._executor = concurrent.futures.ThreadPoolExecutor(max_workers=4)
+
+    def create_job(self, case_id: str, job_type: Literal["scan", "pivot"]) -> ScanJobStatus:
+        """Create and register a queued background job."""
+        job = ScanJobStatus(case_id=case_id, job_type=job_type)
+        with self._lock:
+            self._jobs[job.job_id] = job
+        return job
+
+    def get_job(self, job_id: str) -> ScanJobStatus | None:
+        """Retrieve a job status record by ID."""
+        with self._lock:
+            job = self._jobs.get(job_id)
+            return job.model_copy(deep=True) if job else None
+
+    def launch_coro(self, job: ScanJobStatus, coro_factory: Any) -> None:
+        """Execute `coro_factory()` asynchronously and record job completion/error."""
+
+        async def _runner() -> None:
+            with self._lock:
+                job.status = "running"
+            try:
+                res = await coro_factory()
+                with self._lock:
+                    job.status = "completed"
+                    job.result = res
+                    job.completed_at_utc = utc_now().isoformat()
+            except Exception as exc:
+                with self._lock:
+                    job.status = "failed"
+                    job.error = f"{type(exc).__name__}: {exc}"
+                    job.completed_at_utc = utc_now().isoformat()
+
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(_runner())
+        except RuntimeError:
+            self._executor.submit(lambda: asyncio.run(_runner()))
+
+
+def verify_api_token(provided_header_auth: str | None, provided_api_key: str | None, expected_token: str | None) -> bool:
+    """Return True if authentication is disabled or the supplied Bearer/X-API-Key token matches."""
+    if not expected_token:
+        return True
+    candidate: str | None = None
+    if provided_header_auth and provided_header_auth.lower().startswith("bearer "):
+        candidate = provided_header_auth[7:].strip()
+    elif provided_api_key:
+        candidate = provided_api_key.strip()
+    if not candidate:
+        return False
+    return hmac.compare_digest(candidate, expected_token)
+
+
 class OmniSINTAPIService:
     """Framework-agnostic async service layer backing FastAPI and Flask endpoints."""
 
@@ -122,9 +202,14 @@ class OmniSINTAPIService:
         storage: CaseStorage | None = None,
         orchestrator: ScanOrchestrator | None = None,
         broadcaster: ProgressBroadcaster | None = None,
+        api_auth_token: str | None = None,
     ) -> None:
         self.storage = storage or CaseStorage()
         self.broadcaster = broadcaster or ProgressBroadcaster()
+        self.jobs = JobManager()
+        self.api_auth_token = (
+            api_auth_token if api_auth_token is not None else get_settings().api_auth_token
+        )
         if orchestrator is not None:
             self.orchestrator = orchestrator
         else:
@@ -147,6 +232,7 @@ class OmniSINTAPIService:
                 "title": c.title,
                 "target_query": c.target_query,
                 "investigator": c.investigator,
+                "legal_basis": c.legal_basis,
                 "status": c.status.value,
                 "created_at_utc": c.created_at_utc.isoformat(),
                 "updated_at_utc": c.updated_at_utc.isoformat(),
@@ -166,6 +252,8 @@ class OmniSINTAPIService:
             target_query=req.target_query,
             investigator=req.investigator,
             description=req.description,
+            legal_basis=req.legal_basis,
+            retention_days=req.retention_days,
         )
 
     async def get_case(self, case_id: str) -> Case:
@@ -198,6 +286,12 @@ class OmniSINTAPIService:
             "citation_valid": report.citation_audit.is_valid if report else True,
         }
 
+    def submit_scan_job(self, case_id: str, req: ScanRequest) -> ScanJobStatus:
+        """Queue a non-blocking background scan job and return its ScanJobStatus."""
+        job = self.jobs.create_job(case_id=case_id, job_type="scan")
+        self.jobs.launch_coro(job, lambda: self.run_scan(case_id, req))
+        return job
+
     async def pivot_node(self, case_id: str, req: PivotNodeRequest) -> dict[str, Any]:
         """Execute a pivot on `req.node_id` inside `case_id`."""
         await self.ensure_ready()
@@ -217,6 +311,12 @@ class OmniSINTAPIService:
             "persona_count": len(updated_case.personas),
             "citation_valid": report.citation_audit.is_valid if report else True,
         }
+
+    def submit_pivot_job(self, case_id: str, req: PivotNodeRequest) -> ScanJobStatus:
+        """Queue a non-blocking background pivot job and return its ScanJobStatus."""
+        job = self.jobs.create_job(case_id=case_id, job_type="pivot")
+        self.jobs.launch_coro(job, lambda: self.pivot_node(case_id, req))
+        return job
 
     async def get_graph_payload(self, case_id: str) -> GraphPayloadResponse:
         """Build Cytoscape.js graph elements and PersonaCluster hierarchy trees for `case_id`."""
@@ -264,12 +364,20 @@ class OmniSINTAPIService:
             audit_log=audit_summaries,
         )
 
-    async def export_report(self, case_id: str, fmt: str) -> tuple[str, str]:
+    async def export_report(
+        self,
+        case_id: str,
+        fmt: str,
+        redact_pii: bool = False,
+    ) -> tuple[str, str]:
         """Export a Case as Markdown or STIX 2.1 JSON; returns `(content, media_type)`."""
         case = await self.get_case(case_id)
         norm = fmt.strip().lower()
         if norm in ("md", "markdown"):
-            return MarkdownExporter().export(case, verify_custody=True), "text/markdown; charset=utf-8"
+            return (
+                MarkdownExporter().export(case, verify_custody=True, redact_pii=redact_pii),
+                "text/markdown; charset=utf-8",
+            )
         if norm in ("stix", "stix2", "json"):
             return STIXExporter().export_json(case), "application/stix+json; charset=utf-8"
         raise ValueError(f"Unsupported export format '{fmt}' (expected 'markdown' or 'stix')")
@@ -282,21 +390,33 @@ def build_fastapi_router(service: OmniSINTAPIService) -> Any:  # pragma: no cove
 
     router = APIRouter(prefix="/api", tags=["omnisint"])
 
+    def _require_auth(request: Any) -> None:
+        ok = verify_api_token(
+            request.headers.get("authorization"),
+            request.headers.get("x-api-key"),
+            service.api_auth_token,
+        )
+        if not ok:
+            raise HTTPException(status_code=401, detail="Unauthorized")
+
     @router.get("/health")
     async def health() -> dict[str, str]:
         return {"status": "ok", "service": "omnisint"}
 
     @router.get("/cases")
-    async def list_cases() -> list[dict[str, Any]]:
+    async def list_cases(request: Any) -> list[dict[str, Any]]:
+        _require_auth(request)
         return await service.list_cases()
 
     @router.post("/cases", status_code=201)
-    async def create_case(payload: CreateCaseRequest) -> dict[str, Any]:
+    async def create_case(payload: CreateCaseRequest, request: Any) -> dict[str, Any]:
+        _require_auth(request)
         case = await service.create_case(payload)
         return case.model_dump(mode="json")
 
     @router.get("/cases/{case_id}")
-    async def get_case(case_id: str) -> dict[str, Any]:
+    async def get_case(case_id: str, request: Any) -> dict[str, Any]:
+        _require_auth(request)
         try:
             case = await service.get_case(case_id)
             return case.model_dump(mode="json")
@@ -304,21 +424,53 @@ def build_fastapi_router(service: OmniSINTAPIService) -> Any:  # pragma: no cove
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @router.post("/cases/{case_id}/scan")
-    async def scan_case(case_id: str, payload: ScanRequest) -> dict[str, Any]:
+    async def scan_case(
+        case_id: str,
+        payload: ScanRequest,
+        request: Any,
+        async_mode: bool = False,
+    ) -> Any:
+        _require_auth(request)
         try:
-            return await service.run_scan(case_id, payload)
+            await service.get_case(case_id)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+        if async_mode or request.query_params.get("async") == "true":
+            job = service.submit_scan_job(case_id, payload)
+            return Response(
+                content=json_dumps_safe(job.model_dump(mode="json")),
+                status_code=202,
+                media_type="application/json",
+            )
+        return await service.run_scan(case_id, payload)
 
     @router.post("/cases/{case_id}/pivot")
-    async def pivot_case_node(case_id: str, payload: PivotNodeRequest) -> dict[str, Any]:
+    async def pivot_case_node(case_id: str, payload: PivotNodeRequest, request: Any) -> Any:
+        _require_auth(request)
         try:
-            return await service.pivot_node(case_id, payload)
+            await service.get_case(case_id)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+        if request.query_params.get("async") == "true":
+            job = service.submit_pivot_job(case_id, payload)
+            return Response(
+                content=json_dumps_safe(job.model_dump(mode="json")),
+                status_code=202,
+                media_type="application/json",
+            )
+        return await service.pivot_node(case_id, payload)
+
+    @router.get("/jobs/{job_id}")
+    async def get_job_status(job_id: str, request: Any) -> dict[str, Any]:
+        _require_auth(request)
+        job = service.jobs.get_job(job_id)
+        if job is None:
+            raise HTTPException(status_code=404, detail=f"Job '{job_id}' not found")
+        return job.model_dump(mode="json")
 
     @router.get("/cases/{case_id}/graph")
-    async def get_case_graph(case_id: str) -> dict[str, Any]:
+    async def get_case_graph(case_id: str, request: Any) -> dict[str, Any]:
+        _require_auth(request)
         try:
             res = await service.get_graph_payload(case_id)
             return res.model_dump(mode="json")
@@ -326,7 +478,8 @@ def build_fastapi_router(service: OmniSINTAPIService) -> Any:  # pragma: no cove
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @router.get("/cases/{case_id}/custody")
-    async def get_case_custody(case_id: str) -> dict[str, Any]:
+    async def get_case_custody(case_id: str, request: Any) -> dict[str, Any]:
+        _require_auth(request)
         try:
             res = await service.verify_custody(case_id)
             return res.model_dump(mode="json")
@@ -334,9 +487,10 @@ def build_fastapi_router(service: OmniSINTAPIService) -> Any:  # pragma: no cove
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @router.get("/cases/{case_id}/export/{fmt}")
-    async def export_case(case_id: str, fmt: str) -> Any:
+    async def export_case(case_id: str, fmt: str, request: Any, redact_pii: bool = False) -> Any:
+        _require_auth(request)
         try:
-            content, media_type = await service.export_report(case_id, fmt)
+            content, media_type = await service.export_report(case_id, fmt, redact_pii=redact_pii)
             return Response(content=content, media_type=media_type)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc

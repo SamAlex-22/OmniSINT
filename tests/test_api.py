@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import time
 import unittest
 from typing import Any
 
@@ -115,6 +116,95 @@ class TestOmniSINTAPI(unittest.TestCase):
             # 8. 404 handling for missing case
             missing_res = client.get("/api/cases/nonexistent-case")
             self.assertEqual(missing_res.status_code, 404)
+        finally:
+            asyncio.run(storage.close())
+
+    def test_api_auth_async_jobs_pii_redaction_and_xss_hardening(self) -> None:
+        async def _mock_http(
+            url: str,
+            headers: dict[str, str] | None,
+            params: dict[str, Any] | None,
+            timeout: float,
+        ) -> HttpResponseData:
+            if url == "https://api.github.com/users/krypton_sec_x7":
+                return HttpResponseData(
+                    status_code=200,
+                    body={
+                        "login": "krypton_sec_x7",
+                        "name": "<img src=x onerror=alert(1)>",
+                        "email": "secret@alexsec.io",
+                    },
+                )
+            return HttpResponseData(status_code=404, body={})
+
+        storage = CaseStorage(":memory:")
+        asyncio.run(storage.initialize())
+        registry = create_default_registry(
+            config=CollectorConfig(rate_limit_per_second=100.0),
+            http_transport=_mock_http,
+        )
+        orchestrator = ScanOrchestrator(storage=storage, registry=registry)
+        app = create_app(
+            storage=storage,
+            orchestrator=orchestrator,
+            api_auth_token="super-secret-token",
+        )
+
+        try:
+            client = app.test_client()
+
+            # Unauthenticated /api/health succeeds; /api/cases returns 401
+            self.assertEqual(client.get("/api/health").status_code, 200)
+            self.assertEqual(client.get("/api/cases").status_code, 401)
+
+            # Web GUI HTML uses safe DOM creation and escapeHtml helper
+            html = client.get("/").get_data(as_text=True)
+            self.assertIn("function escapeHtml", html)
+            self.assertIn("titleEl.textContent", html)
+
+            auth_headers = {"Authorization": "Bearer super-secret-token"}
+            create_res = client.post(
+                "/api/cases",
+                headers=auth_headers,
+                json={
+                    "title": "Auth & Async Job Case",
+                    "target_query": "krypton_sec_x7",
+                    "legal_basis": "incident-response-ticket-402",
+                    "retention_days": 90,
+                },
+            )
+            self.assertEqual(create_res.status_code, 201)
+            created = create_res.get_json()
+            case_id = created["case_id"]
+            self.assertEqual(created["legal_basis"], "incident-response-ticket-402")
+            self.assertEqual(created["retention_days"], 90)
+
+            # Submit non-blocking async scan -> 202 Accepted with job_id
+            async_res = client.post(
+                f"/api/cases/{case_id}/scan?async=true",
+                headers=auth_headers,
+                json={"query": "krypton_sec_x7", "max_hops": 1, "run_ai_analysis": True},
+            )
+            self.assertEqual(async_res.status_code, 202)
+            job_id = async_res.get_json()["job_id"]
+
+            job_data: dict[str, Any] = {}
+            for _ in range(40):
+                poll = client.get(f"/api/jobs/{job_id}", headers=auth_headers)
+                self.assertEqual(poll.status_code, 200)
+                job_data = poll.get_json()
+                if job_data["status"] in ("completed", "failed"):
+                    break
+                time.sleep(0.02)
+            self.assertEqual(job_data["status"], "completed")
+
+            # Export with PII redaction masks emails
+            redacted_md = client.get(
+                f"/api/cases/{case_id}/export/markdown?redact_pii=true",
+                headers=auth_headers,
+            ).get_data(as_text=True)
+            self.assertNotIn("secret@alexsec.io", redacted_md)
+            self.assertIn("s***@alexsec.io", redacted_md)
         finally:
             asyncio.run(storage.close())
 

@@ -319,6 +319,8 @@ OMNISINT_LLM_MODEL=gemini-2.5-flash
 OMNISINT_LLM_API_KEY=                 # Optional API key for Gemini or OpenAI
 OMNISINT_GITHUB_TOKEN=                # Optional GitHub PAT for higher rate limits
 OMNISINT_VIRUSTOTAL_API_KEY=          # Optional VirusTotal v3 API key
+OMNISINT_HTTP_PROXY=                  # Optional HTTP/HTTPS OPSEC proxy URL
+OMNISINT_API_AUTH_TOKEN=              # Optional Bearer / X-API-Key token for Web API
 ```
 
 ### Step 3: Run the Verification Test Suite & CLI Demo
@@ -328,9 +330,9 @@ All unit and integration tests are deterministic and run completely offline:
 python3 -m unittest discover -s tests -v
 
 # Run the built-in colliding-namesake disambiguation demo via CLI
-python3 -m omnisint.cli.main demo --db demo.db --output-md dossier.md --output-stix bundle.stix.json
-python3 -m omnisint.cli.main case verify demo-collision-case --db demo.db
-python3 -m omnisint.cli.main tui demo-collision-case --db demo.db --snapshot
+python3 -m omnisint demo --db demo.db --output-md dossier.md --output-stix bundle.stix.json
+python3 -m omnisint case verify demo-collision-case --db demo.db
+python3 -m omnisint tui demo-collision-case --db demo.db --snapshot
 ```
 
 ---

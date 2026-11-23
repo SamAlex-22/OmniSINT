@@ -25,6 +25,7 @@ This document is written so that **anyone**—whether you are a first-time open-
 - [Milestone 8 (Task 8): Async Scan Orchestrator, Cross-Indicator Pivot Engine & STIX 2.1 / Markdown Exporters](#milestone-8-task-8-async-scan-orchestrator-cross-indicator-pivot-engine--stix-21--markdown-exporters)
 - [Milestone 9 (Task 9): FastAPI / WSGI Backend, WebSocket Live Stream & Cytoscape.js Interactive Web GUI](#milestone-9-task-9-fastapi--wsgi-backend-websocket-live-stream--cytoscapejs-interactive-web-gui)
 - [Milestone 10 (Task 10): CLI, Interactive Terminal Dashboard (TUI) & End-to-End Integration Suite](#milestone-10-task-10-cli-interactive-terminal-dashboard-tui--end-to-end-integration-suite)
+- [Milestone 11: Enterprise Security, Real-World Collector Expansion, API Governance & Disambiguation Benchmark](#milestone-11-enterprise-security-real-world-collector-expansion-api-governance--disambiguation-benchmark)
 
 ---
 
@@ -591,6 +592,35 @@ Security operators working over SSH or inside automated CI/SOAR pipelines need f
 ### 2. What the Unit Tests Prove (`tests/test_cli_e2e.py`)
 - `test_demo_case_separates_colliding_personas_and_exports_reports`: Exercises `omnisint demo`, SQLite persistence, `case list`, `case show`, `case verify`, `report --format stix`, `tui --snapshot`, Markdown/STIX exports, and verifies that tampering a payload row in SQLite causes `omnisint case verify` to fail with a non-zero exit code.
 - `test_tui_dashboard_interactive_views_and_persona_navigation`: Tests persona navigation and switching across `hierarchy`, `matrix`, `custody`, and `brief` views.
+
+---
+
+## Milestone 11: Enterprise Security, Real-World Collector Expansion, API Governance & Disambiguation Benchmark
+
+**Status:** Completed  
+**Modules Created / Updated:**
+- [web/index.html](file:///Users/alex/OmniSINT/web/index.html), [omnisint/collectors/base.py](file:///Users/alex/OmniSINT/omnisint/collectors/base.py), [omnisint/collectors/username_collector.py](file:///Users/alex/OmniSINT/omnisint/collectors/username_collector.py), [omnisint/collectors/domain_ct_collector.py](file:///Users/alex/OmniSINT/omnisint/collectors/domain_ct_collector.py)
+- [omnisint/core/models.py](file:///Users/alex/OmniSINT/omnisint/core/models.py), [omnisint/core/custody.py](file:///Users/alex/OmniSINT/omnisint/core/custody.py), [omnisint/core/storage.py](file:///Users/alex/OmniSINT/omnisint/core/storage.py)
+- [omnisint/api/routes/cases.py](file:///Users/alex/OmniSINT/omnisint/api/routes/cases.py), [omnisint/api/app.py](file:///Users/alex/OmniSINT/omnisint/api/app.py), [omnisint/reporting/markdown_exporter.py](file:///Users/alex/OmniSINT/omnisint/reporting/markdown_exporter.py), [omnisint/reporting/stix_exporter.py](file:///Users/alex/OmniSINT/omnisint/reporting/stix_exporter.py)
+- [omnisint/intelligence/benchmark.py](file:///Users/alex/OmniSINT/omnisint/intelligence/benchmark.py), [omnisint/__main__.py](file:///Users/alex/OmniSINT/omnisint/__main__.py), [pyproject.toml](file:///Users/alex/OmniSINT/pyproject.toml), [tests/test_benchmark.py](file:///Users/alex/OmniSINT/tests/test_benchmark.py), [tests/test_live_smoke.py](file:///Users/alex/OmniSINT/tests/test_live_smoke.py)
+
+### What Was Built & Fixed
+1. **Security & Secret Hygiene:**
+   - Eliminated DOM XSS in [web/index.html](file:///Users/alex/OmniSINT/web/index.html) using `escapeHtml()` and safe `textContent` node construction.
+   - Added `redact_sensitive_url()` in `BaseCollector` so API keys/tokens (e.g., Google CSE `key=...`) are masked with `REDACTED` before persisting `source_uri` to `CustodyLedger` or `http_cache`.
+   - Added optional Bearer / `X-API-Key` authentication (`OMNISINT_API_AUTH_TOKEN`) across all `/api/*` endpoints (excluding `/api/health`).
+2. **Real-World Collector Capabilities & OPSEC:**
+   - Added `load_whatsmyname_specs()` and live `avatar_url` byte downloading (`fetch_bytes`) in `UsernameCollector` so `dHash` values are computed directly from fetched avatar images.
+   - Added `OMNISINT_HTTP_PROXY` routing in `BaseCollector`, expanded `DomainCTCollector` with `MX`/`TXT`/`NS` passive DNS queries, and added opt-in live smoke tests (`tests/test_live_smoke.py`).
+3. **Enterprise Governance, Async Jobs, PII Redaction & Custody Signing:**
+   - Added `legal_basis`, `retention_days`, `custody_signature`, and `custody_public_key` to `Case` + idempotent SQLite migrations (`sign_case_custody`, `verify_case_signature`) and `build_rfc3161_digest_request()`.
+   - Added non-blocking background jobs (`POST /api/cases/{id}/scan?async=true` returning `202 Accepted` + `GET /api/jobs/{job_id}`).
+   - Added `redact_pii=True` on `MarkdownExporter` / `/export/markdown?redact_pii=true` and fixed `STIXExporter` to emit valid STIX 2.1 observable patterns (`[domain-name:value = ...]`, `[ipv4-addr:value = ...]`).
+4. **Labelled Disambiguation Benchmark (`benchmark.py`, `tests/test_benchmark.py`):**
+   - Evaluates pairwise Precision, Recall, F1, and Adjusted Rand Index (ARI) across rare handles, multinational colliding namesakes, location-alias travellers, and timezone-separated personas (`pairwise_f1 >= 0.90`, `ARI >= 0.85`).
+5. **Packaging & CLI Entrypoint (`pyproject.toml`, `omnisint/__main__.py`):**
+   - Split optional extras (`[web]`, `[tui]`, `[graph]`, `[full]`, `[dev]`), removed unused `aiosqlite`, added `cryptography` and `click`, and added `python3 -m omnisint` entrypoint without `runpy` warnings.
+
 
 
 

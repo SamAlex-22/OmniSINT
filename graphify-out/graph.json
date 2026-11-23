@@ -1,63 +1,66 @@
 {
-  "generated_at_utc": "2026-11-17T20:47:41.986150+00:00",
+  "generated_at_utc": "2026-11-23T08:19:42.036130+00:00",
   "stats": {
-    "total_nodes": 182,
-    "total_edges": 756,
-    "communities_count": 10
+    "total_nodes": 203,
+    "total_edges": 827,
+    "communities_count": 11
   },
   "god_nodes": [
     {
       "id": "omnisint.core.models",
-      "degree": 45
+      "degree": 47
     },
     {
       "id": "omnisint.core.custody",
-      "degree": 34
+      "degree": 37
+    },
+    {
+      "id": "omnisint.cli.main",
+      "degree": 32
     },
     {
       "id": "omnisint.core.storage.CaseStorage",
       "degree": 32
     },
     {
-      "id": "omnisint.cli.main",
-      "degree": 31
-    },
-    {
       "id": "omnisint.core.storage",
       "degree": 30
+    },
+    {
+      "id": "omnisint.api.routes.cases",
+      "degree": 29
     },
     {
       "id": "omnisint.core.custody.CustodyLedger",
       "degree": 27
     },
     {
-      "id": "omnisint.collectors.base",
+      "id": "omnisint.intelligence.graph_engine",
       "degree": 26
     },
     {
-      "id": "omnisint.intelligence.graph_engine",
-      "degree": 25
+      "id": "omnisint.intelligence.similarity",
+      "degree": 26
+    },
+    {
+      "id": "omnisint.collectors.base",
+      "degree": 26
     },
     {
       "id": "omnisint.intelligence.ai_analyst",
       "degree": 25
     },
     {
-      "id": "omnisint.intelligence.similarity",
-      "degree": 25
-    },
-    {
-      "id": "omnisint.intelligence.entropy",
-      "degree": 24
-    },
-    {
       "id": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
-      "degree": 23
+      "degree": 24
     }
   ],
   "communities": {
     "omnisint": [
       "omnisint"
+    ],
+    "__main__": [
+      "omnisint.__main__"
     ],
     "api": [
       "omnisint.api",
@@ -70,9 +73,12 @@
       "omnisint.api.routes.cases.CreateCaseRequest",
       "omnisint.api.routes.cases.ScanRequest",
       "omnisint.api.routes.cases.PivotNodeRequest",
+      "omnisint.api.routes.cases.ScanJobStatus",
       "omnisint.api.routes.cases.CustodyVerificationResponse",
       "omnisint.api.routes.cases.GraphPayloadResponse",
       "omnisint.api.routes.cases.ProgressBroadcaster",
+      "omnisint.api.routes.cases.JobManager",
+      "omnisint.api.routes.cases.verify_api_token",
       "omnisint.api.routes.cases.OmniSINTAPIService",
       "omnisint.api.routes.cases.build_fastapi_router",
       "omnisint.api.routes.cases.json_dumps_safe"
@@ -102,6 +108,7 @@
       "omnisint.collectors",
       "omnisint.collectors.create_default_registry",
       "omnisint.collectors.base",
+      "omnisint.collectors.base.redact_sensitive_url",
       "omnisint.collectors.base.HttpResponseData",
       "omnisint.collectors.base.CollectorConfig",
       "omnisint.collectors.base._default_urllib_get",
@@ -118,6 +125,7 @@
       "omnisint.collectors.threat_intel.ThreatIntelCollector",
       "omnisint.collectors.username_collector",
       "omnisint.collectors.username_collector.PlatformSpec",
+      "omnisint.collectors.username_collector.load_whatsmyname_specs",
       "omnisint.collectors.username_collector.UsernameCollector"
     ],
     "config": [
@@ -135,6 +143,8 @@
       "omnisint.core.custody.compute_item_chain_hash",
       "omnisint.core.custody.CustodyLedger",
       "omnisint.core.custody.CustodySigner",
+      "omnisint.core.custody.RFC3161AnchorRecord",
+      "omnisint.core.custody.build_rfc3161_digest_request",
       "omnisint.core.models",
       "omnisint.core.models.utc_now",
       "omnisint.core.models.new_uuid",
@@ -172,6 +182,14 @@
       "omnisint.intelligence.ai_analyst.sanitize_hallucinated_citations",
       "omnisint.intelligence.ai_analyst._default_http_post_json",
       "omnisint.intelligence.ai_analyst.AIAnalyst",
+      "omnisint.intelligence.benchmark",
+      "omnisint.intelligence.benchmark.BenchmarkMetrics",
+      "omnisint.intelligence.benchmark.BenchmarkCase",
+      "omnisint.intelligence.benchmark.BenchmarkCaseResult",
+      "omnisint.intelligence.benchmark.evaluate_clustering",
+      "omnisint.intelligence.benchmark._count_groups",
+      "omnisint.intelligence.benchmark.default_benchmark_cases",
+      "omnisint.intelligence.benchmark.run_disambiguation_benchmark",
       "omnisint.intelligence.entropy",
       "omnisint.intelligence.entropy.HandleEntropyMetrics",
       "omnisint.intelligence.entropy.strip_email_domain",
@@ -222,6 +240,7 @@
     "reporting": [
       "omnisint.reporting",
       "omnisint.reporting.markdown_exporter",
+      "omnisint.reporting.markdown_exporter.redact_pii_text",
       "omnisint.reporting.markdown_exporter._hierarchy_tree_to_mermaid",
       "omnisint.reporting.markdown_exporter.MarkdownExporter",
       "omnisint.reporting.stix_exporter",
@@ -241,6 +260,8 @@
       "tests.test_ai_analyst.TestAIAnalyst",
       "tests.test_api",
       "tests.test_api.TestOmniSINTAPI",
+      "tests.test_benchmark",
+      "tests.test_benchmark.TestDisambiguationBenchmark",
       "tests.test_cli_e2e",
       "tests.test_cli_e2e.TestCLIEndToEnd",
       "tests.test_entropy_and_similarity",
@@ -251,6 +272,8 @@
       "tests.test_identity_collectors.TestIdentityCollectors",
       "tests.test_infra_collectors",
       "tests.test_infra_collectors.TestInfraCollectors",
+      "tests.test_live_smoke",
+      "tests.test_live_smoke.TestLiveCollectorSmoke",
       "tests.test_models_and_custody",
       "tests.test_models_and_custody.TestModelsAndCustody",
       "tests.test_orchestrator_and_reporting",
@@ -266,6 +289,13 @@
       "file": "omnisint/__init__.py",
       "community": "omnisint",
       "docstring": "OmniSINT \u2014 OSINT Aggregation, Case Management, and AI Entity-Resolution Platform."
+    },
+    {
+      "id": "omnisint.__main__",
+      "type": "module",
+      "file": "omnisint/__main__.py",
+      "community": "__main__",
+      "docstring": "Module entrypoint allowing `python3 -m omnisint` execution without runpy warnings."
     },
     {
       "id": "omnisint.api",
@@ -285,7 +315,7 @@
       "id": "omnisint.api.app._run_coro_sync",
       "type": "function",
       "file": "omnisint/api/app.py",
-      "line": 42,
+      "line": 43,
       "community": "api",
       "docstring": "Run an async coroutine cleanly from synchronous Flask handlers."
     },
@@ -301,7 +331,7 @@
       "id": "omnisint.api.app.get_default_app",
       "type": "function",
       "file": "omnisint/api/app.py",
-      "line": 182,
+      "line": 217,
       "community": "api",
       "docstring": "Factory returning a default configured OmniSINT web application."
     },
@@ -317,13 +347,13 @@
       "type": "module",
       "file": "omnisint/api/routes/cases.py",
       "community": "api",
-      "docstring": "REST & WebSocket Case, Scan, Graph, Pivot, Custody & Reporting route handlers for OmniSINT."
+      "docstring": "REST & WebSocket Case, Scan, Graph, Pivot, Custody, Async Job & Reporting route handlers for OmniSINT."
     },
     {
       "id": "omnisint.api.routes.cases.CreateCaseRequest",
       "type": "class",
       "file": "omnisint/api/routes/cases.py",
-      "line": 31,
+      "line": 34,
       "community": "api",
       "methods": [],
       "docstring": "Payload to create a new OSINT investigation Case."
@@ -332,7 +362,7 @@
       "id": "omnisint.api.routes.cases.ScanRequest",
       "type": "class",
       "file": "omnisint/api/routes/cases.py",
-      "line": 42,
+      "line": 47,
       "community": "api",
       "methods": [],
       "docstring": "Payload to trigger a multi-collector OSINT scan inside a Case."
@@ -341,16 +371,25 @@
       "id": "omnisint.api.routes.cases.PivotNodeRequest",
       "type": "class",
       "file": "omnisint/api/routes/cases.py",
-      "line": 54,
+      "line": 59,
       "community": "api",
       "methods": [],
       "docstring": "Payload to execute a one-click pivot on an existing EntityNode."
     },
     {
+      "id": "omnisint.api.routes.cases.ScanJobStatus",
+      "type": "class",
+      "file": "omnisint/api/routes/cases.py",
+      "line": 70,
+      "community": "api",
+      "methods": [],
+      "docstring": "Status tracker for non-blocking background scan or pivot jobs."
+    },
+    {
       "id": "omnisint.api.routes.cases.CustodyVerificationResponse",
       "type": "class",
       "file": "omnisint/api/routes/cases.py",
-      "line": 65,
+      "line": 85,
       "community": "api",
       "methods": [],
       "docstring": "Cryptographic Chain of Custody verification response payload."
@@ -359,7 +398,7 @@
       "id": "omnisint.api.routes.cases.GraphPayloadResponse",
       "type": "class",
       "file": "omnisint/api/routes/cases.py",
-      "line": 79,
+      "line": 99,
       "community": "api",
       "methods": [],
       "docstring": "Cytoscape.js elements + Persona Clusters + Hierarchy Trees for UI rendering."
@@ -368,7 +407,7 @@
       "id": "omnisint.api.routes.cases.ProgressBroadcaster",
       "type": "class",
       "file": "omnisint/api/routes/cases.py",
-      "line": 90,
+      "line": 110,
       "community": "api",
       "methods": [
         "__init__",
@@ -379,10 +418,32 @@
       "docstring": "In-memory pub/sub hub streaming ScanProgressEvents to WebSocket subscribers."
     },
     {
+      "id": "omnisint.api.routes.cases.JobManager",
+      "type": "class",
+      "file": "omnisint/api/routes/cases.py",
+      "line": 137,
+      "community": "api",
+      "methods": [
+        "__init__",
+        "create_job",
+        "get_job",
+        "launch_coro"
+      ],
+      "docstring": "Tracks background scan and pivot tasks across both ASGI and WSGI runtimes."
+    },
+    {
+      "id": "omnisint.api.routes.cases.verify_api_token",
+      "type": "function",
+      "file": "omnisint/api/routes/cases.py",
+      "line": 183,
+      "community": "api",
+      "docstring": "Return True if authentication is disabled or the supplied Bearer/X-API-Key token matches."
+    },
+    {
       "id": "omnisint.api.routes.cases.OmniSINTAPIService",
       "type": "class",
       "file": "omnisint/api/routes/cases.py",
-      "line": 117,
+      "line": 197,
       "community": "api",
       "methods": [
         "__init__",
@@ -391,7 +452,9 @@
         "create_case",
         "get_case",
         "run_scan",
+        "submit_scan_job",
         "pivot_node",
+        "submit_pivot_job",
         "get_graph_payload",
         "verify_custody",
         "export_report"
@@ -402,7 +465,7 @@
       "id": "omnisint.api.routes.cases.build_fastapi_router",
       "type": "function",
       "file": "omnisint/api/routes/cases.py",
-      "line": 278,
+      "line": 386,
       "community": "api",
       "docstring": "Build a FastAPI APIRouter wired to `service` when FastAPI is installed."
     },
@@ -410,7 +473,7 @@
       "id": "omnisint.api.routes.cases.json_dumps_safe",
       "type": "function",
       "file": "omnisint/api/routes/cases.py",
-      "line": 349,
+      "line": 503,
       "community": "api",
       "docstring": "Serialize Pydantic models or JSON objects safely."
     },
@@ -585,7 +648,7 @@
       "id": "omnisint.collectors.create_default_registry",
       "type": "function",
       "file": "omnisint/collectors/__init__.py",
-      "line": 25,
+      "line": 27,
       "community": "collectors",
       "docstring": "Create a CollectorRegistry pre-populated with all OmniSINT passive collectors."
     },
@@ -594,13 +657,21 @@
       "type": "module",
       "file": "omnisint/collectors/base.py",
       "community": "collectors",
-      "docstring": "Abstract BaseCollector, rate-limiting, caching, custody integration, and CollectorRegistry."
+      "docstring": "Abstract BaseCollector, rate-limiting, caching, proxy routing, secret redaction, custody integration, and CollectorRegistry."
+    },
+    {
+      "id": "omnisint.collectors.base.redact_sensitive_url",
+      "type": "function",
+      "file": "omnisint/collectors/base.py",
+      "line": 34,
+      "community": "collectors",
+      "docstring": "Mask sensitive query parameters (e.g. API keys/tokens) before storing URIs in custody or cache."
     },
     {
       "id": "omnisint.collectors.base.HttpResponseData",
       "type": "class",
       "file": "omnisint/collectors/base.py",
-      "line": 30,
+      "line": 54,
       "community": "collectors",
       "methods": [],
       "docstring": "Normalized HTTP response returned by collector transports."
@@ -609,7 +680,7 @@
       "id": "omnisint.collectors.base.CollectorConfig",
       "type": "class",
       "file": "omnisint/collectors/base.py",
-      "line": 46,
+      "line": 70,
       "community": "collectors",
       "methods": [],
       "docstring": "Runtime configuration for passive OSINT collectors."
@@ -618,7 +689,7 @@
       "id": "omnisint.collectors.base._default_urllib_get",
       "type": "async_function",
       "file": "omnisint/collectors/base.py",
-      "line": 61,
+      "line": 86,
       "community": "collectors",
       "docstring": "Perform an async HTTP GET via httpx (when installed) or stdlib urllib in a worker thread."
     },
@@ -626,7 +697,7 @@
       "id": "omnisint.collectors.base.BaseCollector",
       "type": "class",
       "file": "omnisint/collectors/base.py",
-      "line": 120,
+      "line": 153,
       "community": "collectors",
       "methods": [
         "__init__",
@@ -634,6 +705,7 @@
         "_respect_rate_limit",
         "_normalize_transport_output",
         "fetch_with_custody",
+        "fetch_bytes",
         "_record_custody_item",
         "collect"
       ],
@@ -643,7 +715,7 @@
       "id": "omnisint.collectors.base.CollectorRegistry",
       "type": "class",
       "file": "omnisint/collectors/base.py",
-      "line": 291,
+      "line": 400,
       "community": "collectors",
       "methods": [
         "__init__",
@@ -755,16 +827,24 @@
       "id": "omnisint.collectors.username_collector.PlatformSpec",
       "type": "class",
       "file": "omnisint/collectors/username_collector.py",
-      "line": 26,
+      "line": 28,
       "community": "collectors",
       "methods": [],
-      "docstring": "Definition of a passive platform check for UsernameCollector."
+      "docstring": "Definition of a passive platform check for UsernameCollector (WhatsMyName compatible)."
+    },
+    {
+      "id": "omnisint.collectors.username_collector.load_whatsmyname_specs",
+      "type": "function",
+      "file": "omnisint/collectors/username_collector.py",
+      "line": 43,
+      "community": "collectors",
+      "docstring": "Load PlatformSpec entries from a WhatsMyName JSON file path, JSON string, or parsed dictionary."
     },
     {
       "id": "omnisint.collectors.username_collector.UsernameCollector",
       "type": "class",
       "file": "omnisint/collectors/username_collector.py",
-      "line": 71,
+      "line": 120,
       "community": "collectors",
       "methods": [
         "__init__",
@@ -793,7 +873,7 @@
       "id": "omnisint.config.get_settings",
       "type": "function",
       "file": "omnisint/config.py",
-      "line": 57,
+      "line": 61,
       "community": "config",
       "docstring": "Return a fresh settings instance."
     },
@@ -815,7 +895,7 @@
       "id": "omnisint.core.custody.payload_kind",
       "type": "function",
       "file": "omnisint/core/custody.py",
-      "line": 41,
+      "line": 43,
       "community": "core",
       "docstring": "Return the structural kind of a raw payload (\"json\", \"text\", or \"bytes\")."
     },
@@ -823,7 +903,7 @@
       "id": "omnisint.core.custody.canonicalize_payload",
       "type": "function",
       "file": "omnisint/core/custody.py",
-      "line": 50,
+      "line": 52,
       "community": "core",
       "docstring": "Serialize a raw OSINT payload into deterministic canonical bytes."
     },
@@ -831,7 +911,7 @@
       "id": "omnisint.core.custody.compute_sha256",
       "type": "function",
       "file": "omnisint/core/custody.py",
-      "line": 64,
+      "line": 66,
       "community": "core",
       "docstring": "Compute hex-encoded SHA-256 digest of a canonicalized payload."
     },
@@ -839,7 +919,7 @@
       "id": "omnisint.core.custody.compute_chain_hash",
       "type": "function",
       "file": "omnisint/core/custody.py",
-      "line": 69,
+      "line": 71,
       "community": "core",
       "docstring": "Compute the tamper-evident chained SHA-256 digest for one evidence record."
     },
@@ -847,7 +927,7 @@
       "id": "omnisint.core.custody.compute_item_chain_hash",
       "type": "function",
       "file": "omnisint/core/custody.py",
-      "line": 104,
+      "line": 106,
       "community": "core",
       "docstring": "Recompute the chain hash for an EvidenceItem (optionally against a different predecessor)."
     },
@@ -855,7 +935,7 @@
       "id": "omnisint.core.custody.CustodyLedger",
       "type": "class",
       "file": "omnisint/core/custody.py",
-      "line": 119,
+      "line": 121,
       "community": "core",
       "methods": [
         "__init__",
@@ -873,7 +953,7 @@
       "id": "omnisint.core.custody.CustodySigner",
       "type": "class",
       "file": "omnisint/core/custody.py",
-      "line": 253,
+      "line": 255,
       "community": "core",
       "methods": [
         "__init__",
@@ -885,6 +965,23 @@
         "verify_signature"
       ],
       "docstring": "Signs and verifies a CustodyLedger head state using Ed25519 (or HMAC-SHA256 fallback)."
+    },
+    {
+      "id": "omnisint.core.custody.RFC3161AnchorRecord",
+      "type": "class",
+      "file": "omnisint/core/custody.py",
+      "line": 355,
+      "community": "core",
+      "methods": [],
+      "docstring": "Canonical SHA-256 imprint metadata prepared for RFC 3161 TSA timestamp anchoring."
+    },
+    {
+      "id": "omnisint.core.custody.build_rfc3161_digest_request",
+      "type": "function",
+      "file": "omnisint/core/custody.py",
+      "line": 368,
+      "community": "core",
+      "docstring": "Build deterministic SHA-256 imprint metadata for anchoring a CustodyLedger head via RFC 3161."
     },
     {
       "id": "omnisint.core.models",
@@ -1074,7 +1171,7 @@
       "id": "omnisint.core.storage.make_cache_key",
       "type": "function",
       "file": "omnisint/core/storage.py",
-      "line": 37,
+      "line": 38,
       "community": "core",
       "docstring": "Generate a deterministic SHA-256 cache key for a collector request."
     },
@@ -1082,7 +1179,7 @@
       "id": "omnisint.core.storage.CacheEntry",
       "type": "class",
       "file": "omnisint/core/storage.py",
-      "line": 54,
+      "line": 55,
       "community": "core",
       "methods": [
         "is_expired"
@@ -1093,7 +1190,7 @@
       "id": "omnisint.core.storage.CaseStorage",
       "type": "class",
       "file": "omnisint/core/storage.py",
-      "line": 74,
+      "line": 75,
       "community": "core",
       "methods": [
         "__init__",
@@ -1133,6 +1230,8 @@
         "_record_evidence_sync",
         "record_evidence",
         "verify_case_custody",
+        "sign_case_custody",
+        "verify_case_signature",
         "_merge_collector_result_sync",
         "merge_collector_result",
         "_get_cached_response_sync",
@@ -1252,6 +1351,72 @@
         "analyze_case_sync"
       ],
       "docstring": "Citation-enforced AI Entity Disambiguation Analyst & Dossier Synthesizer."
+    },
+    {
+      "id": "omnisint.intelligence.benchmark",
+      "type": "module",
+      "file": "omnisint/intelligence/benchmark.py",
+      "community": "intelligence",
+      "docstring": "Labelled entity-resolution benchmark harness for calibrating & measuring KnowledgeGraphEngine accuracy."
+    },
+    {
+      "id": "omnisint.intelligence.benchmark.BenchmarkMetrics",
+      "type": "class",
+      "file": "omnisint/intelligence/benchmark.py",
+      "line": 16,
+      "community": "intelligence",
+      "methods": [],
+      "docstring": "Pairwise precision/recall/F1 and Adjusted Rand Index (ARI) clustering evaluation metrics."
+    },
+    {
+      "id": "omnisint.intelligence.benchmark.BenchmarkCase",
+      "type": "class",
+      "file": "omnisint/intelligence/benchmark.py",
+      "line": 31,
+      "community": "intelligence",
+      "methods": [],
+      "docstring": "A single labelled multi-persona entity disambiguation test scenario."
+    },
+    {
+      "id": "omnisint.intelligence.benchmark.BenchmarkCaseResult",
+      "type": "class",
+      "file": "omnisint/intelligence/benchmark.py",
+      "line": 42,
+      "community": "intelligence",
+      "methods": [],
+      "docstring": "Evaluation output for a single BenchmarkCase."
+    },
+    {
+      "id": "omnisint.intelligence.benchmark.evaluate_clustering",
+      "type": "function",
+      "file": "omnisint/intelligence/benchmark.py",
+      "line": 53,
+      "community": "intelligence",
+      "docstring": "Compute exact pairwise Precision, Recall, F1, and Adjusted Rand Index (ARI) in pure Python."
+    },
+    {
+      "id": "omnisint.intelligence.benchmark._count_groups",
+      "type": "function",
+      "file": "omnisint/intelligence/benchmark.py",
+      "line": 124,
+      "community": "intelligence",
+      "docstring": ""
+    },
+    {
+      "id": "omnisint.intelligence.benchmark.default_benchmark_cases",
+      "type": "function",
+      "file": "omnisint/intelligence/benchmark.py",
+      "line": 131,
+      "community": "intelligence",
+      "docstring": "Return a multi-scenario labelled benchmark suite covering edge cases and multinational namesakes."
+    },
+    {
+      "id": "omnisint.intelligence.benchmark.run_disambiguation_benchmark",
+      "type": "function",
+      "file": "omnisint/intelligence/benchmark.py",
+      "line": 230,
+      "community": "intelligence",
+      "docstring": "Run KnowledgeGraphEngine across labelled benchmark cases and compute aggregate accuracy metrics."
     },
     {
       "id": "omnisint.intelligence.entropy",
@@ -1685,10 +1850,18 @@
       "docstring": "Investigative Markdown dossier exporter with Hierarchy Trees & SHA-256 Chain of Custody tables."
     },
     {
+      "id": "omnisint.reporting.markdown_exporter.redact_pii_text",
+      "type": "function",
+      "file": "omnisint/reporting/markdown_exporter.py",
+      "line": 16,
+      "community": "reporting",
+      "docstring": "Mask emails, IPv4 host octets, and phone numbers for PII-safe sharing."
+    },
+    {
       "id": "omnisint.reporting.markdown_exporter._hierarchy_tree_to_mermaid",
       "type": "function",
       "file": "omnisint/reporting/markdown_exporter.py",
-      "line": 10,
+      "line": 24,
       "community": "reporting",
       "docstring": "Convert a PersonaCluster HierarchyTreeNode into a Mermaid flowchart TD diagram."
     },
@@ -1696,7 +1869,7 @@
       "id": "omnisint.reporting.markdown_exporter.MarkdownExporter",
       "type": "class",
       "file": "omnisint/reporting/markdown_exporter.py",
-      "line": 37,
+      "line": 51,
       "community": "reporting",
       "methods": [
         "export"
@@ -1811,12 +1984,32 @@
       "id": "tests.test_api.TestOmniSINTAPI",
       "type": "class",
       "file": "tests/test_api.py",
-      "line": 16,
+      "line": 17,
       "community": "tests",
       "methods": [
-        "test_api_case_scan_graph_pivot_custody_and_exports"
+        "test_api_case_scan_graph_pivot_custody_and_exports",
+        "test_api_auth_async_jobs_pii_redaction_and_xss_hardening"
       ],
       "docstring": "Offline integration tests for the OmniSINT Web API and Cytoscape.js UI serving."
+    },
+    {
+      "id": "tests.test_benchmark",
+      "type": "module",
+      "file": "tests/test_benchmark.py",
+      "community": "tests",
+      "docstring": "Unit tests for the labelled disambiguation benchmark harness."
+    },
+    {
+      "id": "tests.test_benchmark.TestDisambiguationBenchmark",
+      "type": "class",
+      "file": "tests/test_benchmark.py",
+      "line": 13,
+      "community": "tests",
+      "methods": [
+        "test_evaluate_clustering_exact_and_split_cases",
+        "test_default_disambiguation_benchmark_meets_accuracy_targets"
+      ],
+      "docstring": "Verify entity-resolution precision, recall, F1, and Adjusted Rand Index."
     },
     {
       "id": "tests.test_cli_e2e",
@@ -1893,12 +2086,13 @@
       "id": "tests.test_identity_collectors.TestIdentityCollectors",
       "type": "class",
       "file": "tests/test_identity_collectors.py",
-      "line": 20,
+      "line": 22,
       "community": "tests",
       "methods": [
         "test_collector_registry_and_ttl_cache_deduplication",
         "test_username_collector_extracts_profiles_and_avatar_dhash",
-        "test_github_collector_extracts_commit_emails_repos_and_ssh_gpg_keys"
+        "test_github_collector_extracts_commit_emails_repos_and_ssh_gpg_keys",
+        "test_whatsmyname_loader_avatar_url_fetch_and_url_secret_redaction"
       ],
       "docstring": "Offline deterministic tests for BaseCollector, CollectorRegistry, UsernameCollector, and GitHubCollector."
     },
@@ -1921,6 +2115,24 @@
         "test_search_dork_collector_wayback_and_cse"
       ],
       "docstring": "Offline deterministic tests for DomainCTCollector, ThreatIntelCollector, and SearchDorkCollector."
+    },
+    {
+      "id": "tests.test_live_smoke",
+      "type": "module",
+      "file": "tests/test_live_smoke.py",
+      "community": "tests",
+      "docstring": "Opt-in live-network smoke tests (skipped offline unless OMNISINT_LIVE_TESTS=1)."
+    },
+    {
+      "id": "tests.test_live_smoke.TestLiveCollectorSmoke",
+      "type": "class",
+      "file": "tests/test_live_smoke.py",
+      "line": 16,
+      "community": "tests",
+      "methods": [
+        "test_live_github_and_doh_smoke"
+      ],
+      "docstring": "Real-network sanity checks against public GitHub and Google DoH APIs."
     },
     {
       "id": "tests.test_models_and_custody",
@@ -1982,12 +2194,23 @@
         "test_case_lifecycle_and_file_persistence",
         "test_node_and_edge_canonical_deduplication",
         "test_evidence_custody_chain_roundtrip_and_merge_collector_result",
-        "test_ttl_response_cache_hit_expiry_and_invalidation"
+        "test_ttl_response_cache_hit_expiry_and_invalidation",
+        "test_persisted_ed25519_case_signature_and_rfc3161_anchor"
       ],
       "docstring": "Test suite for async SQLite case persistence, graph deduplication, custody chain, and TTL cache."
     }
   ],
   "edges": [
+    {
+      "source": "omnisint.__main__",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.__main__",
+      "target": "omnisint.cli.main",
+      "relation": "imports"
+    },
     {
       "source": "omnisint.api",
       "target": "omnisint.api.app",
@@ -2064,6 +2287,11 @@
       "relation": "calls"
     },
     {
+      "source": "omnisint.api.app.create_app",
+      "target": "omnisint.api.routes.cases.verify_api_token",
+      "relation": "calls"
+    },
+    {
       "source": "omnisint.api.app",
       "target": "omnisint.api.app.get_default_app",
       "relation": "defines"
@@ -2085,7 +2313,22 @@
     },
     {
       "source": "omnisint.api.routes.cases",
+      "target": "concurrent.futures",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "hmac",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
       "target": "json",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "threading",
       "relation": "imports"
     },
     {
@@ -2096,6 +2339,11 @@
     {
       "source": "omnisint.api.routes.cases",
       "target": "pydantic",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "omnisint.config",
       "relation": "imports"
     },
     {
@@ -2160,6 +2408,21 @@
     },
     {
       "source": "omnisint.api.routes.cases",
+      "target": "omnisint.api.routes.cases.ScanJobStatus",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.api.routes.cases.ScanJobStatus",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.api.routes.cases.ScanJobStatus",
+      "target": "omnisint.core.models.utc_now",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
       "target": "omnisint.api.routes.cases.CustodyVerificationResponse",
       "relation": "defines"
     },
@@ -2185,8 +2448,33 @@
     },
     {
       "source": "omnisint.api.routes.cases",
+      "target": "omnisint.api.routes.cases.JobManager",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.api.routes.cases.JobManager",
+      "target": "omnisint.api.routes.cases.ScanJobStatus",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.api.routes.cases.JobManager",
+      "target": "omnisint.core.models.utc_now",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
+      "target": "omnisint.api.routes.cases.verify_api_token",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.api.routes.cases",
       "target": "omnisint.api.routes.cases.OmniSINTAPIService",
       "relation": "defines"
+    },
+    {
+      "source": "omnisint.api.routes.cases.OmniSINTAPIService",
+      "target": "omnisint.api.routes.cases.JobManager",
+      "relation": "calls"
     },
     {
       "source": "omnisint.api.routes.cases.OmniSINTAPIService",
@@ -2219,9 +2507,24 @@
       "relation": "calls"
     },
     {
+      "source": "omnisint.api.routes.cases.OmniSINTAPIService",
+      "target": "omnisint.config.get_settings",
+      "relation": "calls"
+    },
+    {
       "source": "omnisint.api.routes.cases",
       "target": "omnisint.api.routes.cases.build_fastapi_router",
       "relation": "defines"
+    },
+    {
+      "source": "omnisint.api.routes.cases.build_fastapi_router",
+      "target": "omnisint.api.routes.cases.verify_api_token",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.api.routes.cases.build_fastapi_router",
+      "target": "omnisint.api.routes.cases.json_dumps_safe",
+      "relation": "calls"
     },
     {
       "source": "omnisint.api.routes.cases",
@@ -2755,6 +3058,11 @@
     },
     {
       "source": "omnisint.collectors.base",
+      "target": "omnisint.collectors.base.redact_sensitive_url",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.base",
       "target": "omnisint.collectors.base.HttpResponseData",
       "relation": "defines"
     },
@@ -2800,6 +3108,11 @@
     },
     {
       "source": "omnisint.collectors.base.BaseCollector",
+      "target": "omnisint.collectors.base.redact_sensitive_url",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.base.BaseCollector",
       "target": "omnisint.config.get_settings",
       "relation": "calls"
     },
@@ -2811,6 +3124,11 @@
     {
       "source": "omnisint.collectors.base.BaseCollector",
       "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.collectors.base.BaseCollector",
+      "target": "omnisint.collectors.base._default_urllib_get",
       "relation": "calls"
     },
     {
@@ -3155,6 +3473,16 @@
     },
     {
       "source": "omnisint.collectors.username_collector",
+      "target": "json",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "pathlib",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
       "target": "typing",
       "relation": "imports"
     },
@@ -3207,6 +3535,16 @@
       "source": "omnisint.collectors.username_collector.PlatformSpec",
       "target": "BaseModel",
       "relation": "inherits"
+    },
+    {
+      "source": "omnisint.collectors.username_collector",
+      "target": "omnisint.collectors.username_collector.load_whatsmyname_specs",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.collectors.username_collector.load_whatsmyname_specs",
+      "target": "omnisint.collectors.username_collector.PlatformSpec",
+      "relation": "calls"
     },
     {
       "source": "omnisint.collectors.username_collector",
@@ -3345,6 +3683,11 @@
     },
     {
       "source": "omnisint.core.custody",
+      "target": "pydantic",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.core.custody",
       "target": "omnisint.core.models",
       "relation": "imports"
     },
@@ -3437,6 +3780,31 @@
       "source": "omnisint.core.custody",
       "target": "omnisint.core.custody.CustodySigner",
       "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.custody",
+      "target": "omnisint.core.custody.RFC3161AnchorRecord",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.custody.RFC3161AnchorRecord",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.core.custody",
+      "target": "omnisint.core.custody.build_rfc3161_digest_request",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.core.custody.build_rfc3161_digest_request",
+      "target": "omnisint.core.custody.RFC3161AnchorRecord",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.core.custody.build_rfc3161_digest_request",
+      "target": "omnisint.core.models.utc_now",
+      "relation": "calls"
     },
     {
       "source": "omnisint.core.models",
@@ -3885,6 +4253,11 @@
     },
     {
       "source": "omnisint.intelligence",
+      "target": "omnisint.intelligence.benchmark",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence",
       "target": "omnisint.intelligence.entropy",
       "relation": "imports"
     },
@@ -4076,6 +4449,146 @@
     {
       "source": "omnisint.intelligence.ai_analyst.AIAnalyst",
       "target": "omnisint.intelligence.ai_analyst.sanitize_hallucinated_citations",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark",
+      "target": "collections",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark",
+      "target": "itertools",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark",
+      "target": "typing",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark",
+      "target": "pydantic",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark",
+      "target": "omnisint.intelligence.graph_engine",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark",
+      "target": "omnisint.intelligence.similarity",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark",
+      "target": "omnisint.intelligence.benchmark.BenchmarkMetrics",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark.BenchmarkMetrics",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark",
+      "target": "omnisint.intelligence.benchmark.BenchmarkCase",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark.BenchmarkCase",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark",
+      "target": "omnisint.intelligence.benchmark.BenchmarkCaseResult",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark.BenchmarkCaseResult",
+      "target": "BaseModel",
+      "relation": "inherits"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark",
+      "target": "omnisint.intelligence.benchmark.evaluate_clustering",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark.evaluate_clustering",
+      "target": "omnisint.intelligence.benchmark.BenchmarkMetrics",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark.evaluate_clustering",
+      "target": "omnisint.intelligence.benchmark._count_groups",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark",
+      "target": "omnisint.intelligence.benchmark._count_groups",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark",
+      "target": "omnisint.intelligence.benchmark.default_benchmark_cases",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark.default_benchmark_cases",
+      "target": "omnisint.intelligence.similarity.compute_dhash_from_pixels",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark.default_benchmark_cases",
+      "target": "omnisint.intelligence.benchmark.BenchmarkCase",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark.default_benchmark_cases",
+      "target": "omnisint.core.models.EntityNode",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark",
+      "target": "omnisint.intelligence.benchmark.run_disambiguation_benchmark",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark.run_disambiguation_benchmark",
+      "target": "omnisint.intelligence.benchmark.BenchmarkMetrics",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark.run_disambiguation_benchmark",
+      "target": "omnisint.intelligence.graph_engine.KnowledgeGraphEngine",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark.run_disambiguation_benchmark",
+      "target": "omnisint.intelligence.benchmark.evaluate_clustering",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark.run_disambiguation_benchmark",
+      "target": "omnisint.intelligence.benchmark.default_benchmark_cases",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.intelligence.benchmark.run_disambiguation_benchmark",
+      "target": "omnisint.intelligence.benchmark.BenchmarkCaseResult",
       "relation": "calls"
     },
     {
@@ -4785,6 +5298,11 @@
     },
     {
       "source": "omnisint.reporting.markdown_exporter",
+      "target": "re",
+      "relation": "imports"
+    },
+    {
+      "source": "omnisint.reporting.markdown_exporter",
       "target": "omnisint.core.custody",
       "relation": "imports"
     },
@@ -4800,6 +5318,11 @@
     },
     {
       "source": "omnisint.reporting.markdown_exporter",
+      "target": "omnisint.reporting.markdown_exporter.redact_pii_text",
+      "relation": "defines"
+    },
+    {
+      "source": "omnisint.reporting.markdown_exporter",
       "target": "omnisint.reporting.markdown_exporter._hierarchy_tree_to_mermaid",
       "relation": "defines"
     },
@@ -4811,6 +5334,11 @@
     {
       "source": "omnisint.reporting.markdown_exporter.MarkdownExporter",
       "target": "omnisint.core.custody.CustodyLedger",
+      "relation": "calls"
+    },
+    {
+      "source": "omnisint.reporting.markdown_exporter.MarkdownExporter",
+      "target": "omnisint.reporting.markdown_exporter.redact_pii_text",
       "relation": "calls"
     },
     {
@@ -5055,6 +5583,11 @@
     },
     {
       "source": "tests.test_api",
+      "target": "time",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_api",
       "target": "unittest",
       "relation": "imports"
     },
@@ -5106,6 +5639,41 @@
     {
       "source": "tests.test_api.TestOmniSINTAPI",
       "target": "omnisint.core.orchestrator.ScanOrchestrator",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_benchmark",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_benchmark",
+      "target": "unittest",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_benchmark",
+      "target": "omnisint.intelligence.benchmark",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_benchmark",
+      "target": "tests.test_benchmark.TestDisambiguationBenchmark",
+      "relation": "defines"
+    },
+    {
+      "source": "tests.test_benchmark.TestDisambiguationBenchmark",
+      "target": "unittest.TestCase",
+      "relation": "inherits"
+    },
+    {
+      "source": "tests.test_benchmark.TestDisambiguationBenchmark",
+      "target": "omnisint.intelligence.benchmark.evaluate_clustering",
+      "relation": "calls"
+    },
+    {
+      "source": "tests.test_benchmark.TestDisambiguationBenchmark",
+      "target": "omnisint.intelligence.benchmark.run_disambiguation_benchmark",
       "relation": "calls"
     },
     {
@@ -5375,17 +5943,7 @@
     },
     {
       "source": "tests.test_identity_collectors",
-      "target": "omnisint.collectors.base",
-      "relation": "imports"
-    },
-    {
-      "source": "tests.test_identity_collectors",
-      "target": "omnisint.collectors.github_collector",
-      "relation": "imports"
-    },
-    {
-      "source": "tests.test_identity_collectors",
-      "target": "omnisint.collectors.username_collector",
+      "target": "omnisint.collectors",
       "relation": "imports"
     },
     {
@@ -5420,32 +5978,7 @@
     },
     {
       "source": "tests.test_identity_collectors.TestIdentityCollectors",
-      "target": "omnisint.collectors.username_collector.UsernameCollector",
-      "relation": "calls"
-    },
-    {
-      "source": "tests.test_identity_collectors.TestIdentityCollectors",
-      "target": "omnisint.collectors.github_collector.GitHubCollector",
-      "relation": "calls"
-    },
-    {
-      "source": "tests.test_identity_collectors.TestIdentityCollectors",
-      "target": "omnisint.collectors.base.HttpResponseData",
-      "relation": "calls"
-    },
-    {
-      "source": "tests.test_identity_collectors.TestIdentityCollectors",
       "target": "omnisint.core.storage.CaseStorage",
-      "relation": "calls"
-    },
-    {
-      "source": "tests.test_identity_collectors.TestIdentityCollectors",
-      "target": "omnisint.collectors.base.CollectorConfig",
-      "relation": "calls"
-    },
-    {
-      "source": "tests.test_identity_collectors.TestIdentityCollectors",
-      "target": "omnisint.collectors.base.CollectorRegistry",
       "relation": "calls"
     },
     {
@@ -5507,6 +6040,41 @@
       "source": "tests.test_infra_collectors.TestInfraCollectors",
       "target": "omnisint.collectors.create_default_registry",
       "relation": "calls"
+    },
+    {
+      "source": "tests.test_live_smoke",
+      "target": "__future__",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_live_smoke",
+      "target": "os",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_live_smoke",
+      "target": "unittest",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_live_smoke",
+      "target": "omnisint.collectors",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_live_smoke",
+      "target": "omnisint.core.models",
+      "relation": "imports"
+    },
+    {
+      "source": "tests.test_live_smoke",
+      "target": "tests.test_live_smoke.TestLiveCollectorSmoke",
+      "relation": "defines"
+    },
+    {
+      "source": "tests.test_live_smoke.TestLiveCollectorSmoke",
+      "target": "unittest.IsolatedAsyncioTestCase",
+      "relation": "inherits"
     },
     {
       "source": "tests.test_models_and_custody",

@@ -1,4 +1,4 @@
-"""Abstract BaseCollector, rate-limiting, caching, custody integration, and CollectorRegistry."""
+"""Abstract BaseCollector, rate-limiting, caching, proxy routing, secret redaction, custody integration, and CollectorRegistry."""
 
 from __future__ import annotations
 
@@ -25,6 +25,30 @@ try:
 except ImportError:  # pragma: no cover
     httpx = None
     HAS_HTTPX = False
+
+_SENSITIVE_QUERY_KEYS: frozenset[str] = frozenset(
+    {"key", "api_key", "apikey", "token", "access_token", "secret", "auth"}
+)
+
+
+def redact_sensitive_url(url: str) -> str:
+    """Mask sensitive query parameters (e.g. API keys/tokens) before storing URIs in custody or cache."""
+    parsed = urllib.parse.urlsplit(url)
+    if not parsed.query:
+        return url
+    pairs = urllib.parse.parse_qsl(parsed.query, keep_blank_values=True)
+    redacted_pairs: list[tuple[str, str]] = []
+    changed = False
+    for k, v in pairs:
+        if k.strip().lower() in _SENSITIVE_QUERY_KEYS and v:
+            redacted_pairs.append((k, "REDACTED"))
+            changed = True
+        else:
+            redacted_pairs.append((k, v))
+    if not changed:
+        return url
+    new_query = urllib.parse.urlencode(redacted_pairs)
+    return urllib.parse.urlunsplit((parsed.scheme, parsed.netloc, parsed.path, new_query, parsed.fragment))
 
 
 class HttpResponseData(BaseModel):
@@ -56,6 +80,7 @@ class CollectorConfig(BaseModel):
     cache_ttl_seconds: int = Field(default=86400, ge=0)
     max_concurrency: int = Field(default=5, ge=1, le=50)
     user_agent: str = "OmniSINT/0.1.0 (+https://github.com/SamAlex-22/OmniSINT; Passive-OSINT)"
+    http_proxy: str | None = None
 
 
 async def _default_urllib_get(
@@ -63,6 +88,7 @@ async def _default_urllib_get(
     headers: dict[str, str] | None,
     params: dict[str, Any] | None,
     timeout: float,
+    proxy_url: str | None = None,
 ) -> HttpResponseData:
     """Perform an async HTTP GET via httpx (when installed) or stdlib urllib in a worker thread."""
     final_url = url
@@ -72,7 +98,7 @@ async def _default_urllib_get(
         final_url = f"{url}{sep}{query_str}"
 
     if HAS_HTTPX and httpx is not None:  # pragma: no cover
-        async with httpx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
+        async with httpx.AsyncClient(timeout=timeout, follow_redirects=True, proxy=proxy_url) as client:
             resp = await client.get(final_url, headers=headers or {})
             raw_text = resp.text
             parsed_body: str | dict[str, Any] | list[Any] = raw_text
@@ -90,8 +116,15 @@ async def _default_urllib_get(
 
     def _sync_get() -> HttpResponseData:
         req = urllib.request.Request(final_url, headers=headers or {}, method="GET")
+        opener = (
+            urllib.request.build_opener(
+                urllib.request.ProxyHandler({"http": proxy_url, "https": proxy_url})
+            )
+            if proxy_url
+            else urllib.request.build_opener()
+        )
         try:
-            with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310
+            with opener.open(req, timeout=timeout) as resp:  # noqa: S310
                 raw_bytes = resp.read()
                 raw_text = raw_bytes.decode("utf-8", errors="replace")
                 ctype = str(resp.headers.get("Content-Type", "")).lower()
@@ -136,8 +169,23 @@ class BaseCollector(ABC):
             cache_ttl_seconds=self.settings.cache_ttl_seconds,
             max_concurrency=self.settings.max_concurrent_requests,
             user_agent=self.settings.user_agent,
+            http_proxy=self.settings.http_proxy,
         )
-        self._http_transport: HttpGetTransportCallable = http_transport or _default_urllib_get
+        self._has_custom_transport = http_transport is not None
+        if http_transport is not None:
+            self._http_transport: HttpGetTransportCallable = http_transport
+        else:
+            proxy_url = self.config.http_proxy
+
+            async def _proxied_default_get(
+                url: str,
+                headers: dict[str, str] | None,
+                params: dict[str, Any] | None,
+                timeout: float,
+            ) -> HttpResponseData:
+                return await _default_urllib_get(url, headers, params, timeout, proxy_url=proxy_url)
+
+            self._http_transport = _proxied_default_get
         self._rate_lock = asyncio.Lock()
         self._last_request_ts: float = 0.0
 
@@ -177,16 +225,18 @@ class BaseCollector(ABC):
         notes: str = "",
         record_on_non_200: bool = False,
     ) -> tuple[int, str | dict[str, Any] | list[Any], EvidenceItem | None, bool]:
-        """Fetch an external OSINT resource with TTL caching, rate-limiting, backoff, and custody hashing."""
+        """Fetch an external OSINT resource with TTL caching, rate-limiting, secret redaction, and custody hashing."""
+        sanitized_url = redact_sensitive_url(url)
+
         if storage is not None and self.config.use_cache:
-            cached = await storage.get_cached_response(self.name, url, params=params)
+            cached = await storage.get_cached_response(self.name, sanitized_url, params=params)
             if cached is not None:
                 ev_item: EvidenceItem | None = None
                 if cached.status_code == 200 or record_on_non_200:
                     ev_item = self._record_custody_item(
                         case_id=case_id,
                         ledger=ledger,
-                        source_uri=url,
+                        source_uri=sanitized_url,
                         payload=cached.payload,
                         notes=f"{notes} [cache-hit]".strip(),
                     )
@@ -223,7 +273,7 @@ class BaseCollector(ABC):
         if response is None:  # pragma: no cover
             if last_exc is not None:
                 raise last_exc
-            raise RuntimeError(f"Collector {self.name} received no response for {url}")
+            raise RuntimeError(f"Collector {self.name} received no response for {sanitized_url}")
 
         if (
             storage is not None
@@ -232,7 +282,7 @@ class BaseCollector(ABC):
         ):
             await storage.set_cached_response(
                 collector_name=self.name,
-                query_or_uri=url,
+                query_or_uri=sanitized_url,
                 payload=response.body,
                 status_code=response.status_code,
                 params=params,
@@ -249,13 +299,72 @@ class BaseCollector(ABC):
             evidence_item = self._record_custody_item(
                 case_id=case_id,
                 ledger=ledger,
-                source_uri=url,
+                source_uri=sanitized_url,
                 payload=response.body,
                 mime_type=mime,
                 notes=notes,
             )
 
         return response.status_code, response.body, evidence_item, False
+
+    async def fetch_bytes(self, url: str, max_bytes: int = 2_000_000) -> bytes | None:
+        """Download raw bytes (e.g. avatar images) safely up to `max_bytes`."""
+        cleaned_url = url.strip()
+        if not cleaned_url:
+            return None
+
+        if self._has_custom_transport:
+            await self._respect_rate_limit()
+            try:
+                raw_out = await self._http_transport(
+                    cleaned_url,
+                    {"User-Agent": self.config.user_agent, "Accept": "image/*,*/*"},
+                    None,
+                    self.config.timeout_seconds,
+                )
+            except Exception:
+                return None
+            if isinstance(raw_out, bytes):
+                return raw_out[:max_bytes]
+            resp = self._normalize_transport_output(raw_out)
+            if resp.status_code != 200:
+                return None
+            if isinstance(resp.body, dict) and isinstance(resp.body.get("bytes_hex"), str):
+                try:
+                    return bytes.fromhex(resp.body["bytes_hex"])[:max_bytes]
+                except ValueError:
+                    return None
+            if isinstance(resp.body, str) and resp.body:
+                return resp.body.encode("latin-1", errors="replace")[:max_bytes]
+            return None
+
+        def _sync_fetch_bytes() -> bytes | None:
+            req = urllib.request.Request(
+                cleaned_url,
+                headers={"User-Agent": self.config.user_agent, "Accept": "image/*,*/*"},
+                method="GET",
+            )
+            proxy_url = self.config.http_proxy
+            opener = (
+                urllib.request.build_opener(
+                    urllib.request.ProxyHandler({"http": proxy_url, "https": proxy_url})
+                )
+                if proxy_url
+                else urllib.request.build_opener()
+            )
+            try:
+                with opener.open(req, timeout=self.config.timeout_seconds) as resp:  # noqa: S310
+                    if int(getattr(resp, "status", 200)) != 200:
+                        return None
+                    data = resp.read(max_bytes + 1)
+                    if len(data) > max_bytes:
+                        return data[:max_bytes]
+                    return data
+            except Exception:
+                return None
+
+        await self._respect_rate_limit()
+        return await asyncio.to_thread(_sync_fetch_bytes)
 
     def _record_custody_item(
         self,

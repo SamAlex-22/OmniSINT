@@ -61,6 +61,21 @@ class TestInfraCollectors(unittest.IsolatedAsyncioTestCase):
                     },
                 )
             if "dns.google/resolve" in url:
+                if "name=alexsec.io&type=MX" in url:
+                    return HttpResponseData(
+                        status_code=200,
+                        body={"Answer": [{"type": 15, "data": "10 mail.alexsec.io."}]},
+                    )
+                if "name=alexsec.io&type=TXT" in url:
+                    return HttpResponseData(
+                        status_code=200,
+                        body={"Answer": [{"type": 16, "data": '"v=spf1 mx -all"'}]},
+                    )
+                if "name=alexsec.io&type=NS" in url:
+                    return HttpResponseData(
+                        status_code=200,
+                        body={"Answer": [{"type": 2, "data": "ns1.alexsec.io."}]},
+                    )
                 if "name=alexsec.io" in url:
                     return HttpResponseData(
                         status_code=200,
@@ -91,6 +106,10 @@ class TestInfraCollectors(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(orgs, {"OmniSINT Security Lab"})
         self.assertEqual(emails, {"hostmaster@alexsec.io"})
         self.assertTrue(any(n.entity_type == EntityType.CERTIFICATE for n in result.nodes))
+        dom_node = next(n for n in result.nodes if n.entity_type == EntityType.DOMAIN)
+        self.assertIn("MX", dom_node.attributes["dns_records"])
+        self.assertIn("TXT", dom_node.attributes["dns_records"])
+        self.assertIn("NS", dom_node.attributes["dns_records"])
         self.assertTrue(ledger.verify_chain()[0])
 
     async def test_threat_intel_collector_virustotal_and_offline_fallback(self) -> None:
@@ -190,6 +209,12 @@ class TestInfraCollectors(unittest.IsolatedAsyncioTestCase):
         self.assertIn("https://alexsec.io/keys.asc", urls)
         self.assertIn("https://gist.github.com/krypton_sec/12345", urls)
         self.assertTrue(ledger.verify_chain()[0])
+
+        # Verify Google CSE API key was redacted from stored custody source_uri
+        cse_ev = [ev for ev in res_domain.evidence_items if "customsearch" in ev.source_uri]
+        self.assertGreaterEqual(len(cse_ev), 1)
+        self.assertIn("key=REDACTED", cse_ev[0].source_uri)
+        self.assertNotIn("key=k&", cse_ev[0].source_uri)
 
         # Verify default registry contains all 5 collectors
         registry = create_default_registry()

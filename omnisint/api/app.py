@@ -15,6 +15,7 @@ from omnisint.api.routes.cases import (
     PivotNodeRequest,
     ScanRequest,
     build_fastapi_router,
+    verify_api_token,
 )
 from omnisint.core.orchestrator import ScanOrchestrator
 from omnisint.core.storage import CaseStorage
@@ -45,7 +46,6 @@ def _run_coro_sync(coro: Any) -> Any:
         asyncio.get_running_loop()
     except RuntimeError:
         return asyncio.run(coro)
-    # If invoked inside an existing event loop thread, execute on a fresh loop in a thread
     import concurrent.futures
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
@@ -56,11 +56,16 @@ def create_app(
     storage: CaseStorage | None = None,
     orchestrator: ScanOrchestrator | None = None,
     web_dir: Path | None = None,
+    api_auth_token: str | None = None,
 ) -> Any:
     """Create the OmniSINT ASGI (FastAPI) or WSGI (Flask fallback) web application."""
     resolved_web_dir = web_dir or DEFAULT_WEB_DIR
     index_path = resolved_web_dir / "index.html"
-    service = OmniSINTAPIService(storage=storage, orchestrator=orchestrator)
+    service = OmniSINTAPIService(
+        storage=storage,
+        orchestrator=orchestrator,
+        api_auth_token=api_auth_token,
+    )
 
     if HAS_FASTAPI and FastAPI is not None and HTMLResponse is not None:  # pragma: no cover
         app = FastAPI(title="OmniSINT API & Web GUI", version="0.1.0")
@@ -91,6 +96,18 @@ def create_app(
 
     flask_app = Flask(__name__)
     flask_app.extensions["omnisint_service"] = service
+
+    @flask_app.before_request
+    def _enforce_optional_api_auth() -> tuple[Any, int] | None:
+        if request.path.startswith("/api/") and request.path != "/api/health":
+            ok = verify_api_token(
+                request.headers.get("Authorization"),
+                request.headers.get("X-API-Key"),
+                service.api_auth_token,
+            )
+            if not ok:
+                return jsonify({"detail": "Unauthorized"}), 401
+        return None
 
     @flask_app.get("/")
     def serve_index() -> FlaskResponse:
@@ -132,10 +149,14 @@ def create_app(
         except ValidationError as exc:
             return jsonify({"detail": exc.errors()}), 422
         try:
-            res = _run_coro_sync(service.run_scan(case_id, req))
-            return jsonify(res), 200
+            _run_coro_sync(service.get_case(case_id))
         except KeyError as exc:
             return jsonify({"detail": str(exc)}), 404
+        if request.args.get("async", "").lower() == "true":
+            job = service.submit_scan_job(case_id, req)
+            return jsonify(job.model_dump(mode="json")), 202
+        res = _run_coro_sync(service.run_scan(case_id, req))
+        return jsonify(res), 200
 
     @flask_app.post("/api/cases/<case_id>/pivot")
     def pivot_case_node(case_id: str) -> tuple[Any, int]:
@@ -145,10 +166,21 @@ def create_app(
         except ValidationError as exc:
             return jsonify({"detail": exc.errors()}), 422
         try:
-            res = _run_coro_sync(service.pivot_node(case_id, req))
-            return jsonify(res), 200
+            _run_coro_sync(service.get_case(case_id))
         except KeyError as exc:
             return jsonify({"detail": str(exc)}), 404
+        if request.args.get("async", "").lower() == "true":
+            job = service.submit_pivot_job(case_id, req)
+            return jsonify(job.model_dump(mode="json")), 202
+        res = _run_coro_sync(service.pivot_node(case_id, req))
+        return jsonify(res), 200
+
+    @flask_app.get("/api/jobs/<job_id>")
+    def get_job_status(job_id: str) -> tuple[Any, int]:
+        job = service.jobs.get_job(job_id)
+        if job is None:
+            return jsonify({"detail": f"Job '{job_id}' not found"}), 404
+        return jsonify(job.model_dump(mode="json")), 200
 
     @flask_app.get("/api/cases/<case_id>/graph")
     def get_case_graph(case_id: str) -> tuple[Any, int]:
@@ -168,8 +200,11 @@ def create_app(
 
     @flask_app.get("/api/cases/<case_id>/export/<fmt>")
     def export_case(case_id: str, fmt: str) -> FlaskResponse | tuple[Any, int]:
+        redact_pii = request.args.get("redact_pii", "").lower() == "true"
         try:
-            content, media_type = _run_coro_sync(service.export_report(case_id, fmt))
+            content, media_type = _run_coro_sync(
+                service.export_report(case_id, fmt, redact_pii=redact_pii)
+            )
             return FlaskResponse(content, status=200, mimetype=media_type)
         except KeyError as exc:
             return jsonify({"detail": str(exc)}), 404

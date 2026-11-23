@@ -6,6 +6,7 @@ from omnisint.collectors.base import (
     CollectorRegistry,
     HttpGetTransportCallable,
     HttpResponseData,
+    redact_sensitive_url,
 )
 from omnisint.collectors.domain_ct_collector import DomainCTCollector
 from omnisint.collectors.github_collector import GitHubCollector
@@ -18,6 +19,7 @@ from omnisint.collectors.username_collector import (
     DEFAULT_PLATFORM_SPECS,
     PlatformSpec,
     UsernameCollector,
+    load_whatsmyname_specs,
 )
 from omnisint.config import OmniSINTSettings
 
@@ -52,4 +54,6 @@ __all__ = [
     "UsernameCollector",
     "create_default_registry",
     "generate_dork_queries",
+    "load_whatsmyname_specs",
+    "redact_sensitive_url",
 ]

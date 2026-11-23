@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import asyncio
+import json
+from pathlib import Path
 from typing import Any, Sequence
 
 from pydantic import BaseModel, ConfigDict
@@ -24,7 +26,7 @@ from omnisint.intelligence.similarity import compute_dhash_from_bytes
 
 
 class PlatformSpec(BaseModel):
-    """Definition of a passive platform check for UsernameCollector."""
+    """Definition of a passive platform check for UsernameCollector (WhatsMyName compatible)."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -32,6 +34,53 @@ class PlatformSpec(BaseModel):
     api_url_template: str
     profile_url_template: str
     response_kind: str = "json"
+    expected_status: int = 200
+    existence_string: str | None = None
+    missing_string: str | None = None
+    category: str = "social"
+
+
+def load_whatsmyname_specs(
+    source: str | Path | dict[str, Any],
+    max_sites: int | None = None,
+) -> list[PlatformSpec]:
+    """Load PlatformSpec entries from a WhatsMyName JSON file path, JSON string, or parsed dictionary."""
+    if isinstance(source, dict):
+        data = source
+    elif isinstance(source, Path):
+        data = json.loads(source.read_text(encoding="utf-8"))
+    else:
+        raw_str = str(source).strip()
+        if raw_str.startswith("{"):
+            data = json.loads(raw_str)
+        else:
+            data = json.loads(Path(raw_str).read_text(encoding="utf-8"))
+
+    sites = data.get("sites") or []
+    specs: list[PlatformSpec] = []
+    for entry in sites:
+        if not isinstance(entry, dict):
+            continue
+        name = str(entry.get("name") or "").strip()
+        uri_check = str(entry.get("uri_check") or "").strip()
+        uri_pretty = str(entry.get("uri_pretty") or uri_check).strip()
+        if not name or not uri_check or "{account}" not in uri_check:
+            continue
+        specs.append(
+            PlatformSpec(
+                platform=name,
+                api_url_template=uri_check.replace("{account}", "{handle}"),
+                profile_url_template=uri_pretty.replace("{account}", "{handle}"),
+                response_kind="text",
+                expected_status=int(entry.get("e_code", 200)),
+                existence_string=entry.get("e_string"),
+                missing_string=entry.get("m_string"),
+                category=str(entry.get("cat") or "social"),
+            )
+        )
+        if max_sites is not None and len(specs) >= max_sites:
+            break
+    return specs
 
 
 DEFAULT_PLATFORM_SPECS: tuple[PlatformSpec, ...] = (
@@ -81,9 +130,13 @@ class UsernameCollector(BaseCollector):
         config: CollectorConfig | None = None,
         settings: OmniSINTSettings | None = None,
         http_transport: HttpGetTransportCallable | None = None,
+        fetch_avatars: bool = True,
+        max_avatar_bytes: int = 2_000_000,
     ) -> None:
         super().__init__(config=config, settings=settings, http_transport=http_transport)
         self.platforms: list[PlatformSpec] = list(platforms or DEFAULT_PLATFORM_SPECS)
+        self.fetch_avatars = fetch_avatars
+        self.max_avatar_bytes = max_avatar_bytes
 
     @staticmethod
     def _parse_platform_payload(
@@ -182,6 +235,23 @@ class UsernameCollector(BaseCollector):
                 "url": spec.profile_url_template.format(handle=handle),
             }
 
+        # WhatsMyName text/HTML existence & missing-string matching
+        if isinstance(payload, str) and (spec.existence_string or spec.missing_string):
+            if spec.missing_string and spec.missing_string in payload:
+                return None
+            if spec.existence_string and spec.existence_string not in payload:
+                return None
+            return {
+                "username": handle,
+                "display_name": handle,
+                "bio": "",
+                "location": "",
+                "avatar_url": "",
+                "avatar_hash": None,
+                "timestamps": [],
+                "url": spec.profile_url_template.format(handle=handle),
+            }
+
         # Generic fallback for custom PlatformSpec entries
         if isinstance(payload, dict) and (payload.get("username") or payload.get("handle") or payload.get("login")):
             uname = str(payload.get("username") or payload.get("handle") or payload.get("login"))
@@ -246,7 +316,7 @@ class UsernameCollector(BaseCollector):
                     errors.append(f"{spec.platform}: {type(exc).__name__}: {exc}")
                     return
 
-                if status != 200 or ev_item is None:
+                if status != spec.expected_status or ev_item is None:
                     return
 
                 parsed = self._parse_platform_payload(spec, cleaned, payload)
@@ -263,6 +333,13 @@ class UsernameCollector(BaseCollector):
                         av_hash = compute_dhash_from_bytes(bytes.fromhex(parsed["avatar_bytes_seed"]))
                     except ValueError:
                         av_hash = None
+                if not av_hash and self.fetch_avatars and parsed.get("avatar_url"):
+                    raw_av_bytes = await self.fetch_bytes(
+                        str(parsed["avatar_url"]),
+                        max_bytes=self.max_avatar_bytes,
+                    )
+                    if raw_av_bytes:
+                        av_hash = compute_dhash_from_bytes(raw_av_bytes)
 
                 profile_attrs: dict[str, Any] = {
                     "url": parsed["url"],

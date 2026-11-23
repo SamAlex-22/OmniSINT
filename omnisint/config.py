@@ -31,7 +31,11 @@ class OmniSINTSettings(BaseModel):
         ge=1,
         le=100,
     )
-    user_agent: str = "OmniSINT/0.1.0 (+https://github.com/omnisint/omnisint; Passive-OSINT-Research)"
+    user_agent: str = "OmniSINT/0.1.0 (+https://github.com/SamAlex-22/OmniSINT; Passive-OSINT-Research)"
+    http_proxy: str | None = Field(default_factory=lambda: os.getenv("OMNISINT_HTTP_PROXY") or None)
+    api_auth_token: str | None = Field(
+        default_factory=lambda: os.getenv("OMNISINT_API_AUTH_TOKEN") or None
+    )
 
     # Optional external API keys
     github_token: str | None = Field(default_factory=lambda: os.getenv("OMNISINT_GITHUB_TOKEN") or None)

@@ -15,6 +15,7 @@ from omnisint.config import get_settings
 from omnisint.core.custody import (
     GENESIS_CHAIN_HASH,
     CustodyLedger,
+    CustodySigner,
     canonicalize_payload,
     compute_chain_hash,
     compute_sha256,
@@ -125,6 +126,10 @@ class CaseStorage:
                 target_query TEXT NOT NULL,
                 investigator TEXT NOT NULL,
                 description TEXT NOT NULL,
+                legal_basis TEXT NOT NULL DEFAULT 'authorized-defensive-research',
+                retention_days INTEGER,
+                custody_signature TEXT,
+                custody_public_key TEXT,
                 status TEXT NOT NULL,
                 created_at_utc TEXT NOT NULL,
                 updated_at_utc TEXT NOT NULL,
@@ -228,6 +233,19 @@ class CaseStorage:
                 ON http_cache(collector_name);
             """
         )
+        existing_cols = {
+            row["name"]
+            for row in conn.execute("PRAGMA table_info(cases);").fetchall()
+        }
+        migrations = {
+            "legal_basis": "ALTER TABLE cases ADD COLUMN legal_basis TEXT NOT NULL DEFAULT 'authorized-defensive-research';",
+            "retention_days": "ALTER TABLE cases ADD COLUMN retention_days INTEGER;",
+            "custody_signature": "ALTER TABLE cases ADD COLUMN custody_signature TEXT;",
+            "custody_public_key": "ALTER TABLE cases ADD COLUMN custody_public_key TEXT;",
+        }
+        for col_name, ddl in migrations.items():
+            if col_name not in existing_cols:
+                conn.execute(ddl)
         conn.commit()
 
     async def initialize(self) -> None:
@@ -350,19 +368,28 @@ class CaseStorage:
         target_query: str,
         investigator: str = "lead-analyst",
         description: str = "",
+        legal_basis: str = "authorized-defensive-research",
+        retention_days: int | None = None,
     ) -> Case:
-        """Create a new Case with an initial CASE_CREATED audit entry and persist it."""
+        """Create a new Case with governance metadata and initial CASE_CREATED audit entry."""
         case = Case(
             title=title,
             target_query=target_query,
             investigator=investigator,
             description=description,
+            legal_basis=legal_basis,
+            retention_days=retention_days,
         )
         initial_audit = AuditLogEntry(
             case_id=case.case_id,
             actor=investigator,
             action="CASE_CREATED",
-            details={"title": title, "target_query": target_query},
+            details={
+                "title": title,
+                "target_query": target_query,
+                "legal_basis": legal_basis,
+                "retention_days": retention_days,
+            },
         )
         case.audit_log.append(initial_audit)
         return await self.save_case(case)
@@ -378,13 +405,18 @@ class CaseStorage:
                 """
                 INSERT INTO cases (
                     case_id, title, target_query, investigator, description,
+                    legal_basis, retention_days, custody_signature, custody_public_key,
                     status, created_at_utc, updated_at_utc, personas_json, ai_executive_brief
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(case_id) DO UPDATE SET
                     title = excluded.title,
                     target_query = excluded.target_query,
                     investigator = excluded.investigator,
                     description = excluded.description,
+                    legal_basis = excluded.legal_basis,
+                    retention_days = excluded.retention_days,
+                    custody_signature = excluded.custody_signature,
+                    custody_public_key = excluded.custody_public_key,
                     status = excluded.status,
                     updated_at_utc = excluded.updated_at_utc,
                     personas_json = excluded.personas_json,
@@ -396,6 +428,10 @@ class CaseStorage:
                     case.target_query,
                     case.investigator,
                     case.description,
+                    case.legal_basis,
+                    case.retention_days,
+                    case.custody_signature,
+                    case.custody_public_key,
                     case.status.value,
                     case.created_at_utc.isoformat(),
                     case.updated_at_utc.isoformat(),
@@ -547,6 +583,10 @@ class CaseStorage:
             target_query=row["target_query"],
             investigator=row["investigator"],
             description=row["description"],
+            legal_basis=row["legal_basis"] if "legal_basis" in row.keys() else "authorized-defensive-research",
+            retention_days=row["retention_days"] if "retention_days" in row.keys() else None,
+            custody_signature=row["custody_signature"] if "custody_signature" in row.keys() else None,
+            custody_public_key=row["custody_public_key"] if "custody_public_key" in row.keys() else None,
             status=CaseStatus(row["status"]),
             created_at_utc=datetime.fromisoformat(row["created_at_utc"]),
             updated_at_utc=datetime.fromisoformat(row["updated_at_utc"]),
@@ -1036,6 +1076,58 @@ class CaseStorage:
         """Verify the SHA-256 payload hashes and chronological chain hashes for a Case."""
         ledger = await self.get_custody_ledger(case_id)
         return ledger.verify_chain()
+
+    async def sign_case_custody(
+        self,
+        case_id: str,
+        signer: CustodySigner,
+    ) -> tuple[str, str]:
+        """Sign a Case's CustodyLedger head state with Ed25519 and persist signature + public key."""
+        case = await self.get_case(case_id)
+        if case is None:
+            raise KeyError(f"Case '{case_id}' not found")
+        ledger = CustodyLedger(
+            case_id=case.case_id,
+            existing_evidence=case.evidence_ledger,
+            existing_audit_log=case.audit_log,
+        )
+        sig_hex = signer.sign_ledger(ledger)
+        pub_hex = signer.public_key_hex
+        case.custody_signature = sig_hex
+        case.custody_public_key = pub_hex
+        case.audit_log.append(
+            AuditLogEntry(
+                case_id=case_id,
+                actor="omnisint-signer",
+                action="CUSTODY_LEDGER_SIGNED",
+                details={
+                    "algorithm": signer.algorithm,
+                    "head_chain_hash": ledger.head_chain_hash,
+                    "public_key": pub_hex,
+                },
+            )
+        )
+        await self.save_case(case)
+        return sig_hex, pub_hex
+
+    async def verify_case_signature(self, case_id: str) -> bool:
+        """Verify a persisted Case's custody chain AND Ed25519 head signature."""
+        case = await self.get_case(case_id)
+        if case is None or not case.custody_signature or not case.custody_public_key:
+            return False
+        ledger = CustodyLedger(
+            case_id=case.case_id,
+            existing_evidence=case.evidence_ledger,
+            existing_audit_log=case.audit_log,
+        )
+        chain_ok, _ = ledger.verify_chain()
+        if not chain_ok:
+            return False
+        return CustodySigner.verify_signature(
+            ledger,
+            case.custody_signature,
+            case.custody_public_key,
+        )
 
     def _merge_collector_result_sync(
         self,

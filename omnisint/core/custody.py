@@ -15,6 +15,8 @@ import json
 import secrets
 from typing import Any, Literal
 
+from pydantic import BaseModel, ConfigDict
+
 from omnisint.core.models import AuditLogEntry, EvidenceItem, new_uuid, utc_now
 
 try:
@@ -348,4 +350,31 @@ class CustodySigner:
 
         expected = hmac.new(key_bytes, msg, hashlib.sha256).digest()  # pragma: no cover
         return hmac.compare_digest(expected, sig_bytes)  # pragma: no cover
+
+
+class RFC3161AnchorRecord(BaseModel):
+    """Canonical SHA-256 imprint metadata prepared for RFC 3161 TSA timestamp anchoring."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    case_id: str
+    head_chain_hash: str
+    item_count: int
+    imprint_sha256: str
+    hash_algorithm_oid: str = "2.16.840.1.101.3.4.2.1"
+    created_at_utc: str
+
+
+def build_rfc3161_digest_request(ledger: CustodyLedger) -> RFC3161AnchorRecord:
+    """Build deterministic SHA-256 imprint metadata for anchoring a CustodyLedger head via RFC 3161."""
+    msg = CustodySigner._ledger_message(ledger)
+    imprint = hashlib.sha256(msg).hexdigest()
+    return RFC3161AnchorRecord(
+        case_id=ledger.case_id,
+        head_chain_hash=ledger.head_chain_hash,
+        item_count=len(ledger.evidence_items),
+        imprint_sha256=imprint,
+        created_at_utc=utc_now().isoformat(),
+    )
+
 
